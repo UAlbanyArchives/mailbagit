@@ -2,6 +2,7 @@
 layout: page
 title: About the Project
 permalink: /about/
+nav_order: 2
 ---
 
 ### Project Team
