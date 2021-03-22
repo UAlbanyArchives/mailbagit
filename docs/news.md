@@ -7,7 +7,7 @@ nav_order: 3
 
 ## News
 
-* [Project Announcement](#), March 15, 2021.
+* [Project Announcement](https://library.albany.edu/news/archives-email-grant-announcement), March 15, 2021.
 
 ## Conference Presentations
 
