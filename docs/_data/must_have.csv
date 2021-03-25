@@ -1,0 +1,16 @@
+Number,Category,Must have,Requirement Type,Possible System Dependancies
+1,Core,Creates bags that meet the Bagit specification,Technical,
+2,Core,Establish fixity for email by generating commonly used checksums,Functional,
+3,Core,Check fixity by validating checksums,Functional,
+4,Core,Create metadata in bag-info.txt to insure bags are fully actionable,Technical,
+5,Core,Update metadata in bag-info.txt,Technical,
+6,Core,Package attachments and establish fixity by generating checksums,Functional,
+7,Core,Preserve email folder structure and ensure it is actionable,Functional,
+8,Core-PDF,Optionally generate PDFs for each email body that displays basic header information,Functional,"wkhtmltopdf, htmldoc, if not xhtml2pdf"
+9,Core-PDF,Easy process for exporting PDFs for each email in bulk,Functional,
+10,Core-PDF,Easy process for exporting PDFs for individual emails,Functional,
+11,Input,Input from MBOX/EML,Functional,
+12,Input,Input from PST,Functional,libpff has Windows dependencies
+13,Input,Input from IMAP,Functional,
+14,Installation,All core functionality works on Windows/macOS/Common Linux distros,Technical,Python on Windows
+15,Installation,Documentation of any manually-installed dependencies,Functional,

@@ -1,0 +1,11 @@
+Number,Category,Could have,Requirement Type,Possible System Dependancies
+33,Core,"Lists important email metadata separate from source data and filesystem (like a CSV or SQLite), as a tag file",Technical,
+34,Core,Provide an estimated time to completion for users during long-running processes,Technical,
+35,Core,Provide a method of keeping or excluding specific email folders while creating Mailbags,Functional,
+36,Core-PDF,Generate PDFs using customizable CSS,Functional,"wkhtmltopdf, htmldoc, if not xhtml2pdf"
+37,Core-WARC,Customizable scoping rules for WARC creation,Functional,wget
+38,Reporting,Export reports of email headers or text of individual emails,Functional,
+39,Dependency management,Common dependencies across major platforms,Technical,
+40,Dependency management,Individual mini-specs for future system dependencies,Technical,
+41,Installation,"All core dependencies install via a single comand, such as using pip",Technical,
+42,Installation,Able to install on Windows machine without admin privileges,Technical,

@@ -1,0 +1,18 @@
+Number,Category,Should have,Requirement Type,Possible System Dependancies
+16,Core,A process for compressing Mailbags and managing compressed Mailbags,Functional,
+17,Core,"A process for external tools to use email source data, like RATOM or ePADD to use MBOX data within a Mailbag",Functional,
+18,Core,Provide Beyond the Repository (BTR) compliant BagIt Profiles,Technical,
+19,Core,Provide feedback to users about what the tool is doing and its pace of progress,Functional,
+20,Core-WARC,Optionally generate WARC files that include embedded CSS and Images,Functional,wget if not warcio
+21,Core-WARC,Optionally capture external links within WARC files,Functional,wget if not warcio
+22,Core-WARC,Easy process for exporting or connecting with a tool to replay WARC files,Functional,
+23,Reporting,Report and export attachments,Functional,
+24,Reporting,Report the email folders included in a Mailbag and the number of included email in each folder and the account overall,Technical,
+25,Dependency management,"Modular/extendable dependencies that work out-of-the box, but can be overridden",Functional,
+26,Dependency management,Dependancies configurable via YAML or simmilar,Technical,
+27,Dependency management,Multiple conversion options/plugins for PDFs,Technical,"wkhtmltopdf, htmldoc, if not xhtml2pdf"
+28,Dependency management,Multiple conversion options/plugins for WARCs,Technical,
+29,Dependency management,Process for upgrading and managing dependencies,Functional,
+30,Installation,Provide Docker image,Technical,
+31,Installation,Provide an executable for multiple platforms,Technical,
+32,Installation,Clear documentation for managing system privileges,Functional,
