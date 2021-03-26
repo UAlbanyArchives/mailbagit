@@ -6,11 +6,11 @@ parent: Design Documents
 nav_order: 3
 ---
 
-## Requirements
+# Requirements
 
 If you have feedback, please [Suggest or prioritize a Requirement](https://docs.google.com/forms/d/e/1FAIpQLScg34b0NJhuDWaUUvyWJxyK5bBGf9Hh9N0n76XElsoBJd7S1Q/viewform?usp=sf_link) by April 25th!
 
-### Must Have
+## Must Have
 
 <table>
   {% for row in site.data.must_have %}
@@ -27,7 +27,7 @@ If you have feedback, please [Suggest or prioritize a Requirement](https://docs.
   {% endfor %}
 </table>
 
-### Should Have
+## Should Have
 
 <table>
   {% for row in site.data.should_have %}
@@ -44,7 +44,7 @@ If you have feedback, please [Suggest or prioritize a Requirement](https://docs.
   {% endfor %}
 </table>
 
-### Could Have
+## Could Have
 
 <table>
   {% for row in site.data.could_have %}
@@ -61,7 +61,7 @@ If you have feedback, please [Suggest or prioritize a Requirement](https://docs.
   {% endfor %}
 </table>
 
-### Won't Have
+## Won't Have
 
 <table>
   {% for row in site.data.wont_have %}
