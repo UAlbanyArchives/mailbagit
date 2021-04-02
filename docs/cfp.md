@@ -39,6 +39,6 @@ We strongly encourage self-nominations from individuals who identify with underr
 Applications will consist of:
 
 - An existing CV or resume
-- A brief statement of interest in the project, under 200 words.
+- A brief statement of interest in the project, about 200 words.
 
 Interested applicants should complete the [application form](https://docs.google.com/forms/d/e/1FAIpQLSdhri4FLhMBTuBQjka2hEJGYxlZK3LC9IXjUXfNuNA3H4FsuA/viewform?usp=sf_link) and email a CV or resume to gwiedeman [at] albany [dot] edu, by no later than **April 19, 2021.**
