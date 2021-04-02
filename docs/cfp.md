@@ -11,14 +11,14 @@ The M.E. Grenander Department of Special Collections & Archives at the Universit
 
 The Project Team is working on an initial draft of the Mailbag specification, which will be a functional extension of the [BagIt specification](https://tools.ietf.org/html/rfc8493) with requirements for preserving multiple formats for email archives. The structured “bag” required by the Mailbag specification will allow automated tools to act upon email archives to support preservation and access workflows. The Mailbag specification will allow the Mailbag Project to create a Python library, command line utility, and basic Graphical User Interface (GUI) for creating and managing “Mailbags.”
 
-The Mailbag Project is hosting a working meeting to ensure wider participation in the writing process so the specification will meet a broader array of use cases. The working meeting will be held virtually on **May 14th, 2021 from 10am-12pm, EST**. As a participant, you will be awarded an $200 honorarium and be listed as one of the specification contributors. The project team anticipates making 6-10 awards.
+The Mailbag Project is hosting a working meeting to ensure wider participation in the writing process so the specification will meet a broader array of use cases. The working meeting will be held virtually on **May 14th, 2021 from 2pm-4pm, EST**. As a participant, you will be awarded an $200 honorarium and be listed as one of the specification contributors. The project team anticipates making 6-10 awards.
 
 ## Requirements
 
 Interested applicants are required to:
 
 - Perform a detailed review of the initial draft of the Mailbag specification prior to the virtual working meeting
-- Attend the virtual working meeting on May 14th, 2021 from 10am-12pm, EST
+- Attend the virtual working meeting on May 14th, 2021 from 2pm-4pm, EST
 
 and possess skills and experience in: 
 
