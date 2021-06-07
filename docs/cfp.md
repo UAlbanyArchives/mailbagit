@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Call for Participation
+title: Call for Participation (closed)
 permalink: /cfp/
-nav_order: 5
+nav_order: 6
 ---
 
-# Call for Participation - Mailbag Specification Working Meeting
+# Call for Participation - Mailbag Specification Working Meeting (closed)
 
 The M.E. Grenander Department of Special Collections & Archives at the University at Albany, SUNY, seeks community members to participate in a working meeting to assist the Mailbag Project in writing the Mailbag specification.
 
