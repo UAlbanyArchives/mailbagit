@@ -13,6 +13,8 @@ nav_order: 5
 
 ## Conference Presentations
 
+* Wiedeman, Gregory, "Mailbag (Building Capacity and Community for Email Archives)," [Society of American Archivists (SAA) Annual Meeting 2021](https://www2.archivists.org/am2021), prerecorded, Live Q&A August 6, 2021.
+
 * Wiedeman, Gregory, "Mailbag: A Stable Package for Email with Multiple Masters," [Best Practices Exchange 2021](https://bpexchange.wordpress.com/2021-schedule/), May 18, 2021.
 
 * Wiedeman, Gregory, "Mailbag: A Stable Package for Email with Multiple Masters," [Coalition for Networked Information (CNI)](https://cnispring21mtg.sched.com/event/iBXp), March 15, 2021.
