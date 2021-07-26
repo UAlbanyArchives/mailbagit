@@ -14,3 +14,6 @@ Number,Category,Must have,Requirement Type,Possible System Dependancies
 13,Input,Input from IMAP,Functional,
 14,Installation,All core functionality works on Windows/macOS/Common Linux distros,Technical,Python on Windows
 15,Installation,Documentation of any manually-installed dependencies,Functional,
+45,Core,"Preserve the original input data, unless directed to exclude folders or messages",Technical,
+46,Core,Preserve links as attachments,Technical,
+48,Core,Creates mailbags that conform to the Mailbag specification,Technical,

@@ -16,3 +16,5 @@ Number,Category,Should have,Requirement Type,Possible System Dependancies
 30,Installation,Provide Docker image,Technical,
 31,Installation,Provide an executable for multiple platforms,Technical,
 32,Installation,Clear documentation for managing system privileges,Functional,
+47,Core-WARC,Optionally capture attached links within WARC files,Functional,
+49,Input,Input from MSG files,Functional,
