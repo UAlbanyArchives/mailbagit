@@ -9,6 +9,13 @@ assignees: ''
 
 ## The problem the component solves
 
+...
+
+
+## Relevant part of mailbag spec?
+
+...
+
 ## Type of component
 
 - [ ] Core
