@@ -10,6 +10,8 @@ nav_order: 2
 * Gregory Wiedeman, University at Albany, SUNY
 * Mark Wolfe, University at Albany, SUNY
 * Karen Kiorpes, University at Albany, SUNY
+* Harit Garg, University at Albany, SUNY
+* Baibhav Rajbhandari, University at Albany, SUNY
 
 ### Advisory Board
 
