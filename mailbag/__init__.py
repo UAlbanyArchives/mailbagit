@@ -4,6 +4,6 @@
 __version__ = "0.0.1"
 
 
-class Mailbag():
-	def __init__(self):
-		print("Hello world!")
+class Mailbag:
+    def __init__(self):
+        print("Hello world!")
