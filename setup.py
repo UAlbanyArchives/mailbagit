@@ -19,6 +19,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    entry_points={
+        "console_scripts": [
+            "mailbagit=mailbag:cli",
+            "mailbagit-gui=mailbag:gui"
+        ]
+    },
     install_requires=["bagit>=1.8.1,<2", "gooey>=1.0.8.1,<2"],
     python_requires=">=3.6",
 )
