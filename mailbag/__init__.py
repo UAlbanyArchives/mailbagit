@@ -8,7 +8,7 @@ from bagit import _make_parser
 from gooey import Gooey
 
 bagit_parser = _make_parser()
-bagit_parser.description = = f"Mailbag ({bagit_parser.description})"
+bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 
 def cli():
     bagit_parser.parse_args()
