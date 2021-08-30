@@ -1,10 +1,11 @@
+# /usr/bin/env python3
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mailbag", # Replace with your own username
+    name="mailbag",  # Replace with your own username
     version="0.0.1",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
@@ -18,5 +19,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    entry_points={
+        "console_scripts": [
+            "mailbagit=mailbag:cli",
+            "mailbagit-gui=mailbag:gui"
+        ]
+    },
+    install_requires=["bagit>=1.8.1,<2", "gooey>=1.0.8.1,<2"],
+    python_requires=">=3.6",
 )
