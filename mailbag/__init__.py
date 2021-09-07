@@ -7,7 +7,7 @@ __version__ = "0.0.1"
 from bagit import _make_parser, Bag
 from gooey import Gooey
 
-from .parser import EmailFormatParser
+from mailbag.parser import EmailFormatParser
 
 print(EmailFormatParser.registry)
 
