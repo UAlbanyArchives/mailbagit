@@ -19,7 +19,7 @@
 ## Pull Request Checklist
 
 Please check if your PR fulfills the following requirements:
-- [ ] For new components, make sure you are requesting to a separate branch. Don't PR to main!
+- [ ] Make sure you are requesting to the develop branch. Don't PR to main!
 - [ ] This contribution has sufficient documentation
 - [ ] Tests for the changes have been added
 - [ ] All tests pass
