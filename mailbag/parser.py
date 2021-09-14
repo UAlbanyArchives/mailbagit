@@ -16,7 +16,8 @@ class EmailFormatParser(ABC):
 
     # Registry of parsers, key = cls.parser_name, value = cls
     registry = {}
-
+    allMails = []
+    
     def __init_subclass__(cls, **kwargs):
         """Enforce parser_name attribute on subclasses, register them"""
         if not hasattr(cls, 'parser_name'):
