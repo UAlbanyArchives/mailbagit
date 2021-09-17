@@ -26,20 +26,18 @@ class Mbox(EmailFormatParser):
         for key, message in mbox.iteritems():
 
             try:
-                message
+                mailObj = Email()
+                mailObj.populate(Message_ID=message['Message-ID'])
+                mailObj.populate(Email_Folder=message['Email-Folder'])
+                mailObj.populate(Date=message['Date'])
+                mailObj.populate(From=message['From'])
+                mailObj.populate(To=message['To'])
+                mailObj.populate(Cc=message['Cc'])
+                mailObj.populate(Bcc=message['Bcc'])
+                mailObj.populate(Subject=message['Subject'])
+                mailObj.populate(Content_Type=message['Content-Type'])
+                allEmails.append(mailObj)
             except mbox.errors.MessageParseError:
                 continue
-
-            mailObj = Email()
-            mailObj.populate(Message_ID=message['Message-ID'])
-            mailObj.populate(Email_Folder=message['Email-Folder'])
-            mailObj.populate(Date=message['Date'])
-            mailObj.populate(From=message['From'])
-            mailObj.populate(To=message['To'])
-            mailObj.populate(Cc=message['Cc'])
-            mailObj.populate(Bcc=message['Bcc'])
-            mailObj.populate(Subject=message['Subject'])
-            mailObj.populate(Content_Type=message['Content-Type'])
             
-            allEmails.append(mailObj)
         return allEmails
