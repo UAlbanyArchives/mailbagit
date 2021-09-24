@@ -1,8 +1,7 @@
 from mailbag.parser import EmailFormatParser
 from mailbag.emailModel import Email
 import extract_msg
-
-from jsonmodels import models, fields, errors, validators
+import glob
 
 
 class MSG(EmailFormatParser):
@@ -17,23 +16,26 @@ class MSG(EmailFormatParser):
         Return:
             allMails (list) : list of email model objects
         Example:
-            parse(file="/sample.msg")
+            parse(file="/*.msg")
         """
             
         allEmails = []
         file = kwargs['file']
-        print("Reading mails from :", file)        
-        message = extract_msg.openMsg(file)
-
-        mailObj = Email()
-        mailObj.populate(Date=message.date)
-        mailObj.populate(From=message.sender)
-        mailObj.populate(To=message.to)
-        mailObj.populate(Cc=message.cc)
-        mailObj.populate(Bcc=message.bcc)
-        mailObj.populate(Subject=message.subject)
-        mailObj.populate(Body=message.body)
+        print("Reading mails from :", file)
         
-        allEmails.append(mailObj)
-
+        for filename in glob.glob(file, recursive=True):
+            message = extract_msg.openMsg(filename)
+    
+            mailObj = Email()
+            mailObj.populate(
+                Date=message.date,
+                From=message.sender,
+                To=message.to,
+                Cc=message.cc,
+                Bcc=message.bcc,
+                Subject=message.subject,
+                Body=message.body)
+            
+            allEmails.append(mailObj)
+        
         return allEmails
