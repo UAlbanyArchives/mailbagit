@@ -1,25 +1,18 @@
-import mailbag
-from parsers.mbox import Mbox
 
 
 class Controller:
-    """Controller - Main controller to start the program
+    """Controller - Main controller"""
     
-    command line input sample:
-    --input_type mbox --sha1 ../data/sample.mbox --input ../data/sample.mbox
-    """
-    def start(self):
-        args = mailbag.cli()
-        print(args)
-        if(args.input_type == "mbox"):
-            mb = Mbox()
-            emails = mb.parse(file=args.input)
-            
-            for email in emails:
-                print(email)        
+    def __init__(self, args, formats):
+        self.args = args
+        self.format_map = {
+                'mbox': formats.mbox.Mbox,
+                'msg': formats.msg.MSG
+        }
+        
+    def read(self):
 
-
-if __name__ == '__main__':
-    c = Controller()
-    c.start()
-    
+        format = self.format_map[self.args.input](self.args)            
+        messages = format.messages()
+        for m in messages:
+            print(m)
