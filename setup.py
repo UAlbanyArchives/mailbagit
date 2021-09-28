@@ -25,6 +25,6 @@ setuptools.setup(
             "mailbagit-gui=mailbag:gui"
         ]
     },
-    install_requires=["bagit>=1.8.1,<2", "gooey>=1.0.8.1,<2", "jsonmodels>=2.2,<=2.5.0", "extract_msg>=0.23.4,=<0.28.6"],
+    install_requires=["bagit>=1.8.1,<2", "gooey>=1.0.8.1,<2", "jsonmodels>=2.2,<=2.5.0", "extract_msg>=0.23.4"],
     python_requires=">=3.6",
 )
