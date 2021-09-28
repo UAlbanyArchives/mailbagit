@@ -16,10 +16,12 @@ bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 mailbagit_args = bagit_parser.add_argument_group("Mailbag")
 # add mailbag-specific args here
 mailbagit_args.add_argument("--foo", help="The foo argument, you know, that one")
+mailbagit_args.add_argument("--input_type", help="input type MBOX/PST/IMAP/EML/PDF")
+mailbagit_args.add_argument("--input", help="input path MBOX/PST/IMAP/EML/PDF")
 
 def cli():
-    bagit_parser.parse_args()
-    # do the thing
+    args = bagit_parser.parse_args()
+    return args
 
 @Gooey
 def gui():

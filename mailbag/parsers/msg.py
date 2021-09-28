@@ -1,5 +1,5 @@
 from mailbag.parser import EmailFormatParser
-from mailbag.emailModel import Email
+from mailbag.models import Email
 import extract_msg
 import glob
 
