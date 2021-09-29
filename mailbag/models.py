@@ -11,25 +11,4 @@ class Email(models.Base):
     Cc = fields.StringField()
     Bcc = fields.StringField()
     Subject = fields.StringField()
-    Content_Type = fields.StringField()
-    
-    def __str__(self):
-        email = {}
-        try:
-            
-            '''TODO:  Improve efficiency'''
-            email.update({"Message_ID":self.Message_ID,
-                    "Email_Folder":self.Email_Folder,
-                    "Original_Filename":self.Original_Filename,
-                    "Date":self.Date,
-                    "From":self.From,
-                    "To":self.To,
-                    "Cc":self.Cc,
-                    "Bcc":self.Bcc,
-                    "Subject":self.Subject,
-                    "Content_Type":self.Content_Type
-                    })
-        except NameError: 
-            print("Name error")
-            
-        return str(email)
+    Content_Type = fields.StringField()    

@@ -14,5 +14,6 @@ class Controller:
 
         format = self.format_map[self.args.input](self.args)            
         messages = format.messages()
+        
         for m in messages:
-            print(m)
+            print(m.to_struct())
