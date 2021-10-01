@@ -6,7 +6,7 @@ import pypff
 
 class PST(EmailAccount):
     # pst - This concrete class parses PST file format
-    format_name = 'pst1'
+    format_name = 'pst'
 
     def __init__(self, target_account, **kwargs):
         print("Parsity parse")
