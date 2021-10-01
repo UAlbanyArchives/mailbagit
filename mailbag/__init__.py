@@ -18,7 +18,7 @@ mailbagit_options = bagit_parser.add_argument_group("Mailbag options")
 
 # add mailbag-specific required args here
 mailbagit_args.add_argument("-i","--input", required=True, help="input type MBOX/PST/IMAP/EML/PDF/MSG", nargs=1)
-mailbagit_args.add_argument("-d","--derivatives", required=True, help="output type(s) MBOX/PST/EML/PDF/WARC", nargs='+')
+mailbagit_args.add_argument("-d","--derivatives", required=True, help="derivative type(s) MBOX/PST/EML/PDF/WARC", nargs='+')
 
 # add mailbag-specific optional args here
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=1)
@@ -28,7 +28,7 @@ mailbagit_options.add_argument("--exclude_messages", help="a line-separated text
 mailbagit_options.add_argument("-e", "--exclude_input", help="will also exclude email folders and/or messages from the input PST or MBOX file before including it in the mailbag", action='store_true')
 mailbagit_options.add_argument("-l", "--crawl_links", help="will attempt to capture links in messages and include them in WARC output", action='store_true')
 mailbagit_options.add_argument("-a", "--crawl-attached-links", help="will attempt to capture links attached to messages and include them in WARC output", action='store_true')
-mailbagit_options.add_argument("-h", "--no-headers", help="will not include email headers in mailbag.csv", action='store_true')
+mailbagit_options.add_argument("-n", "--no-headers", help="will not include email headers in mailbag.csv", action='store_true')
 mailbagit_options.add_argument("--pdf-css", help="Path to a CSS file to customize PDF derivatives.",nargs=1)
 mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ",nargs='+')
 
