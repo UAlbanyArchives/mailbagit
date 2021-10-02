@@ -24,13 +24,13 @@ class MSG(EmailAccount):
         for filename in glob.glob(self.file, recursive=True):
             mail = extract_msg.openMsg(filename)
             
-            message = {
-                "Date":mail.date,
-                "From":mail.sender,
-                "To":mail.to,
-                "Cc":mail.cc,
-                "Bcc":mail.bcc,
-                "Subject":mail.subject,
-                "Body":mail.body
-            }
-            yield Email(**message)
+            message = Email(
+                Date=mail.date,
+                From=mail.sender,
+                To=mail.to,
+                Cc=mail.cc,
+                Bcc=mail.bcc,
+                Subject=mail.subject,
+                Body=mail.body
+            )
+            yield message

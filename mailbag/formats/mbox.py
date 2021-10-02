@@ -23,18 +23,18 @@ class Mbox(EmailAccount):
     def messages(self):
         for mail in self.data.itervalues():
             try:
-                message = {
-                    "Message_ID":mail['Message-ID'],
-                    "Email_Folder":mail['Email-Folder'],
-                    "Date":mail['Date'],
-                    "From":mail['From'],
-                    "To":mail['To'],
-                    "Cc":mail['Cc'],
-                    "Bcc":mail['Bcc'],
-                    "Subject":mail['Subject'],
-                    "Content_Type":mail['Content-Type']
-                }
+                message = Email(
+                    Message_ID=mail['Message-ID'],
+                    Email_Folder=mail['Email-Folder'],
+                    Date=mail['Date'],
+                    From=mail['From'],
+                    To=mail['To'],
+                    Cc=mail['Cc'],
+                    Bcc=mail['Bcc'],
+                    Subject=mail['Subject'],
+                    Content_Type=mail['Content-Type']
+                )
             except mbox.errors.MessageParseError:
                 continue
-            yield Email(**message)
+            yield message
         
