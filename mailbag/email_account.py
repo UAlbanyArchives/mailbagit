@@ -1,5 +1,5 @@
 from os import listdir
-from os.path import dirname, basename, isfile, join
+from os.path import  basename, dirname, exists, isfile, join
 import sys
 
 from abc import ABC, abstractmethod
@@ -49,19 +49,21 @@ def import_formats(additional_dirs=None):
     dirs = [join(dirname(__file__), 'formats'), *additional_dirs]
 
     for formats_dir in dirs:
+        if not exists(formats_dir): continue
+
         # put formats_dir at front of python load path for import
-        sys.path.insert(0, formats_dir)
+        # note: str is here because arguments may be Paths
+        sys.path.insert(0, str(formats_dir))
 
         try:
             for filename in listdir(formats_dir):
                 module = basename(filename)[:-3]
-                # skip if not a normal file ending in .py
+                # skip if not a normal, non underscored file ending in .py
                 if module.startswith('_') or \
                    not isfile(join(formats_dir, filename)) or \
                    filename[-3:] != '.py':
                     continue
+                import pdb;pdb.set_trace()
                 __import__(module, globals(), locals())
         finally:
             sys.path = sys.path[1:]
-
-import_formats()

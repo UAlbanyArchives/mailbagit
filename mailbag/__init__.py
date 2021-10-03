@@ -6,9 +6,23 @@ __version__ = "0.0.1"
 
 from bagit import _make_parser, Bag
 from gooey import Gooey
+from mailbag.email_account import EmailAccount, import_formats
 
-from mailbag.email_account import EmailAccount
+import os
+from pathlib import Path
 
+plugin_dir = os.environ.get('MAILBAG_PLUGIN_DIR', None)
+
+# Formats are loaded from:
+#   1. formats directory inside the package (built-in)
+#   2. .mailbag/formats in user home directory
+#   3. plugin dir set in environment variable
+format_dirs = []
+format_dirs.append(Path("~/.mailbag/formats").expanduser())
+if plugin_dir:
+    format_dirs.append((Path(plugin_dir) / 'formats').expanduser())
+
+import_formats(format_dirs)
 print(EmailAccount.registry)
 
 bagit_parser = _make_parser()
