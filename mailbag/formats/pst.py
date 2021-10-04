@@ -15,38 +15,53 @@ class PST(EmailAccount):
 
         self.file =target_account.input_path
         print("Reading :", self.file)
-        pst = pypff.file()
-        pst.open("self.file")
 
-        self.data = pst.get_root_folder()
+
+
+
+
+
 
     def account_data(self):
         return account_data
 
+    def parse_folder(root):
+        messages=[]
+
+        for folder in root.sub_folders:
+            if folder.number_of_sub_folders:
+                messages += PST.parse_folder(folder)
+
+
+            for message in folder.sub_messages:
+                messages.append({
+                    "subject": message.subject,
+                    "sender": message.sender_name,
+                    "Folder":folder.name
+
+                })
+
+        return messages
+
     def messages(self):
-        for folder in self.sub_folders:
+        pst = pypff.file()
+        pst.open(self.file)
+        root = pst.get_root_folder()
+        m=PST.parse_folder(root)
+        for att in m:
+            message = {
+                #"Message_ID": i['Message-ID'],
+                "Email_Folder": att["Folder"],
+               # "Date": i["Creationtime"],
+                "From": att["sender"],
+               # "To": i["To"],
+               # "Cc": i["CC"],
+               # "Bcc": i['Bcc'],
+                "Subject": att["subject"],
+                #"Content_Type": i['Content-Type']
+            }
 
-                messages1 = []
-                if folder.number_of_sub_folders:
-                    messages1 += PST.messages(self=folder)
-                for msg in folder.sub_messages:
-                    message = {
-                    #"Message_ID":msg.id,
-                    "Email_Folder":msg.folder.name,
-                    #"Date":msg.date,
-                    "From":msg.sender_name,
-                    #"To":msg.to,
-                    #Cc":msg.cc,
-                    #"Bcc":msg.bcc,
-                    "Subject":msg.subject,
-                    #"Content_Type":msg.content_type
-
-
-                         }
-
-
-
-        yield Email(**message)
+            yield Email(**message)
 
 
 
