@@ -9,6 +9,7 @@ from gooey import Gooey
 from mailbag.email_account import EmailAccount
 from mailbag.controller import Controller
 
+
 print(EmailAccount.registry)
 
 bagit_parser = _make_parser()
