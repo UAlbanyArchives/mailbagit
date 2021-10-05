@@ -22,7 +22,7 @@ class MSG(EmailAccount):
 
     def messages(self):
         for filename in glob.glob(self.file, recursive=True):
-            mail = extract_msg.openMsg(filename)
+            mail = extract_msg.openMsg(filename,overrideEncoding='Latin-1')
             
             message = Email(
                 Date=mail.date,

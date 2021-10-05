@@ -4,11 +4,11 @@ from mailbag.controller import Controller
 from mailbag.models import Email
 import mailbag
 
-def test_reader():
+def test_reader_Mbox():
     args = {}
     c = Controller(args)
     format, path = mailbag.formats.mbox.Mbox,"data/sample1.mbox"
-    mbox = c.reader(format,path)
+    data = c.reader(format,path)
     
     expected = []
     expected.append(Email(
@@ -28,6 +28,22 @@ def test_reader():
         To = 'ualbanymodernpoliticalarchives@gmail.com'
     ))
 
-    for id, m in enumerate(mbox):
+    for id, m in enumerate(data):
         assert m == expected[id]
+
+def test_reader_MSG():
+    args = {}
+    c = Controller(args)
+    format, path = mailbag.formats.msg.MSG,"data/sample1.msg"
+    data = c.reader(format,path)
     
+    expected = []
+    expected.append(Email(
+        Date = 'Sat, 12 Aug 2006 14:25:25 -0400',
+        From = 'John Doe <jdoes@someserver.com>',
+        Subject = '(outlookEMLandMSGconverter Trial Version Import) BitDaddys Software',
+        To = 'sales@bitdaddys.com'
+    ))
+    
+    for id, m in enumerate(data):
+        assert m == expected[id]
