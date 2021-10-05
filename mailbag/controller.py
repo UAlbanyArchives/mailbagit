@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 class Controller:
     """Controller - Main controller"""
     
-    def __init__(self, args, formats):
+    def __init__(self, args):
         self.args = args
     
     @property
@@ -12,16 +12,20 @@ class Controller:
         return EmailAccount.registry
 
     def read(self):
-
+        
+        self.path = self.args.directory[0]
+        self.format = self.format_map[self.args.input]
+        
         if len(self.args.directory) > 1:
             # checks that mailbag was only given one directory as input. 
             # bagit-python loops through all directory args, and we may have to 
             # handle multiple inputs at some point but for now just raise an error.
             raise ValueError("Mailbag currently only reads one input source.")
         else:
+            self.reader(self.format,self.path)
+    
+    def reader(self,format,path):
+        data = format(path)
+        messages = data.messages()
 
-            format = self.format_map[self.args.input](self.args.directory[0])            
-            messages = format.messages()
-        
-        for m in messages:
-            print(m.to_struct())
+        return messages
