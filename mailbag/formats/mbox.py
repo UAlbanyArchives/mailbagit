@@ -13,7 +13,7 @@ class Mbox(EmailAccount):
         account_data = {}
         messages = []
 
-        self.file = target_account.input_path
+        self.file = target_account
         print("Reading :", self.file)        
         self.data = mailbox.mbox(self.file)
 
