@@ -21,7 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           sudo apt-get install build-essential python3-wxgtk4.0
-          pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 wxPython
+          pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with black
         run: |
