@@ -12,7 +12,7 @@ def test_reader_Mbox():
     
     expected = []
     expected.append(Email(
-        Content_Type = 'multipart/alternative; \r\n\tboundary="----=_Part_315462_994415758.1467289309709"',
+        Content_Type = 'multipart/alternative; \n\tboundary="----=_Part_315462_994415758.1467289309709"',
         Date = 'Thu, 30 Jun 2016 12:22:39 +0000 (GMT)',
         From = 'Chuck Schumer <info@chuckschumer.com>',
         Message_ID = '<1314145029.920292481467289359777.JavaMail.app@rbg21.atlis1>',
