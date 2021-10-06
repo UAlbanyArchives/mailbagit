@@ -2,7 +2,8 @@ from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 import mailbox
 import pypff
-
+from os.path import join
+from email import parser
 
 class PST(EmailAccount):
     # pst - This concrete class parses PST file format
@@ -43,25 +44,48 @@ class PST(EmailAccount):
 
         return messages
 
+    def folders(self, folder, path):
+        # recursive function that calls itself on any subfolders and
+        # returns a generator of messages
+        # path is a list that you can create the filepath with join()
+        if folder.number_of_sub_folders:
+            path.append(folder.name)
+            for folder_index in range(folder.number_of_sub_folders):
+                subfolder = folder.get_sub_folder(folder_index)
+                yield from self.folders(subfolder, path)
+        elif folder.number_of_sub_messages:
+            path.append(folder.name)
+            for index in range(folder.number_of_sub_messages):
+                messageObj = folder.get_sub_message(index)
+                headerParser = parser.HeaderParser()
+                headers = headerParser.parsestr(messageObj.transport_headers)
+                message = {
+                    "Message_ID": headers['Message-ID'],
+                    "Email_Folder": join(*path),
+                    "Date": headers["Date"],
+                    "From": headers["From"],
+                    "To": headers["To"],
+                    "Cc": headers["CC"],
+                    "Bcc": headers["Bcc"],
+                    "Subject": headers["Subject"],
+                    "Content_Type": headers["Content-Type"]
+                }
+                yield Email(**message)
+        else:
+            # gotta return empty directory to controller somehow
+            print ("??--> " + folder.name)
+
     def messages(self):
         pst = pypff.file()
         pst.open(self.file)
         root = pst.get_root_folder()
-        m=PST.parse_folder(root)
-        for att in m:
-            message = {
-                #"Message_ID": i['Message-ID'],
-                "Email_Folder": att["Folder"],
-               # "Date": i["Creationtime"],
-                "From": att["sender"],
-               # "To": i["To"],
-               # "Cc": i["CC"],
-               # "Bcc": i['Bcc'],
-                "Subject": att["subject"],
-                #"Content_Type": i['Content-Type']
-            }
-
-            yield Email(**message)
+        count = 0
+        for folder in root.sub_folders:
+            if folder.number_of_sub_folders:
+                return self.folders(folder, [])
+            else:
+                # gotta return empty directory to controller somehow
+                print ("??--> " + folder.name)
 
 
 

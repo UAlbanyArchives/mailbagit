@@ -7,7 +7,8 @@ class Controller:
         self.args = args
         self.format_map = {
                 'mbox': formats.mbox.Mbox,
-                'msg': formats.msg.MSG
+                'msg': formats.msg.MSG,
+                'pst': formats.pst.PST
         }
         
     def read(self):
