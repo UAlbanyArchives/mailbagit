@@ -19,30 +19,8 @@ class PST(EmailAccount):
 
 
 
-
-
-
-
     def account_data(self):
         return account_data
-
-    def parse_folder(root):
-        messages=[]
-
-        for folder in root.sub_folders:
-            if folder.number_of_sub_folders:
-                messages += PST.parse_folder(folder)
-
-
-            for message in folder.sub_messages:
-                messages.append({
-                    "subject": message.subject,
-                    "sender": message.sender_name,
-                    "Folder":folder.name
-
-                })
-
-        return messages
 
     def folders(self, folder, path):
         # recursive function that calls itself on any subfolders and
