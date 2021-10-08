@@ -30,7 +30,7 @@ def test_Mbox():
         assert m == expected[id]
 
 
-def test_reader_MSG():
+def test_MSG():
     data = mailbag.formats.msg.MSG("data/sample1.msg").messages()
 
     expected = []
