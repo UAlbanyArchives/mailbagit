@@ -36,5 +36,4 @@ class Mbox(EmailAccount):
                 )
             except mbox.errors.MessageParseError:
                 continue
-            yield message
-        
+            yield message      
