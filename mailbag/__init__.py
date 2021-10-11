@@ -53,7 +53,7 @@ class Mailbag:
         if args.input in EmailAccount.registry.keys():
             
             c = Controller(args)
-            c.read()
+            c.read(args.input,args.directory)
 
         else:
             print ("no parser found")
