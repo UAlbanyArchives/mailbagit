@@ -64,7 +64,7 @@ class Mailbag:
         
         if args.input in EmailAccount.registry.keys():
             
-            c = Controller(args,formats)
+            c = Controller(args)
             c.read()
 
         else:

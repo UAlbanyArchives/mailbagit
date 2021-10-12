@@ -63,7 +63,6 @@ def import_formats(additional_dirs=None):
                    not isfile(join(formats_dir, filename)) or \
                    filename[-3:] != '.py':
                     continue
-                import pdb;pdb.set_trace()
                 __import__(module, globals(), locals())
         finally:
             sys.path = sys.path[1:]

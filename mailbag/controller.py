@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 class Controller:
     """Controller - Main controller"""
     
-    def __init__(self, args, formats):
+    def __init__(self, args):
         self.args = args
     
     @property
