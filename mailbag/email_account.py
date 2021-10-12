@@ -48,7 +48,7 @@ def import_formats(additional_dirs=None):
 
     dirs = [join(dirname(__file__), 'formats'), *additional_dirs]
 
-    for formats_dir in dirs:
+    for formats_dir in reversed(dirs):
         if not exists(formats_dir): continue
 
         # put formats_dir at front of python load path for import

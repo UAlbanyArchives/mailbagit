@@ -58,7 +58,8 @@ class PST(EmailAccount):
         count = 0
         for folder in root.sub_folders:
             if folder.number_of_sub_folders:
-                return self.folders(folder, [])
+                print (":(")
+                #return self.folders(folder, [])
             else:
                 # gotta return empty directory to controller somehow
                 print ("??--> " + folder.name)
