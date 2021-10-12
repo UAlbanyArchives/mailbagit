@@ -1,6 +1,10 @@
+import mailbox
+import structlog
+
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
-import mailbox
+
+log = structlog.get_logger()
 
 
 class Mbox(EmailAccount):
@@ -8,13 +12,12 @@ class Mbox(EmailAccount):
     format_name = 'mbox'
 
     def __init__(self, target_account, **kwargs):
-        print("Parsity parse")
+        log.info("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
-        messages = []
 
         self.file = target_account
-        print("Reading :", self.file)        
+        log.info("Reading : " + self.file)        
         self.data = mailbox.mbox(self.file)
 
     def account_data(self):
@@ -36,4 +39,4 @@ class Mbox(EmailAccount):
                 )
             except mbox.errors.MessageParseError:
                 continue
-            yield message      
+            yield message
