@@ -12,7 +12,7 @@ class Controller:
         return EmailAccount.registry
 
     def read(self):
-        
+
         self.path = self.args.directory[0]
         self.format = self.format_map[self.args.input]
         
