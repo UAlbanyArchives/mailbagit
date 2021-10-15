@@ -11,18 +11,19 @@ class Controller:
     def format_map(self):
         return EmailAccount.registry
 
-    def read(self):
-
-        self.path = self.args.directory[0]
-        self.format = self.format_map[self.args.input]
+    def read(self,input,directory):
         
-        if len(self.args.directory) > 1:
+        path = directory[0]
+        format = self.format_map[input]
+        
+        if len(directory) > 1:
             # checks that mailbag was only given one directory as input. 
             # bagit-python loops through all directory args, and we may have to 
             # handle multiple inputs at some point but for now just raise an error.
             raise ValueError("Mailbag currently only reads one input source.")
         else:
-            self.reader(self.format,self.path)
+            self.reader(format,path)
+
     
     def reader(self,format,path):
         data = format(path)

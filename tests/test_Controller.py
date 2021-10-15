@@ -1,8 +1,8 @@
 import pytest
-
 from mailbag.controller import Controller
-from mailbag.models import Email
 import mailbag
+from mailbag.models import Email
+
 
 def test_reader_Mbox():
     args = {}
