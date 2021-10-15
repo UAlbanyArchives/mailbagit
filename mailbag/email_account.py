@@ -1,5 +1,6 @@
 from os import listdir
-from os.path import dirname, basename, isfile, join
+from os.path import  basename, dirname, exists, isfile, join
+import sys
 
 from abc import ABC, abstractmethod
 class EmailAccount(ABC):
@@ -41,14 +42,27 @@ be called on it."""
         """Generator method that yields one message at a time from an email account as `Email`s."""
         pass
 
-def import_formats():
-    formats_dir = join(dirname(__file__), 'formats')
+def import_formats(additional_dirs=None):
+    if not additional_dirs:
+        additional_dirs = []
 
-    for filename in listdir(formats_dir):
-        module = basename(filename)
+    dirs = [join(dirname(__file__), 'formats'), *additional_dirs]
 
-        if module.startswith('_') or not isfile(join(formats_dir, filename)):
-            continue
-        __import__('mailbag.formats.' + module[:-3], globals(), locals())
+    for formats_dir in dirs:
+        if not exists(formats_dir): continue
 
-import_formats()
+        # put formats_dir at front of python load path for import
+        # note: str is here because arguments may be Paths
+        sys.path.insert(0, str(formats_dir))
+
+        try:
+            for filename in listdir(formats_dir):
+                module = basename(filename)[:-3]
+                # skip if not a normal, non underscored file ending in .py
+                if module.startswith('_') or \
+                   not isfile(join(formats_dir, filename)) or \
+                   filename[-3:] != '.py':
+                    continue
+                __import__(module, globals(), locals())
+        finally:
+            sys.path = sys.path[1:]

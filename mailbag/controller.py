@@ -23,6 +23,7 @@ class Controller:
             raise ValueError("Mailbag currently only reads one input source.")
         else:
             self.reader(format,path)
+
     
     def reader(self,format,path):
         data = format(path)
