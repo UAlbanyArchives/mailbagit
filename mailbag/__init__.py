@@ -49,13 +49,14 @@ mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as
 def cli():
     args = bagit_parser.parse_args()
     print (args)
+    args.input=args.input.lower()
     return Mailbag(args)
 
 
 @Gooey
 def gui():
     bagit_parser.parse_args()
-    # do the thing
+    # do the thi
 
 
 class Mailbag:
