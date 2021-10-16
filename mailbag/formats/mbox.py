@@ -1,10 +1,10 @@
 import mailbox
-import structlog
+from structlog import get_logger
 
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 
-log = structlog.get_logger()
+log = get_logger()
 
 
 class Mbox(EmailAccount):
@@ -17,7 +17,7 @@ class Mbox(EmailAccount):
         account_data = {}
 
         self.file = target_account
-        log.info("Reading : " + self.file)        
+        log.info("Reading : ", File=self.file)        
         self.data = mailbox.mbox(self.file)
 
     def account_data(self):

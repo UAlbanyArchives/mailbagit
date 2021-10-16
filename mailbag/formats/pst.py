@@ -1,13 +1,13 @@
 from os.path import join
 import mailbox
 import pypff
-import structlog
+from structlog import get_logger
 
 from email import parser
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 
-log = structlog.get_logger()
+log = get_logger()
 
 
 class PST(EmailAccount):
@@ -19,7 +19,7 @@ class PST(EmailAccount):
         # code goes here to set up mailbox and pull out any relevant account_data
 
         self.file = target_account
-        log.info("Reading :" + self.file)
+        log.info("Reading :",File=self.file)
 
     def account_data(self):
         return account_data
