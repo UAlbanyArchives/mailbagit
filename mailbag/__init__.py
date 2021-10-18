@@ -56,7 +56,7 @@ def cli():
 @Gooey
 def gui():
     bagit_parser.parse_args()
-    # do the thi
+    # do the thing
 
 
 class Mailbag:
