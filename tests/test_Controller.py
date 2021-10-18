@@ -1,13 +1,13 @@
 import pytest
 from mailbag.controller import Controller
-import mailbag
 from mailbag.models import Email
+from mailbag.formats import mbox, msg
 
 
 def test_reader_Mbox():
     args = {}
     c = Controller(args)
-    format, path = mailbag.formats.mbox.Mbox,"data/sample1.mbox"
+    format, path = mbox.Mbox,"data/sample1.mbox"
     data = c.reader(format,path)
     
     expected = []
@@ -34,7 +34,7 @@ def test_reader_Mbox():
 def test_reader_MSG():
     args = {}
     c = Controller(args)
-    format, path = mailbag.formats.msg.MSG,"data/sample1.msg"
+    format, path = msg.MSG,"data/sample1.msg"
     data = c.reader(format,path)
     
     expected = []
