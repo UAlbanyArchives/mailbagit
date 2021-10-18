@@ -1,18 +1,19 @@
 import os
-from dotenv import load_dotenv, find_dotenv
-import logging
-import structlog
+import logging, structlog
+
 
 def configure():
-    load_dotenv(find_dotenv())
-    DEBUG=os.getenv('DEBUG').lower()
-    if DEBUG=='true':
-        structlog.configure(
-            wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
-        )
-    else:
-        structlog.configure(
-            wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
-        )
+    
     log = structlog.get_logger()
-    log.info("MODE:", DEBUG=DEBUG)
+    
+    try:
+        LOGLEVEL = os.environ.get('MAILBAG_LOG_LEVEL', None).upper()
+        level = logging._nameToLevel[LOGLEVEL]
+    except:
+        log.warn("MAILBAG_LOG_LEVEL environment variable not set or incorrect")
+        
+    structlog.configure(
+                wrapper_class=structlog.make_filtering_bound_logger(level)
+            )
+    log = structlog.get_logger()
+    log.info("MAILBAG_LOG_LEVEL:", LOGS=LOGLEVEL)
