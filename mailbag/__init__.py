@@ -67,7 +67,7 @@ class Mailbag:
             c = Controller(args)
 
             c.read(args.input,args.directory)
-
+            c.organizeFileStructure(args.input,args.directory)
 
 
         else:
