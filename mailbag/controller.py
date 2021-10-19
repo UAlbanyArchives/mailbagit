@@ -27,3 +27,6 @@ class Controller:
         else:
             format = self.format_map[self.args.input](self.args.directory[0])            
             messages = format.messages()
+
+            for m in messages:
+                pass

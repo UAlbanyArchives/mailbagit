@@ -13,7 +13,7 @@ class MSG(EmailAccount):
     format_name = 'msg'
 
     def __init__(self, target_account, **kwargs):
-        log.info("Parsity parse")
+        log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
 
@@ -36,4 +36,5 @@ class MSG(EmailAccount):
                 Subject=mail.subject,
                 Body=mail.body
             )
+            log.debug(message.to_struct())
             yield message

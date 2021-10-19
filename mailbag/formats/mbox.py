@@ -12,7 +12,7 @@ class Mbox(EmailAccount):
     format_name = 'mbox'
 
     def __init__(self, target_account, **kwargs):
-        log.info("Parsity parse")
+        log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
 
@@ -37,6 +37,7 @@ class Mbox(EmailAccount):
                     Subject=mail['Subject'],
                     Content_Type=mail['Content-Type']
                 )
+                log.debug(message.to_struct())
             except mbox.errors.MessageParseError:
                 continue
             yield message
