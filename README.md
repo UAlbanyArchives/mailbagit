@@ -1,6 +1,6 @@
 # Mailbag
 
-A tool for creating and managing Mailbags, a package for preserving email with multiple masters
+A tool for creating and managing Mailbags, a package for preserving email in multiple formats
 
 ## Installation
 
@@ -97,3 +97,12 @@ e.g. `-c tar.gz`
 ### Bagit-python arguments
 
 Mailbag also accepts [bagit-python](https://github.com/LibraryOfCongress/bagit-python) arguments. Thus, you can provide arguments like `--processes 2` or arguments to add metadata such as `--source-organization University at Albany, SUNY` 
+
+
+## Plugins
+
+New formats (and eventually, other components) may be provided to mailbag to extend its functionality.  By default, mailbag will look for formats in the following places:
+
+1. formats built into mailbag
+2. a `.mailbag/formats` subdirectory in the user's home directory.
+3. a `formats` subdirectory within a directory specified in the `MAILBAG_PLUGIN_DIR` environment variable.
