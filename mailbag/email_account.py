@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import  basename, dirname, exists, isfile, join
+from importlib.machinery import SourceFileLoader
 import sys
 
 from abc import ABC, abstractmethod
@@ -51,18 +52,13 @@ def import_formats(additional_dirs=None):
     for formats_dir in dirs:
         if not exists(formats_dir): continue
 
-        # put formats_dir at front of python load path for import
-        # note: str is here because arguments may be Paths
-        sys.path.insert(0, str(formats_dir))
+        for filename in listdir(formats_dir):
+            module = basename(filename)[:-3]
+            full_path = join(formats_dir, filename)
+            # skip if not a normal, non underscored file ending in .py
+            if module.startswith('_') or \
+               not isfile(full_path) or \
+               filename[-3:] != '.py':
+                continue
 
-        try:
-            for filename in listdir(formats_dir):
-                module = basename(filename)[:-3]
-                # skip if not a normal, non underscored file ending in .py
-                if module.startswith('_') or \
-                   not isfile(join(formats_dir, filename)) or \
-                   filename[-3:] != '.py':
-                    continue
-                __import__(module, globals(), locals())
-        finally:
-            sys.path = sys.path[1:]
+            SourceFileLoader(module, full_path).load_module()
