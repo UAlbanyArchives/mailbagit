@@ -3,17 +3,30 @@
 # Version of the mailbag package
 __version__ = "0.0.1"
 
+import os
+from pathlib import Path
 from bagit import _make_parser, Bag
 from gooey import Gooey
 from structlog import get_logger
-
-from mailbag.email_account import EmailAccount
+from mailbag.email_account import EmailAccount, import_formats
 from mailbag.controller import Controller
 import mailbag.loggerx
 
 loggerx.configure()
 log = get_logger()
 
+plugin_dir = os.environ.get('MAILBAG_PLUGIN_DIR', None)
+
+# Formats are loaded from:
+#   1. formats directory inside the package (built-in)
+#   2. .mailbag/formats in user home directory
+#   3. plugin dir set in environment variable
+format_dirs = []
+format_dirs.append(Path("~/.mailbag/formats").expanduser())
+if plugin_dir:
+    format_dirs.append((Path(plugin_dir) / 'formats').expanduser())
+
+import_formats(format_dirs)
 log.debug("EmailAccount:", Registry=EmailAccount.registry)
 
 bagit_parser = _make_parser()
@@ -41,6 +54,7 @@ mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as
 def cli():
     args = bagit_parser.parse_args()
     log.debug("Arguments:",args=args)
+    args.input=args.input.lower()
     return Mailbag(args)
 
 
@@ -56,8 +70,10 @@ class Mailbag:
         
         if args.input in EmailAccount.registry.keys():
             
-            c = Controller(args, formats)
-            c.read()
+
+            c = Controller(args)
+            c.read(args.input,args.directory)
+
 
         else:
             log.error("No parser found")
