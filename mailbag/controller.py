@@ -1,5 +1,10 @@
+from structlog import get_logger
+
 from mailbag.email_account import EmailAccount
 from dataclasses import dataclass, asdict, field, InitVar
+
+log = get_logger()
+
 
 class Controller:
     """Controller - Main controller"""
@@ -20,6 +25,7 @@ class Controller:
             # checks that mailbag was only given one directory as input. 
             # bagit-python loops through all directory args, and we may have to 
             # handle multiple inputs at some point but for now just raise an error.
+            log.error("Mailbag currently only reads one input source.")
             raise ValueError("Mailbag currently only reads one input source.")
         else:
             self.reader(format,path)
