@@ -1,7 +1,6 @@
 from os import listdir
 from os.path import  basename, dirname, exists, isfile, join
 from importlib.machinery import SourceFileLoader
-import sys
 
 from abc import ABC, abstractmethod
 class EmailAccount(ABC):
