@@ -6,7 +6,7 @@ import os
 
 
 def test_Mbox():
-    data = mailbag.formats.mbox.Mbox("data\\sample1.mbox").messages()
+    data = mailbag.formats.mbox.Mbox(os.path.join("data", "sample1.mbox")).messages()
 
     expected = []
     expected.append(Email(
@@ -31,7 +31,7 @@ def test_Mbox():
 
 
 def test_MSG():
-    data = mailbag.formats.msg.MSG("data\\sample1.msg").messages()
+    data = mailbag.formats.msg.MSG(os.path.join("data", "sample1.msg")).messages()
 
     expected = []
     expected.append(Email(
@@ -46,21 +46,20 @@ def test_MSG():
 
 
 def test_PST():
-    # path = os.path.join("data", "sample1.pst")
-    data = mailbag.formats.pst.PST('data\\sample1.pst').messages()
+    data = mailbag.formats.pst.PST(os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")).messages()
 
     expected = []
     expected.append(Email(
-        CC='gwiedeman@albany.edu',
+        Cc='gwiedeman@albany.edu',
         Content_Type='multipart/alternative; boundary=da8640888b204494a76c3a9e1f2a9112f911e113df090efab9b04e884486',
         Date='Thu, 30 Sep 2021 17:30:56 +0000 (UTC)',
         Email_Folder='Top of Outlook data file\\Inbox\\Today at UAlbany',
         From='Today at UAlbany <tau@albany.edu>',
         Message_ID='<2Y2JQkdFSGmQAIdjAOswdQ@geopod-ismtpd-3-0>',
         Subject='Today at UAlbany - Focus on Research',
+        To='gwiedeman@albany.edu'
     ))
 
     for id, m in enumerate(data):
         assert m == expected[id]
-
-
+        break
