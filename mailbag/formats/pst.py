@@ -1,6 +1,5 @@
 from os.path import join
 import mailbox
-import pypff
 from structlog import get_logger
 
 from email import parser
@@ -15,6 +14,10 @@ class PST(EmailAccount):
     format_name = 'pst'
 
     def __init__(self, target_account, **kwargs):
+        # only import libpff when PST is selected as the input format
+        # this way it won't be required for parsing other formats
+        import pypff
+
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
 
