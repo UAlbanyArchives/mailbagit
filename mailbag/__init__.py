@@ -9,25 +9,30 @@ from bagit import _make_parser, Bag
 from gooey import Gooey
 from structlog import get_logger
 from mailbag.email_account import EmailAccount, import_formats
+from mailbag.derivative import Derivative, import_derivatives
 from mailbag.controller import Controller
 import mailbag.loggerx
 
 loggerx.configure()
 log = get_logger()
 
-plugin_dir = os.environ.get('MAILBAG_PLUGIN_DIR', None)
+plugin_basedir = os.environ.get('MAILBAG_PLUGIN_DIR', None)
 
-# Formats are loaded from:
-#   1. formats directory inside the package (built-in)
-#   2. .mailbag/formats in user home directory
-#   3. plugin dir set in environment variable
-format_dirs = []
-format_dirs.append(Path("~/.mailbag/formats").expanduser())
-if plugin_dir:
-    format_dirs.append((Path(plugin_dir) / 'formats').expanduser())
+# Formats and derivatives are loaded from:
+#   1. formats/derivatives directories inside the package (built-in)
+#   2. .mailbag/{formats,dirivatives} in user home directory
+#   3. {formats,dirivatives} subdirectories in plugin dir set in environment variable
+plugin_dirs = {"formats": [], "derivatives": []}
+for plugin_type, dirs in plugin_dirs.items():
+    dirs.append(Path(f"~/.mailbag/{plugin_type}").expanduser())
+    if plugin_basedir:
+        dirs.append((Path(plugin_basedir) / plugin_type).expanduser())
 
-import_formats(format_dirs)
+import_formats(plugin_dirs['formats'])
+import_derivatives(plugin_dirs['derivatives'])
+
 log.debug("EmailAccount:", Registry=EmailAccount.registry)
+log.debug("Derivative:", Registry=Derivative.registry)
 
 bagit_parser = _make_parser()
 bagit_parser.description = f"Mailbag ({bagit_parser.description})"
@@ -67,9 +72,9 @@ def gui():
 class Mailbag:
 
     def __init__(self, args):
-        
+
         if args.input in EmailAccount.registry.keys():
-            
+
 
             c = Controller(args)
             c.read(args.input,args.directory)
