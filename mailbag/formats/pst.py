@@ -1,8 +1,6 @@
 from os.path import join
 import mailbox
-import pypff
 from structlog import get_logger
-
 from email import parser
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
@@ -57,6 +55,10 @@ class PST(EmailAccount):
             log.error("??--> " + folder.name)
 
     def messages(self):
+        # only import libpff when PST is selected as the input format
+        # this way it won't be required for parsing other formats
+        import pypff
+
         pst = pypff.file()
         pst.open(self.file)
         root = pst.get_root_folder()
