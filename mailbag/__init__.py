@@ -69,7 +69,6 @@ class Mailbag:
             c = Controller(args)
 
             c.read(args.input, args.directory)
-            c.organizeFileStructure(args.dry_run, args.mailbag_name, args.input, args.directory)
 
         else:
             print ("no parser found")
