@@ -101,8 +101,13 @@ Mailbag also accepts [bagit-python](https://github.com/LibraryOfCongress/bagit-p
 
 ## Plugins
 
-New formats (and eventually, other components) may be provided to mailbag to extend its functionality.  By default, mailbag will look for formats in the following places:
+New formats (and eventually, other components) may be provided to mailbag to extend its functionality. You may also override the mailbag's built-in parsers. By default, mailbag will look for formats in the following places:
 
-1. formats built into mailbag
+1. a `formats` subdirectory within a directory specified in the `MAILBAG_PLUGIN_DIR` environment variable.
+	Unix Example:
+	`mkdir ~/myplugindir`
+	`mkdir ~/mypluigndir/formats`
+	`touch ~/myplugindir/formats/pst.py`
+	`export MAILBAG_PLUGIN_DIR=$HOME/myplugindir`
 2. a `.mailbag/formats` subdirectory in the user's home directory.
-3. a `formats` subdirectory within a directory specified in the `MAILBAG_PLUGIN_DIR` environment variable.
+3. formats built into mailbag
