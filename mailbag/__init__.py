@@ -45,7 +45,7 @@ mailbagit_options.add_argument("-n", "--no-headers", help="will not include emai
 mailbagit_options.add_argument("--pdf-css", help="Path to a CSS file to customize PDF derivatives.",nargs=None)
 mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ",nargs=None)
 mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
-mailbagit_options.add_argument("-m", "--mailbag_name", help="Mailbag name", nargs=None)
+mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
 
 def cli():

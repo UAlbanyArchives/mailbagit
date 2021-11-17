@@ -25,12 +25,14 @@ class Mbox(EmailAccount):
         return account_data
  
     def messages(self):
+        parent = str(Path(self.file).parent)
+        path = helper.emailFolder(self.dry_run,self.mailbag_name,self.format_name,parent,self.file)
+                
         for mail in self.data.itervalues():
             try:
-                parent = str(Path(self.file).parent)
                 message = Email(
                     Message_ID=mail['Message-ID'],
-                    Email_Folder=helper.emailFolder(self.dry_run,self.mailbag_name,self.format_name,parent,self.file),
+                    Email_Folder=mail['Email-Folder'],
                     Date=mail['Date'],
                     From=mail['From'],
                     To=mail['To'],
