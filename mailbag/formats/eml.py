@@ -2,11 +2,14 @@ import datetime
 import json
 import eml_parser
 from os.path import join
+#import mailbag.helper as helper
 import mailbox
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
+import email
+import glob, os
 
 
 
@@ -26,47 +29,35 @@ class EML(EmailAccount):
         account_data = {}
 
         self.file = target_account
+        #self.dry_run = dry_run
+        #self.mailbag_name = mailbag_name
         log.info("Reading : ", File=self.file)
-
 
     def account_data(self):
         return account_data
 
-    def json_serial(obj):
-        if isinstance(obj, datetime.datetime):
-            serial = obj.isoformat()
-
-            return serial
 
     def messages(self):
 
-        with open(self.file, 'rb') as fhdl:
-            raw_email = fhdl.read()
+        files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
-        ep = eml_parser.EmlParser()
-        parsed_eml = ep.decode_email_bytes(raw_email)
-        # print(dir(parsed_eml))
-        c = json.dumps(parsed_eml, default=EML.json_serial)
-        parsed_json = (json.loads(c))
-        for i in parsed_json["header"]["header"]["message-id"]:
-            Message = i
-        for i in parsed_json["header"]["to"]:
-            To = i
-        for i in parsed_json["header"]["header"]["content-type"]:
-            c=i
+        for i in files:
+            print(i)
+            with open(i, 'rb') as f:
+                a = f.read()
+            msg = email.message_from_bytes(a)
 
 
 
-        message = Email(
-                  Message_ID= Message,
-                  # Email_Folder="",
-                    Date=parsed_json["header"]["date"],
-                    From=parsed_json["header"]["from"],
-                    To=To,
-                    #Cc=parsed_json["header"]["received_foremail"],
-                    #Bcc=mail['Bcc'],
-                    Subject=parsed_json["header"]["subject"],
-                    Content_Type=c
+            message = Email(
+                    #Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),
+                    Message_ID=msg["Message-id"],
+                    Date=msg["date"],
+                    From=msg["from"],
+                    To=msg["to"],
+                    Subject=msg["subject"],
+                    Content_Type=msg["content-type"]
                 )
+
 
         yield message
