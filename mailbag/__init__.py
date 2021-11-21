@@ -39,9 +39,12 @@ bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 mailbagit_args = bagit_parser.add_argument_group("Mailbag arguments")
 mailbagit_options = bagit_parser.add_argument_group("Mailbag options")
 
+input_types = list(EmailAccount.registry.keys())
+derivative_types = list(Derivative.registry.keys())
+
 # add mailbag-specific required args here
-mailbagit_args.add_argument("-i", "--input", required=True, help="input type MBOX/PST/IMAP/EML/PDF/MSG", nargs=None)
-mailbagit_args.add_argument("-d", "--derivatives", required=True, help="derivative type(s) MBOX/PST/EML/PDF/WARC", nargs='+')
+mailbagit_args.add_argument("-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, nargs=None)
+mailbagit_args.add_argument("-d", "--derivatives", choices=derivative_types, required=False, help=f"types of derivatives to create before bagging", nargs='+')
 
 # add mailbag-specific optional args here
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
