@@ -111,3 +111,14 @@ New formats (and eventually, other components) may be provided to mailbag to ext
 	`export MAILBAG_PLUGIN_DIR=$HOME/myplugindir`
 2. a `.mailbag/formats` subdirectory in the user's home directory.
 3. formats built into mailbag
+
+## Logging
+
+1. Set environment variable `MAILBAG_LOG_LEVEL` to either `NOTSET`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL` or `CRITICAL`.
+2. Example of the logger initiation and usage in `Python`:<br /><br />
+	`from structlog import get_logger`<br/>
+	`import mailbag.loggerx`<br/>
+	`loggerx.configure()`<br/>
+	`log = get_logger()`<br/>	
+	`log.error("Error message here")`<br/>
+	`log.info("Information message here")`
