@@ -106,7 +106,7 @@ New formats (and eventually, other components) may be provided to mailbag to ext
 1. a `formats` subdirectory within a directory specified in the `MAILBAG_PLUGIN_DIR` environment variable.
 	Unix Example:
 	`mkdir ~/myplugindir`
-	`mkdir ~/mypluigndir/formats`
+	`mkdir ~/myplugindir/formats`
 	`touch ~/myplugindir/formats/pst.py`
 	`export MAILBAG_PLUGIN_DIR=$HOME/myplugindir`
 2. a `.mailbag/formats` subdirectory in the user's home directory.
@@ -114,8 +114,12 @@ New formats (and eventually, other components) may be provided to mailbag to ext
 
 ## Logging
 
-1. Set environment variable `MAILBAG_LOG_LEVEL` to either `NOTSET`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL` or `CRITICAL`.
-2. Example of the logger initiation and usage in `Python`:<br /><br />
+* The level of logs displayed by Mailbag is based on an environment variable `MAILBAG_LOG_LEVEL`.
+Log levels are available in the following order : `NOTSET`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `CRITICAL`.
+For example, when the `MAILBAG_LOG_LEVEL` is `NOTSET`, `Mailbag` displays logs of all levels.
+And when `MAILBAG_LOG_LEVEL` is `WARN`, it displays logs of level `WARN` and above. i.e. `WARN`, `ERROR`, or `CRITICAL`.
+
+* Example of the logger initiation and usage in `Python`:<br/><br/>
 	`from structlog import get_logger`<br/>
 	`import mailbag.loggerx`<br/>
 	`loggerx.configure()`<br/>
