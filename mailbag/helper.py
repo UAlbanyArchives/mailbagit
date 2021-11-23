@@ -4,7 +4,7 @@ import os, shutil, glob
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
-        shutil.copy(oldPath, newPath)
+        shutil.move(oldPath, newPath)
     except IOError as e:
         print('Unable to move file. %s' % e)
         

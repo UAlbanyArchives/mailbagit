@@ -11,7 +11,6 @@ class MSG(EmailAccount):
 
     def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
         print("Parsity parse")
-        # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
         messages = []
 
