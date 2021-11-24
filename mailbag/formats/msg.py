@@ -26,10 +26,11 @@ class MSG(EmailAccount):
         
         files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
         for filePath in files:
+            subFolder = helper.emailFolder(self.file,filePath)
+
             mail = extract_msg.openMsg(filePath,overrideEncoding='Latin-1')
-            
             message = Email(
-                Email_Folder=helper.emailFolder(self.dry_run,self.mailbag_name,self.format_name,self.file,filePath),
+                Email_Folder=subFolder,
                 Date=mail.date,
                 From=mail.sender,
                 To=mail.to,
@@ -38,4 +39,12 @@ class MSG(EmailAccount):
                 Subject=mail.subject,
                 Body=mail.body
             )
+            
+            # Make sure the MSG file is closed
+            mail.close()
+            # Move MBOX to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+
             yield message
+
+

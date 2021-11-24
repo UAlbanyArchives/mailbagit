@@ -26,9 +26,9 @@ class Mbox(EmailAccount):
         
         files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
         for filePath in files:
-            data = mailbox.mbox(filePath)
-            subFolder = helper.emailFolder(self.dry_run,self.mailbag_name,self.format_name,self.file,filePath)
+            subFolder = helper.emailFolder(self.file,filePath)
             
+            data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
                     message = Email(
@@ -45,3 +45,8 @@ class Mbox(EmailAccount):
                 except mbox.errors.MessageParseError:
                     continue
                 yield message
+
+            # Make sure the MBOX file is closed
+            data.close()
+            # Move MBOX to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
