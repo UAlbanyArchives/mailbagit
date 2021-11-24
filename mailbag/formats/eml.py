@@ -1,6 +1,5 @@
 import datetime
 import json
-import eml_parser
 from os.path import join
 #import mailbag.helper as helper
 import mailbox
