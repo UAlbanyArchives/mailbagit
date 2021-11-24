@@ -116,8 +116,10 @@ New formats (and eventually, other components) may be provided to mailbag to ext
 
 * The level of logs displayed by Mailbag is based on an environment variable `MAILBAG_LOG_LEVEL`.
 Log levels are available in the following order : `NOTSET`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `CRITICAL`.
-For example, when the `MAILBAG_LOG_LEVEL` is `NOTSET`, `Mailbag` displays logs of all levels.
+For example, when the `MAILBAG_LOG_LEVEL` is `DEBUG`, `Mailbag` displays logs of all levels.
 And when `MAILBAG_LOG_LEVEL` is `WARN`, it displays logs of level `WARN` and above. i.e. `WARN`, `ERROR`, or `CRITICAL`.
+
+* If no `MAILBAG_LOG_LEVEL` environment variable is set, mailbag will default to `WARN`.
 
 * Example of the logger initiation and usage in `Python`:<br/><br/>
 	`from structlog import get_logger`<br/>
