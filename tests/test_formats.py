@@ -6,7 +6,7 @@ import os
 
 
 def test_Mbox():
-    data = mailbag.formats.mbox.Mbox(os.path.join("data", "sample1.mbox")).messages()
+    data = mailbag.formats.mbox.Mbox(False, "New_Mailbag", os.path.join("data", "sample1.mbox")).messages()
 
     expected = []
     expected.append(Email(
@@ -31,7 +31,7 @@ def test_Mbox():
 
 
 def test_MSG():
-    data = mailbag.formats.msg.MSG(os.path.join("data", "sample1.msg")).messages()
+    data = mailbag.formats.msg.MSG(False, "New_Mailbag", os.path.join("data", "sample1.msg")).messages()
 
     expected = []
     expected.append(Email(
@@ -46,7 +46,7 @@ def test_MSG():
 
 
 def test_PST():
-    data = mailbag.formats.pst.PST(os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")).messages()
+    data = mailbag.formats.pst.PST(False, "New_Mailbag", os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")).messages()
 
     expected = []
     expected.append(Email(

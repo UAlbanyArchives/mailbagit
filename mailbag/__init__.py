@@ -55,8 +55,10 @@ mailbagit_options.add_argument("-e", "--exclude_input", help="will also exclude 
 mailbagit_options.add_argument("-l", "--crawl_links", help="will attempt to capture links in messages and include them in WARC output", action='store_true')
 mailbagit_options.add_argument("-a", "--crawl-attached-links", help="will attempt to capture links attached to messages and include them in WARC output", action='store_true')
 mailbagit_options.add_argument("-n", "--no-headers", help="will not include email headers in mailbag.csv", action='store_true')
-mailbagit_options.add_argument("--pdf-css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
-mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None)
+mailbagit_options.add_argument("--pdf-css", help="Path to a CSS file to customize PDF derivatives.",nargs=None)
+mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ",nargs=None)
+mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
+mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
 
 def cli():
@@ -78,10 +80,9 @@ class Mailbag:
 
         if args.input in EmailAccount.registry.keys():
 
-
+            log.info("Creating Mailbag: " + args.mailbag_name)
             c = Controller(args)
-            c.read(args.input,args.directory)
-
+            c.read(args.input, args.directory)
 
         else:
             log.error("No parser found")

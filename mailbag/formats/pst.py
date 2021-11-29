@@ -12,7 +12,7 @@ class PST(EmailAccount):
     # pst - This concrete class parses PST file format
     format_name = 'pst'
 
-    def __init__(self, target_account, **kwargs):
+    def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
 
