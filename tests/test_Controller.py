@@ -6,7 +6,7 @@ from mailbag.formats import mbox, msg, pst
 
 
 def test_reader_Mbox():
-    args = {}
+    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
     c = Controller(args)
     format, path = mbox.Mbox, os.path.join("data", "sample1.mbox")
     data = c.reader(format, path)
@@ -34,7 +34,7 @@ def test_reader_Mbox():
 
 
 def test_reader_MSG():
-    args = {}
+    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
     c = Controller(args)
     format, path = msg.MSG, os.path.join("data", "sample1.msg")
     data = c.reader(format, path)
@@ -52,7 +52,7 @@ def test_reader_MSG():
 
 
 def test_reader_PST():
-    args = {}
+    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
     c = Controller(args)
     format, path = pst.PST, os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
     data = c.reader(format, path)
@@ -74,11 +74,13 @@ def test_reader_PST():
         assert m == expected[id]
         break
 
+"""
+leaving this in but commenting out, as this functionality has been moved to the helper
 def test_organizeFileStructure():
     args = {}
     c = Controller(args)
-    # leaving this in but commenting out, as this functionality has been moved to the helper
-    #c.organizeFileStructure(False, 'faculty', 'msg', ['data'])
+    c.organizeFileStructure(False, 'faculty', 'msg', ['data'])
     
     # Assumes data/sample1.msg file exists
     assert os.path.exists(os.path.join('data', 'faculty', 'data', 'msg', 'sample1.msg')) is True
+"""
