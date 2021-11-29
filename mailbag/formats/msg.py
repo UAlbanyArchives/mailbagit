@@ -1,23 +1,26 @@
+import extract_msg
+import glob, os
+from structlog import get_logger
+
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 import mailbag.helper as helper
-import extract_msg
-import glob, os
 
+log = get_logger()
 
 class MSG(EmailAccount):
     """MSG - This concrete class parses msg file format"""
     format_name = 'msg'
 
     def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
-        print("Parsity parse")
+        log.debug("Parsity parse")
+        # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
-        messages = []
 
         self.file = target_account
         self.dry_run = dry_run
         self.mailbag_name = mailbag_name
-        print("Reading :", self.file)
+        log.info("Reading :",File=self.file)
 
     def account_data(self):
         return account_data
@@ -46,5 +49,3 @@ class MSG(EmailAccount):
             new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
 
             yield message
-
-

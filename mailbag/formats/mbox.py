@@ -1,23 +1,27 @@
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email
 import mailbox
+from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
+
+from mailbag.email_account import EmailAccount
+from mailbag.models import Email
 import mailbag.helper as helper
+
+log = get_logger()
 
 class Mbox(EmailAccount):
     """Mbox - This concrete class parses mbox file format"""
     format_name = 'mbox'
 
     def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
-        print("Parsity parse")
+        log.debug("Parsity parse")
+        # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
-        messages = []
 
         self.file = target_account
         self.dry_run = dry_run
         self.mailbag_name = mailbag_name
-        print("Reading :", self.file)        
+        log.info("Reading : ", File=self.file)    
 
     def account_data(self):
         return account_data

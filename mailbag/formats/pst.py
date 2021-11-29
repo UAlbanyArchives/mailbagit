@@ -1,9 +1,11 @@
+from os.path import join
+import mailbox
+from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
-from os.path import join
-import mailbox
-import pypff
+
+log = get_logger()
 
 
 class PST(EmailAccount):
@@ -11,11 +13,11 @@ class PST(EmailAccount):
     format_name = 'pst'
 
     def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
-        print("Parsity parse")
+        log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
 
         self.file = target_account
-        print("Reading :", self.file)
+        log.info("Reading :",File=self.file)
 
     def account_data(self):
         return account_data
@@ -46,12 +48,17 @@ class PST(EmailAccount):
                     Subject=headers["Subject"],
                     Content_Type=headers["Content-Type"]
                 )
+                log.debug(message.to_struct())
                 yield message
         else:
             # gotta return empty directory to controller somehow
-            print ("??--> " + folder.name)
+            log.error("??--> " + folder.name)
 
     def messages(self):
+        # only import libpff when PST is selected as the input format
+        # this way it won't be required for parsing other formats
+        import pypff
+
         pst = pypff.file()
         pst.open(self.file)
         root = pst.get_root_folder()
@@ -61,5 +68,4 @@ class PST(EmailAccount):
                 return self.folders(folder, [])
             else:
                 # gotta return empty directory to controller somehow
-                print ("??--> " + folder.name)
-
+                log.error("??--> " + folder.name)
