@@ -51,7 +51,6 @@ def test_reader_MSG():
         assert m == expected[id]
 
 
-<<<<<<< HEAD
 def test_reader_PST():
     args = {}
     c = Controller(args)

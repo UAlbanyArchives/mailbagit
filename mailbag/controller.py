@@ -10,6 +10,9 @@ import mailbag.helper as helper
 log = get_logger()
 
 
+log = get_logger()
+
+
 class Controller:
     """Controller - Main controller"""
     

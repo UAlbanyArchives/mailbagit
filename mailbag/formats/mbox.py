@@ -27,7 +27,7 @@ class Mbox(EmailAccount):
         return account_data
  
     def messages(self):
-        
+           
         files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
         for filePath in files:
             subFolder = helper.emailFolder(self.file,filePath)

@@ -82,7 +82,6 @@ class Mailbag:
 
             log.info("Creating Mailbag: " + args.mailbag_name)
             c = Controller(args)
-
             c.read(args.input, args.directory)
 
         else:
