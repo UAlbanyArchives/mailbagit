@@ -1,14 +1,19 @@
 import pytest
 import os
 from mailbag.controller import Controller
+from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 from mailbag.formats import mbox, msg, pst
+from argparse import Namespace
+
+@pytest.fixture
+def cli_args():
+    return Namespace(dry_run=False, mailbag_name="New_Mailbag")
 
 
-def test_reader_Mbox():
-    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
-    c = Controller(args)
-    format, path = mbox.Mbox, os.path.join("data", "sample1.mbox")
+def test_reader_Mbox(cli_args):
+    c = Controller(cli_args)
+    format, path = EmailAccount.registry['mbox'], os.path.join("data", "sample1.mbox")
     data = c.reader(format, path)
 
     expected = []
@@ -33,10 +38,9 @@ def test_reader_Mbox():
         assert m == expected[id]
 
 
-def test_reader_MSG():
-    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
-    c = Controller(args)
-    format, path = msg.MSG, os.path.join("data", "sample1.msg")
+def test_reader_MSG(cli_args):
+    c = Controller(cli_args)
+    format, path = EmailAccount.registry['msg'], os.path.join("data", "sample1.msg")
     data = c.reader(format, path)
 
     expected = []
@@ -51,10 +55,11 @@ def test_reader_MSG():
         assert m == expected[id]
 
 
-def test_reader_PST():
-    args = {"dry_run": False, "mailbag_name": "New_Mailbag"}
-    c = Controller(args)
-    format, path = pst.PST, os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
+def test_reader_PST(cli_args):
+    if 'pst' not in EmailAccount.registry:
+        raise pytest.skip("PST format not installed")
+    c = Controller(cli_args)
+    format, path = EmailAccount.registry['pst'], os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
     data = c.reader(format, path)
 
     expected =[]
@@ -80,7 +85,7 @@ def test_organizeFileStructure():
     args = {}
     c = Controller(args)
     c.organizeFileStructure(False, 'faculty', 'msg', ['data'])
-    
+
     # Assumes data/sample1.msg file exists
     assert os.path.exists(os.path.join('data', 'faculty', 'data', 'msg', 'sample1.msg')) is True
 """
