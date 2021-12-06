@@ -1,12 +1,18 @@
 from mailbag.controller import Controller
 from mailbag.models import Email
+from argparse import Namespace
+from mailbag.email_account import EmailAccount
 import mailbag
 import pytest
 import os
 
+# This is a mock object representing the args returned from argparse/Gooey
+@pytest.fixture
+def cli_args():
+    return Namespace(dry_run=False, mailbag_name="New_Mailbag")
 
-def test_Mbox():
-    data = mailbag.formats.mbox.Mbox(False, "New_Mailbag", os.path.join("data", "sample1.mbox")).messages()
+def test_Mbox(cli_args):
+    data = EmailAccount.registry['mbox'](os.path.join("data", "sample1.mbox"), cli_args).messages()
 
     expected = []
     expected.append(Email(
@@ -30,8 +36,8 @@ def test_Mbox():
         assert m == expected[id]
 
 
-def test_MSG():
-    data = mailbag.formats.msg.MSG(False, "New_Mailbag", os.path.join("data", "sample1.msg")).messages()
+def test_MSG(cli_args):
+    data = EmailAccount.registry['msg'](os.path.join("data", "sample1.msg"), cli_args).messages()
 
     expected = []
     expected.append(Email(
@@ -45,8 +51,11 @@ def test_MSG():
         assert m == expected[id]
 
 
-def test_PST():
-    data = mailbag.formats.pst.PST(False, "New_Mailbag", os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")).messages()
+def test_PST(cli_args):
+    if not 'pst' in EmailAccount.registry:
+        raise pytest.skip("PST not installed, cannot test")
+
+    data = EmailAccount.registry['pst'](os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst"), cli_args).messages()
 
     expected = []
     expected.append(Email(
