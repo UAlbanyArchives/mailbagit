@@ -11,4 +11,6 @@ class Email(models.Base):
     Cc = fields.StringField()
     Bcc = fields.StringField()
     Subject = fields.StringField()
-    Content_Type = fields.StringField()    
+    Content_Type = fields.StringField()
+    Header =  fields.ListField(items_types=[tuple])
+    Body = fields.StringField() 

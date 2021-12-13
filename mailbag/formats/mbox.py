@@ -35,6 +35,11 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
+                    if mail.is_multipart():
+                        content = ''.join(part.get_payload() for part in mail.get_payload())
+                    else:
+                        content = mail.get_payload()
+                    
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,
@@ -44,7 +49,9 @@ class Mbox(EmailAccount):
                         Cc=mail['Cc'],
                         Bcc=mail['Bcc'],
                         Subject=mail['Subject'],
-                        Content_Type=mail['Content-Type']
+                        Content_Type=mail['Content-Type'],
+                        Header=mail.items(),
+                        Body=content
                     )
                 except mbox.errors.MessageParseError:
                     continue
