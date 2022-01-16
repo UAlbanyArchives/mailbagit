@@ -12,9 +12,11 @@ def cli_args():
 
 
 def test_reader_Mbox(cli_args):
+    cli_args.directory = os.path.join("data", "sample1.mbox")
+    cli_args.input = "mbox"
+
     c = Controller(cli_args)
-    format, path = EmailAccount.registry['mbox'], os.path.join("data", "sample1.mbox")
-    data = c.reader(format, path)
+    data = c.generate_mailbag()
 
     expected = []
     expected.append(Email(
@@ -39,9 +41,11 @@ def test_reader_Mbox(cli_args):
 
 
 def test_reader_MSG(cli_args):
+    cli_args.directory = os.path.join("data", "sample1.msg")
+    cli_args.input = "msg"
+
     c = Controller(cli_args)
-    format, path = EmailAccount.registry['msg'], os.path.join("data", "sample1.msg")
-    data = c.reader(format, path)
+    data = c.generate_mailbag()
 
     expected = []
     expected.append(Email(
@@ -58,9 +62,11 @@ def test_reader_MSG(cli_args):
 def test_reader_PST(cli_args):
     if 'pst' not in EmailAccount.registry:
         raise pytest.skip("PST format not installed")
+    cli_args.directory = os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
+    cli_args.input = "pst"
+
     c = Controller(cli_args)
-    format, path = EmailAccount.registry['pst'], os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
-    data = c.reader(format, path)
+    data = c.generate_mailbag()
 
     expected =[]
     expected.append(Email(
