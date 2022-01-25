@@ -41,8 +41,7 @@ class EML(EmailAccount):
         files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
         for i in files:
-            #print(i)
-            log.debug(i)
+            #log.debug(i)
             with open(i, 'rb') as f:
                 a = f.read()
             msg = email.message_from_bytes(a)
