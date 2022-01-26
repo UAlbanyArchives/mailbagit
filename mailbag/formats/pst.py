@@ -31,25 +31,30 @@ class PST(EmailAccount):
             for folder_index in range(folder.number_of_sub_folders):
                 subfolder = folder.get_sub_folder(folder_index)
                 yield from self.folders(subfolder, path)
-        elif folder.number_of_sub_messages:
-            path.append(folder.name)
-            for index in range(folder.number_of_sub_messages):
-                messageObj = folder.get_sub_message(index)
-                headerParser = parser.HeaderParser()
-                headers = headerParser.parsestr(messageObj.transport_headers)
-                message = Email(
-                    Message_ID=headers['Message-ID'],
-                    Email_Folder=join(*path),
-                    Date=headers["Date"],
-                    From=headers["From"],
-                    To=headers["To"],
-                    Cc=headers["To"],
-                    Bcc=headers["Bcc"],
-                    Subject=headers["Subject"],
-                    Content_Type=headers["Content-Type"]
-                )
-                log.debug(message.to_struct())
-                yield message
+            if folder.number_of_sub_messages:
+                log.debug("Reading folder: " + folder.name)
+                path.append(folder.name)
+                for index in range(folder.number_of_sub_messages):
+                    messageObj = folder.get_sub_message(index)
+                    headerParser = parser.HeaderParser()
+                    headers = headerParser.parsestr(messageObj.transport_headers)
+                    message = Email(
+                        Message_ID=headers['Message-ID'],
+                        Email_Folder=join(*path),
+                        Date=headers["Date"],
+                        From=headers["From"],
+                        To=headers["To"],
+                        Cc=headers["To"],
+                        Bcc=headers["Bcc"],
+                        Subject=headers["Subject"],
+                        Content_Type=headers["Content-Type"],
+                        Headers=headers,
+                        Text_Body=messageObj.html_body,
+                        HTML_Body=messageObj.plain_text_body,
+                        Message=None
+                    )
+                    #log.debug(message.to_struct())
+                    yield message
         else:
             # gotta return empty directory to controller somehow
             log.error("??--> " + folder.name)
@@ -68,4 +73,4 @@ class PST(EmailAccount):
                 return self.folders(folder, [])
             else:
                 # gotta return empty directory to controller somehow
-                log.error("??--> " + folder.name)
+                log.error("???--> " + folder.name)

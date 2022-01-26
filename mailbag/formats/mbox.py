@@ -1,3 +1,4 @@
+import email
 import mailbox
 from structlog import get_logger
 from pathlib import Path
@@ -35,11 +36,16 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
+                    mailObject = email.message_from_bytes(mail.as_bytes())
+                    print (dir(mail))
+                    # Try to parse content
                     if mail.is_multipart():
-                        content = ''.join(part.get_payload() for part in mail.get_payload())
-                    else:
-                        content = mail.get_payload()
-                    
+                        for part in mail.walk():
+                            if part.get_content_type() == "text/html":
+                                html_body = part.get_payload()
+                            elif part.get_content_type() == "text/plain":
+                                text_body = part.get_payload()
+
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,
@@ -50,8 +56,10 @@ class Mbox(EmailAccount):
                         Bcc=mail['Bcc'],
                         Subject=mail['Subject'],
                         Content_Type=mail['Content-Type'],
-                        Header=mail.items(),
-                        Body=content
+                        Headers=mail,
+                        Text_Body=text_body,
+                        HTML_Body=html_body,
+                        Message=mailObject
                     )
                 except mbox.errors.MessageParseError:
                     continue
