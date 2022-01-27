@@ -32,8 +32,8 @@ class Controller:
 
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
-        for d in derivatives:
-            d.do_task_per_account()
+        #for d in derivatives:
+        #    d.do_task_per_account()
 
         for message in mail_account.messages():
             # do stuff you ought to do per message here

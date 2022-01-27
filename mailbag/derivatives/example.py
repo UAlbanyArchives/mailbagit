@@ -14,4 +14,7 @@ class ExampleDerivative(Derivative):
         print(self.account.account_data())
 
     def do_task_per_message(self, message):
-        print(message)
+        if message.Message_ID:
+            print(message.Message_ID.strip())
+        else:
+            print(message.Subject)

@@ -78,5 +78,12 @@ def main():
         exit()
 
     log.debug("Arguments:",args=args)
-    c = Controller(args)
-    return c.generate_mailbag()
+
+    # we still have to ask for feedback on handleing multiple input directories
+    # This is kind of what I expect, but will cause conflicts because the mailbag name is the same
+    i = 0
+    for input_path in args.directory:
+        args.directory = args.directory[i]
+        i += 1
+        c = Controller(args)
+        return c.generate_mailbag()
