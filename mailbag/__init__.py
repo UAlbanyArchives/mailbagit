@@ -79,11 +79,13 @@ def main():
 
     log.debug("Arguments:",args=args)
 
-    # we still have to ask for feedback on handleing multiple input directories
-    # This is kind of what I expect, but will cause conflicts because the mailbag name is the same
-    i = 0
-    for input_path in args.directory:
-        args.directory = args.directory[i]
-        i += 1
+    # Raise and error and exit when given multiple inputs
+    if len(args.directory) > 1:
+        log.error("Multiple input paths provided. Mailbagit only supports single input paths. \
+            You may want to try providing a directory of email or running the command multiple \
+            times to create multiple mailbags.")
+        exit()
+    else:
+        args.directory = args.directory[0]
         c = Controller(args)
         return c.generate_mailbag()
