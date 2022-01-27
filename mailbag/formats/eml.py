@@ -42,9 +42,9 @@ class EML(EmailAccount):
 
         for i in files:
             #log.debug(i)
-            with open(i, 'rb') as f:
-                a = f.read()
-            msg = email.message_from_bytes(a)
+            with open(i, 'r') as f:
+                #a = f.read()
+                msg = email.message_from_file(f)
 
 
 
