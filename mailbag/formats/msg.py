@@ -15,21 +15,21 @@ class MSG(EmailAccount):
     """MSG - This concrete class parses msg file format"""
     format_name = 'msg'
 
-    def __init__(self, dry_run, mailbag_name, target_account, **kwargs):
+    def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
 
         self.file = target_account
-        self.dry_run = dry_run
-        self.mailbag_name = mailbag_name
+        self.dry_run = args.dry_run
+        self.mailbag_name = args.mailbag_name
         log.info("Reading :",File=self.file)
 
     def account_data(self):
         return account_data
 
     def messages(self):
-        
+
         files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
         for filePath in files:
             subFolder = helper.emailFolder(self.file,filePath)

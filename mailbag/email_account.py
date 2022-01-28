@@ -27,7 +27,7 @@ class EmailAccount(ABC):
         __class__.registry[cls.format_name] = cls
 
     @abstractmethod
-    def __init__(self, target_account, **kwargs):
+    def __init__(self, target_account, args, **kwargs):
         """Implement a method that finds and sets up an account so that `account_data` and `messages` can
 be called on it."""
         pass
