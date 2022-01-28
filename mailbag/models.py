@@ -17,3 +17,4 @@ class Email(models.Base):
     HTML_Body = fields.StringField()
     Text_Body = fields.StringField()
     Message = fields.EmbeddedField(Message)
+    Error = fields.StringField()

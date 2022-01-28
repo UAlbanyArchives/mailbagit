@@ -3,6 +3,7 @@ import mailbox
 from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
+import email.errors
 
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
@@ -28,7 +29,7 @@ class Mbox(EmailAccount):
         return account_data
  
     def messages(self):
-           
+        
         files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
         for filePath in files:
             subFolder = helper.emailFolder(self.file,filePath)
@@ -59,13 +60,17 @@ class Mbox(EmailAccount):
                         Headers=mail,
                         Text_Body=text_body,
                         HTML_Body=html_body,
-                        Message=mailObject
+                        Message=mailObject,
+                        Error='False'
                     )
-                except mbox.errors.MessageParseError:
-                    continue
+                except (email.errors.MessageParseError, Exception) as e:
+                    log.error(e)
+                    message = Email(
+                        Error='True'
+                    )
                 yield message
 
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            # new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)

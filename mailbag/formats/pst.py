@@ -35,24 +35,34 @@ class PST(EmailAccount):
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
-                    messageObj = folder.get_sub_message(index)
-                    headerParser = parser.HeaderParser()
-                    headers = headerParser.parsestr(messageObj.transport_headers)
-                    message = Email(
-                        Message_ID=headers['Message-ID'],
-                        Email_Folder=join(*path),
-                        Date=headers["Date"],
-                        From=headers["From"],
-                        To=headers["To"],
-                        Cc=headers["To"],
-                        Bcc=headers["Bcc"],
-                        Subject=headers["Subject"],
-                        Content_Type=headers["Content-Type"],
-                        Headers=headers,
-                        Text_Body=messageObj.html_body,
-                        HTML_Body=messageObj.plain_text_body,
-                        Message=None
-                    )
+                    
+                    try:
+                        messageObj = folder.get_sub_message(index)
+                        headerParser = parser.HeaderParser()
+                        headers = headerParser.parsestr(messageObj.transport_headers)
+                        message = Email(
+                            Message_ID=headers['Message-ID'],
+                            Email_Folder=join(*path),
+                            Date=headers["Date"],
+                            From=headers["From"],
+                            To=headers["To"],
+                            Cc=headers["To"],
+                            Bcc=headers["Bcc"],
+                            Subject=headers["Subject"],
+                            Content_Type=headers["Content-Type"],
+                            Headers=headers,
+                            Text_Body=messageObj.html_body,
+                            HTML_Body=messageObj.plain_text_body,
+                            Message=None,
+                            Error='False'
+                        )
+                    
+                    except (email.errors.MessageParseError, Exception) as e:
+                        log.error(e)
+                        message = Email(
+                            Error='True'
+                        )
+                
                     #log.debug(message.to_struct())
                     yield message
         else:
