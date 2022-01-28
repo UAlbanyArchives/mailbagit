@@ -1,7 +1,9 @@
+import email
 import mailbox
 from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
+import email.errors
 
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
@@ -27,7 +29,7 @@ class Mbox(EmailAccount):
         return account_data
 
     def messages(self):
-
+        
         files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
         for filePath in files:
             subFolder = helper.emailFolder(self.file,filePath)
@@ -35,6 +37,16 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
+                    mailObject = email.message_from_bytes(mail.as_bytes())
+                    print (dir(mail))
+                    # Try to parse content
+                    if mail.is_multipart():
+                        for part in mail.walk():
+                            if part.get_content_type() == "text/html":
+                                html_body = part.get_payload()
+                            elif part.get_content_type() == "text/plain":
+                                text_body = part.get_payload()
+
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,
@@ -44,13 +56,21 @@ class Mbox(EmailAccount):
                         Cc=mail['Cc'],
                         Bcc=mail['Bcc'],
                         Subject=mail['Subject'],
-                        Content_Type=mail['Content-Type']
+                        Content_Type=mail['Content-Type'],
+                        Headers=mail,
+                        Text_Body=text_body,
+                        HTML_Body=html_body,
+                        Message=mailObject,
+                        Error='False'
                     )
-                except mbox.errors.MessageParseError:
-                    continue
+                except (email.errors.MessageParseError, Exception) as e:
+                    log.error(e)
+                    message = Email(
+                        Error='True'
+                    )
                 yield message
 
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            # new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)

@@ -10,9 +10,6 @@ import mailbag.helper as helper
 log = get_logger()
 
 
-log = get_logger()
-
-
 class Controller:
     """Controller - Main controller"""
 
@@ -43,6 +40,9 @@ class Controller:
         messages = data.messages()
 
         for message in messages:
-            log.debug(message.to_struct())
+            log.debug("Headers: " + str(type(message.Headers)))
+            log.debug("HTML: " + str(type(message.HTML_Body)))
+            log.debug("Text: " + str(type(message.Text_Body)))
+            log.debug("Message: " + str(type(message.Message)))
 
         return messages
