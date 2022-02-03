@@ -34,8 +34,8 @@ class Controller:
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
-
-        files = os.path.join(mail_account.file, "output.csv")
+        os.mkdir(os.path.join(self.args.directory, self.args.mailbag_name))
+        files = os.path.join(self.args.directory,self.args.mailbag_name, "output.csv")
 
         header = ['Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type']
