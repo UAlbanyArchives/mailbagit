@@ -7,6 +7,7 @@ from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
 
+
 log = get_logger()
 
 class Controller:
@@ -34,6 +35,7 @@ class Controller:
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
+
 
         for message in mail_account.messages():
             # do stuff you ought to do per message here
