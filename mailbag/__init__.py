@@ -62,27 +62,30 @@ mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mail
 
 
 def cli():
-    args = bagit_parser.parse_args()
-    log.debug("Arguments:",args=args)
-    args.input=args.input.lower()
-    return Mailbag(args)
-
+    """hook for CLI-only mailbag invocation"""
+    main()
 
 @Gooey
 def gui():
-    bagit_parser.parse_args()
-    # do the thing
+    """hook for GUI mailbag invocation"""
+    main()
 
+def main():
+    args = bagit_parser.parse_args()
+    args.input=args.input.lower()
+    if args.input not in EmailAccount.registry.keys():
+        log.error("No parser found")
+        exit()
 
-class Mailbag:
+    log.debug("Arguments:",args=args)
 
-    def __init__(self, args):
-
-        if args.input in EmailAccount.registry.keys():
-
-            log.info("Creating Mailbag: " + args.mailbag_name)
-            c = Controller(args)
-            c.read(args.input, args.directory)
-
-        else:
-            log.error("No parser found")
+    # Raise and error and exit when given multiple inputs
+    if len(args.directory) > 1:
+        log.error("Multiple input paths provided. Mailbagit only supports single input paths. \
+            You may want to try providing a directory of email or running the command multiple \
+            times to create multiple mailbags.")
+        exit()
+    else:
+        args.directory = args.directory[0]
+        c = Controller(args)
+        return c.generate_mailbag()
