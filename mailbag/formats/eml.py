@@ -40,10 +40,10 @@ class EML(EmailAccount):
             subFolder = helper.emailFolder(self.file, filePath)
 
 
-            with open(filePath, 'r') as f:
-                try:
+            try:
+                with open(filePath, 'r') as f:
                     msg = email.message_from_file(f)
-                    print(dir(msg))
+                    
                     # Try to parse content
                     if msg.is_multipart():
                         for part in msg.walk():
@@ -66,12 +66,17 @@ class EML(EmailAccount):
                             Message = msg,
                             Error = 'False'
                                 )
-                except (email.errors.MessageParseError, Exception) as e:
-                    log.error(e)
-                    message = Email(
-                        Error='True'
-                    )
-
-                new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name,
-                                                             self.format_name, subFolder, filePath)
-                yield message
+                    
+                    # Make sure the EML file is closed
+                    f.close()
+                    
+            except (email.errors.MessageParseError, Exception) as e:
+                log.error(e)
+                message = Email(
+                    Error='True'
+                )
+            
+            # Move EML to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name,
+                                                         self.format_name, subFolder, filePath)
+            yield message
