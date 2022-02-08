@@ -49,14 +49,16 @@ class Mbox(EmailAccount):
                                 html_body = part.get_payload()
                             elif part.get_content_type() == "text/plain":
                                 text_body = part.get_payload()
+                                
+                                log.debug("Content-type "+part.get_content_maintype())
+                            
+                            # Extract Attachments
+                            # if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition'):
+                            attachmentName,attachment = helper.saveAttachments(part)
+                            if attachmentName:
+                                attachmentNames.append(attachmentName)
+                                attachments.append(attachment)
 
-                                if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition'):
-                            # else:
-                                    attachmentName,attachment = helper.saveAttachments(part)
-                                    if attachmentName:
-                                        attachmentNames.append(attachmentName)
-                                        attachments.append(attachment)
-                    print('attachmentNames ',attachmentNames)
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,

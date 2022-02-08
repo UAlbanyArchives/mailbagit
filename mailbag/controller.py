@@ -44,5 +44,9 @@ class Controller:
             log.debug("HTML: " + str(type(message.HTML_Body)))
             log.debug("Text: " + str(type(message.Text_Body)))
             log.debug("Message: " + str(type(message.Message)))
+            log.debug('message.AttachmentNum '+str(message.AttachmentNum))
+            for i in range(message.AttachmentNum):
+                log.debug(message.AttachmentNames[i])
+                # log.debug(message.AttachmentFiles[i])
 
         return messages
