@@ -40,13 +40,23 @@ class Mbox(EmailAccount):
                     mailObject = email.message_from_bytes(mail.as_bytes())
                     print (dir(mail))
                     # Try to parse content
+                    attachmentNames = []
+                    attachments = []
                     if mail.is_multipart():
+                        
                         for part in mail.walk():
                             if part.get_content_type() == "text/html":
                                 html_body = part.get_payload()
                             elif part.get_content_type() == "text/plain":
                                 text_body = part.get_payload()
 
+                                if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition'):
+                            # else:
+                                    attachmentName,attachment = helper.saveAttachments(part)
+                                    if attachmentName:
+                                        attachmentNames.append(attachmentName)
+                                        attachments.append(attachment)
+                    print('attachmentNames ',attachmentNames)
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,
@@ -61,6 +71,9 @@ class Mbox(EmailAccount):
                         Text_Body=text_body,
                         HTML_Body=html_body,
                         Message=mailObject,
+                        AttachmentNum=len(attachmentNames),
+                        AttachmentNames=attachmentNames,
+                        AttachmentFiles=attachments,
                         Error='False'
                     )
                 except (email.errors.MessageParseError, Exception) as e:
@@ -73,4 +86,4 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            # new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)

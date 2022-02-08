@@ -17,4 +17,7 @@ class Email(models.Base):
     HTML_Body = fields.StringField()
     Text_Body = fields.StringField()
     Message = fields.EmbeddedField(Message)
+    AttachmentNum = fields.IntField()
+    AttachmentNames = fields.ListField(str)
+    AttachmentFiles = fields.ListField(bytes)
     Error = fields.StringField()
