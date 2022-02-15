@@ -8,6 +8,7 @@ import email.errors
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 import mailbag.helper as helper
+from extract_msg import attachment
 
 log = get_logger()
 
@@ -29,11 +30,12 @@ class MSG(EmailAccount):
         return account_data
 
     def messages(self):
-
+        
         files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
         for filePath in files:
+            
             subFolder = helper.emailFolder(self.file,filePath)
-
+            
             try:
                 mail = extract_msg.openMsg(filePath)
     
@@ -47,6 +49,15 @@ class MSG(EmailAccount):
                         html_body = rtf_obj.html
                     else:
                         html_body = None
+
+                attachmentNames = []
+                attachments = []
+                
+                for attachment in mail.attachments:
+                    if attachment.longFilename:
+                        attachmentNames.append(attachment.longFilename)
+                        attachments.append(attachment.data)
+                
                 message = Email(
                     Email_Folder=subFolder,
                     Date=mail.date,
@@ -61,6 +72,9 @@ class MSG(EmailAccount):
                     HTML_Body=html_body,
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg
                     Message=None,
+                    AttachmentNum=len(attachmentNames),
+                    AttachmentNames=attachmentNames,
+                    AttachmentFiles=attachments,
                     Error='False'
                 )
                 

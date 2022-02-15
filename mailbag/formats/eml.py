@@ -38,8 +38,7 @@ class EML(EmailAccount):
 
     def messages(self):
 
-        # files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
-        files = ["data/sample1_jpg_attachment.eml"]
+        files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
         for i in files:
             #log.debug(i)
