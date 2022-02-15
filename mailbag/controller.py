@@ -1,5 +1,5 @@
 from structlog import get_logger
-
+import csv
 from mailbag.email_account import EmailAccount
 from mailbag.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
@@ -35,7 +35,21 @@ class Controller:
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
-
+        os.mkdir(os.path.join(self.args.directory, self.args.mailbag_name))
+        files = os.path.join(self.args.directory, self.args.mailbag_name, "mailbag.csv")
+        header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
+                  'Content_Type', 'Error']
+        with open(files, 'w', encoding='UTF8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            mailbag_message_id = 1
+            '''mailbag_message_id Variable to declare Mailbag_Message_ID field in csv'''
+            for message in mail_account.messages():
+                # do stuff you ought to do per message here
+                writer.writerow(
+                    [mailbag_message_id, message.Message_ID, message.Email_Folder, message.Date, message.From, message.To, message.Cc,
+                     message.Bcc, message.Subject, message.Content_Type, message.Error])
+                mailbag_message_id = mailbag_message_id + 1
 
         for message in mail_account.messages():
             # do stuff you ought to do per message here
