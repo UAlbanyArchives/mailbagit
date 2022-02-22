@@ -40,44 +40,63 @@ if not skip_registry:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
                     yield from self.folders(subfolder, path)
-                if folder.number_of_sub_messages:
-                    log.debug("Reading folder: " + folder.name)
-                    path.append(folder.name)
-                    for index in range(folder.number_of_sub_messages):
-                        
-                        try:
-                            messageObj = folder.get_sub_message(index)
-                            headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
-                            message = Email(
-                                Message_ID=headers['Message-ID'],
-                                Email_Folder=join(*path),
-                                Date=headers["Date"],
-                                From=headers["From"],
-                                To=headers["To"],
-                                Cc=headers["To"],
-                                Bcc=headers["Bcc"],
-                                Subject=headers["Subject"],
-                                Content_Type=headers["Content-Type"],
-                                Headers=headers,
-                                # detecting encoding might be problematic but works for now
-                                Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
-                                HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
-                                Message=None,
-                                Error='False'
-                            )
-                        
-                        except (email.errors.MessageParseError, Exception) as e:
-                            log.error(e)
-                            message = Email(
-                                Error='True'
-                            )
+            if folder.number_of_sub_messages:
+                log.debug("Reading folder: " + folder.name)
+                path.append(folder.name)
+                for index in range(folder.number_of_sub_messages):
                     
-                        #log.debug(message.to_struct())
-                        yield message
-            else:
-                # gotta return empty directory to controller somehow
-                log.error("??--> " + folder.name)
+                    try:
+                        messageObj = folder.get_sub_message(index)
+                        headerParser = parser.HeaderParser()
+                        headers = headerParser.parsestr(messageObj.transport_headers)
+                        
+                        attachmentNames = []
+                        attachments = []
+                        log.debug('No. of attachments:'+str(messageObj.number_of_attachments))
+                        if messageObj.number_of_attachments > 0:
+                            total_attachment_size_bytes = 0
+                            for i in range(messageObj.number_of_attachments):
+                                total_attachment_size_bytes = total_attachment_size_bytes + (messageObj.get_attachment(i)).get_size()
+                                # attachment_content = ((messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())).decode('ascii',errors="ignore")
+                                attachment_content = (messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())
+                                attachments.append(attachment_content)
+                                attachmentNames.append(str(i))
+                                
+                                # Attachment content test
+                                # a_file = open(str(i), "wb")
+                                # a_file.write(attachment_content)
+                        message = Email(
+                            Message_ID=headers['Message-ID'],
+                            Email_Folder=join(*path),
+                            Date=headers["Date"],
+                            From=headers["From"],
+                            To=headers["To"],
+                            Cc=headers["To"],
+                            Bcc=headers["Bcc"],
+                            Subject=headers["Subject"],
+                            Content_Type=headers["Content-Type"],
+                            Headers=headers,
+                            # detecting encoding might be problematic but works for now
+                            # Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
+                            # HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
+                            AttachmentNum = int(messageObj.number_of_attachments),
+                            Message=None,
+                            AttachmentNames=attachmentNames,
+                            AttachmentFiles=attachments,
+                            Error='False'
+                        )
+                    
+                    except (Exception) as e:
+                        log.error(e)
+                        message = Email(
+                            Error='True'
+                        )
+                
+                    #log.debug(message.to_struct())
+                    yield message
+            # else:
+            #     # gotta return empty directory to controller somehow
+            #     log.error("??--> " + folder.name)
 
 
         def messages(self):
