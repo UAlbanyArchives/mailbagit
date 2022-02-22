@@ -36,7 +36,7 @@ class Controller:
         # for d in derivatives:
         # d.do_task_per_account()
         os.mkdir(os.path.join(self.args.directory, self.args.mailbag_name))
-        files = os.path.join(self.args.directory, self.args.mailbag_name, "mailbag.csv")
+        files = os.path.join(self.args.directory, self.args.mailbag_name, 'data')
         header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type', 'Error']
         csv_data = []
@@ -46,6 +46,8 @@ class Controller:
         csv_portion.append(header)
         for message in mail_account.messages():
             # do stuff you ought to do per message here
+
+            # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
                 mailbag_message_id = 1
                 message.Mailbag_Message_ID = mailbag_message_id
@@ -56,6 +58,7 @@ class Controller:
                     [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
                      message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
                 csv_portion_count = 0
+            #if count is less than 100000 , appending the messages in one list
             else:
                 mailbag_message_id += 1
                 message.Mailbag_Message_ID = mailbag_message_id
@@ -65,18 +68,22 @@ class Controller:
             csv_portion_count += 1
 
         csv_data.append(csv_portion)
-        #if not self.args.dry_run:
-
-        if len(csv_data) == 1:
-
-                with open("mailbag.csv", 'w', encoding='UTF8', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerows(csv_data)
-        else:
+        if not self.args.dry_run:
+            #Creating csv
+            log.debug("csv created")
+            # checking if there are portions in list or not
+            if len(csv_data) == 1:
+                filename=os.path.join(files,"mailbag.csv")
+                with open(filename, 'w',encoding='UTF8', newline='') as f:
+                    for i in csv_data:
+                        writer = csv.writer(f)
+                        writer.writerows(i)
+            else:
                 portion_count = 0
                 for portion in csv_data:
                     portion_count += 1
-                    filename = "mailbag-" + str(portion_count) + ".csv"
+                    name= str(portion_count) + ".csv"
+                    filename = os.path.join(files,name)
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
