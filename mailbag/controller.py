@@ -70,7 +70,7 @@ class Controller:
         csv_data.append(csv_portion)
         if not self.args.dry_run:
             #Creating csv
-            log.debug("csv created")
+            log.debug("csv generation")
             # checking if there are portions in list or not
             if len(csv_data) == 1:
                 filename=os.path.join(files,"mailbag.csv")
@@ -91,6 +91,6 @@ class Controller:
         for message in mail_account.messages():
         # do stuff you ought to do per message here
             for d in derivatives:
-                        d.do_task_per_message(message)
+                d.do_task_per_message(message, self.args)
 
         return mail_account.messages()
