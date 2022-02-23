@@ -36,10 +36,27 @@ class Controller:
         #for d in derivatives:
         #    d.do_task_per_account()
 
+        #Create folder mailbag folder before writing mailbag.csv
+        if os.path.isfile(self.args.directory):
+            parent_dir = os.path.abspath(os.path.dirname(self.args.directory))
+        else:
+            parent_dir = os.path.abspath(self.args.directory)
+        mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+        log.debug("Creating mailbag at " + str(mailbag_dir))
+        if not self.args.dry_run:
+            os.mkdir(mailbag_dir)
+
+        mailbag_message_id = 0
 
         for message in mail_account.messages():
             # do stuff you ought to do per message here
+
+            # Generate mailbag_message_id
+            mailbag_message_id += 1
+            message.Mailbag_Message_ID = mailbag_message_id
+
+
             for d in derivatives:
-                d.do_task_per_message(message)
+                d.do_task_per_message(message, self.args, mailbag_dir)
 
         return mail_account.messages()
