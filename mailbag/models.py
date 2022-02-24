@@ -18,3 +18,4 @@ class Email(models.Base):
     Text_Body = fields.StringField()
     Message = fields.EmbeddedField(Message)
     Error = fields.StringField()
+    Mailbag_Message_ID=fields.IntField()
