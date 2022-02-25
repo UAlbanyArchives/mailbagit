@@ -1,6 +1,11 @@
 from pathlib import Path
 import os, shutil, glob
 
+# import glob, os
+# import extract_msg
+from structlog import get_logger
+log = get_logger()
+
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
@@ -70,5 +75,13 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
         return file_new_path
 
+def saveAllAttachments(mail_account):
+    for message in mail_account.messages():
+        for i in range(message.AttachmentNum):
+            log.debug('AttachmentNames:'+str(message.AttachmentNames[i]))
+            log.debug(message.AttachmentFiles[i][:100])
+    return (part.get_filename(),part.get_payload(decode=True))
 
+def saveAttachments(part):
+    return (part.get_filename(),part.get_payload(decode=True))
     

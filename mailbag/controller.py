@@ -32,6 +32,9 @@ class Controller:
         derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
         # do stuff you ought to do with per-account info here
+        
+        helper.saveAllAttachments(mail_account)
+        
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
