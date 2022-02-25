@@ -26,23 +26,39 @@ class ExampleDerivative(Derivative):
         print(self.account.account_data())
 
     def do_task_per_message(self, message, args):
+        a = message.Message
+        print("Message",args.directory)
+        print(args.mailbag_name)
 
-        html=message.HTML_Body
-        part = MIMEText(html,'html')
+
+
         msg = MIMEMultipart('alternative')
+
         msg['Subject'] = message.Subject
         msg['From'] = message.From
         msg['To'] = message.To
         msg['Cc'] = message.Cc
         msg['Bcc'] = message.Bcc
-        msg.attach(part)
-        new_path = os.path.join(args.directory,args.mailbag_name,"data")
+        msg['content']=message.Content_Type
+        if(message.Message is not None):
+            msg.attach(message.Message)
+        elif (message.Headers is not None):
+            msg.attach(message.Headers)
+
+
+
+        new_path = os.path.join(args.directory, args.mailbag_name, "data")
 
         log.debug("Writing EML to " + str(new_path))
-        if self.args.dry_run:
-            outfile_name = os.path.join(new_path,"derivative.eml")
-            with open(outfile_name,'w') as outfile:
+
+            #print("Hello")
+        name=str(message.Mailbag_Message_ID)+".eml"
+        outfile_name = os.path.join(new_path, name)
+        with open(outfile_name, 'w') as outfile:
                 gen = generator.Generator(outfile)
                 gen.flatten(msg)
+
+
+
 
 
