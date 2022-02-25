@@ -14,6 +14,7 @@ class Email(models.Base):
     Subject = fields.StringField()
     Content_Type = fields.StringField()
     Headers = fields.EmbeddedField(Message)
+    Body = fields.StringField()
     HTML_Body = fields.StringField()
     Text_Body = fields.StringField()
     Message = fields.EmbeddedField(Message)

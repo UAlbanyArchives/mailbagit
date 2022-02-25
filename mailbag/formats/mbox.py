@@ -37,11 +37,20 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
-                    mailObject = email.message_from_bytes(mail.as_bytes())
+                    mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
                     print (dir(mail))
                     # Try to parse content
                     attachmentNames = []
                     attachments = []
+                    
+                    body = mailObject.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+                    
+                    # Extract Attachments
+                    for attached in mailObject.iter_attachments():
+                        attachmentName,attachment = helper.saveAttachments(attached)
+                        if attachmentName:
+                            attachmentNames.append(attachmentName)
+                            attachments.append(attachment)
                     if mail.is_multipart():
                         
                         for part in mail.walk():
@@ -49,15 +58,7 @@ class Mbox(EmailAccount):
                                 html_body = part.get_payload()
                             elif part.get_content_type() == "text/plain":
                                 text_body = part.get_payload()
-                                
                                 log.debug("Content-type "+part.get_content_maintype())
-                            
-                            # Extract Attachments
-                            # if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition'):
-                            attachmentName,attachment = helper.saveAttachments(part)
-                            if attachmentName:
-                                attachmentNames.append(attachmentName)
-                                attachments.append(attachment)
 
                     message = Email(
                         Message_ID=mail['Message-ID'],
@@ -70,10 +71,11 @@ class Mbox(EmailAccount):
                         Subject=mail['Subject'],
                         Content_Type=mail['Content-Type'],
                         Headers=mail,
+                        Body = body,
                         Text_Body=text_body,
                         HTML_Body=html_body,
                         Message=mailObject,
-                        AttachmentNum=len(attachmentNames),
+                        AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                         AttachmentNames=attachmentNames,
                         AttachmentFiles=attachments,
                         Error='False'

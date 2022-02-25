@@ -68,6 +68,7 @@ class MSG(EmailAccount):
                     Subject=mail.subject,
                     # mail.header appears to be a headers object oddly enough
                     Headers=mail.header,
+                    Body=html_body,
                     Text_Body=mail.body,
                     HTML_Body=html_body,
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg

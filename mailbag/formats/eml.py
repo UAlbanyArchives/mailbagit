@@ -11,10 +11,6 @@ import email
 import glob, os
 from email import policy
 
-
-
-
-
 log = get_logger()
 
 
@@ -28,44 +24,43 @@ class EML(EmailAccount):
         account_data = {}
 
         self.file = target_account
-        #self.dry_run = dry_run
-        #self.mailbag_name = mailbag_name
+        # self.dry_run = dry_run
+        # self.mailbag_name = mailbag_name
         log.info("Reading : ", File=self.file)
 
     def account_data(self):
         return account_data
-
 
     def messages(self):
 
         files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
         for i in files:
-            #log.debug(i)
             attachmentNames = []
             attachments = []
             with open(i, 'r') as f:
                 msg = email.message_from_file(f, policy=policy.default)
-                
+                body = msg.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+
+                # Extract Attachments                
                 for attachment in msg.iter_attachments():
-                    
-                    attachmentName,attachment = helper.saveAttachments(attachment)
+                    attachmentName, attachment = helper.saveAttachments(attachment)
                     if attachmentName:
                         attachmentNames.append(attachmentName)
                         attachments.append(attachment)
 
             message = Email(
-                    #Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),
+                    # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),
                     Message_ID=msg["Message-id"],
                     Date=msg["date"],
                     From=msg["from"],
                     To=msg["to"],
                     Subject=msg["subject"],
                     Content_Type=msg["content-type"],
+                    Body=body,
                     AttachmentNum=len(attachmentNames),
                     AttachmentNames=attachmentNames,
                     AttachmentFiles=attachments
                 )
-
 
             yield message

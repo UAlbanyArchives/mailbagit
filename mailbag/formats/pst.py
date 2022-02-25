@@ -17,16 +17,17 @@ except:
 log = get_logger()
 
 if not skip_registry:
+
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
         format_name = 'pst'
 
-        def __init__(self,  target_account, args, **kwargs):
+        def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
 
             self.file = target_account
-            log.info("Reading :",File=self.file)
+            log.info("Reading :", File=self.file)
 
         def account_data(self):
             return account_data
@@ -52,7 +53,6 @@ if not skip_registry:
                         
                         attachmentNames = []
                         attachments = []
-                        log.debug('No. of attachments:'+str(messageObj.number_of_attachments))
                         if messageObj.number_of_attachments > 0:
                             total_attachment_size_bytes = 0
                             for i in range(messageObj.number_of_attachments):
@@ -77,9 +77,10 @@ if not skip_registry:
                             Content_Type=headers["Content-Type"],
                             Headers=headers,
                             # detecting encoding might be problematic but works for now
+                            Body=str(messageObj.html_body),
                             # Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
                             # HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
-                            AttachmentNum = int(messageObj.number_of_attachments),
+                            AttachmentNum=int(messageObj.number_of_attachments),
                             Message=None,
                             AttachmentNames=attachmentNames,
                             AttachmentFiles=attachments,
@@ -92,12 +93,11 @@ if not skip_registry:
                             Error='True'
                         )
                 
-                    #log.debug(message.to_struct())
+                    # log.debug(message.to_struct())
                     yield message
             # else:
             #     # gotta return empty directory to controller somehow
             #     log.error("??--> " + folder.name)
-
 
         def messages(self):
             pst = pypff.file()
