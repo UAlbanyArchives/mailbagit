@@ -1,5 +1,6 @@
 import os
 import subprocess
+from subprocess import Popen, PIPE
 
 from mailbag.derivative import Derivative
 
@@ -22,7 +23,17 @@ class ExampleDerivative(Derivative):
         write_html = open(html_name, 'w')
         write_html.write(html)
         write_html.close()
-        s = subprocess.run([wkhtmltopdf,html_name,pdf_name])
+        #s = subprocess.run([wkhtmltopdf,html_name,pdf_name])
+        p = Popen([wkhtmltopdf, html_name, pdf_name], stdout=PIPE, stderr=PIPE,universal_newlines=True)
+        stdout, stderr = p.communicate()
+        if len(stdout) > 0:
+            print(stdout)
+        if len(stderr) > 0:
+            print(stderr)
+        #s = subprocess.Popen([wkhtmltopdf, html_name, pdf_name])
+
+
+
 
 
 
