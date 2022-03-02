@@ -75,13 +75,17 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
         return file_new_path
 
-def saveAllAttachments(mail_account):
-    for message in mail_account.messages():
-        for i in range(message.AttachmentNum):
-            log.debug('AttachmentNames:'+str(message.AttachmentNames[i]))
-            log.debug(message.AttachmentFiles[i][:100])
-    return (part.get_filename(),part.get_payload(decode=True))
-
 def saveAttachments(part):
     return (part.get_filename(),part.get_payload(decode=True))
+
+def saveAttachmentOnDisk(attachments_dir,message):
+    
+    message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
+    os.mkdir(message_attachments_dir)
+    for i in range(message.AttachmentNum):
+        log.debug('Saving Attachment:'+str(message.AttachmentNames[i]))
+        attachment_path = os.path.join(message_attachments_dir,message.AttachmentNames[i])
+        f = open(attachment_path, "wb")
+        f.write(message.AttachmentFiles[i])
+        f.close()
     

@@ -32,9 +32,7 @@ class Controller:
         derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
         # do stuff you ought to do with per-account info here
-        
-        helper.saveAllAttachments(mail_account)
-        
+                
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
@@ -45,9 +43,11 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+        attachments_dir = os.path.join(str(mailbag_dir),'attachments') 
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
+            os.mkdir(attachments_dir)
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
         #Setting up mailbag.csv
@@ -66,7 +66,10 @@ class Controller:
             # Generate mailbag_message_id
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
-
+            
+            if not self.args.dry_run and message.AttachmentNum>0:
+                helper.saveAttachmentOnDisk(attachments_dir,message)
+            
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
