@@ -44,17 +44,13 @@ class ExampleDerivative(Derivative):
         if(message.Message is not None):
             msg.attach(message.Message)
         elif (message.Headers is not None):
-           part=MIMEText(message.Text_Body)
-           msg.attach(part)
-           msg.attach(message.Headers)
-
-
+            part = MIMEText(message.Text_Body)
+            msg.attach(part)
+            msg.attach(message.Headers)
 
         new_path = os.path.join(args.directory, args.mailbag_name, "data")
-
         log.debug("Writing EML to " + str(new_path))
-
-        name=str(message.Mailbag_Message_ID)+".eml"
+        name = str(message.Mailbag_Message_ID)+".eml"
         outfile_name = os.path.join(new_path, name)
         with open(outfile_name, 'w') as outfile:
                 gen = generator.Generator(outfile)
