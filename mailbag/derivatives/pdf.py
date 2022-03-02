@@ -1,7 +1,5 @@
 import os
-import subprocess
 from subprocess import Popen, PIPE
-
 from mailbag.derivative import Derivative
 
 
@@ -18,9 +16,15 @@ class ExampleDerivative(Derivative):
     def do_task_per_message(self, message, args):
         wkhtmltopdf = 'wkhtmltopdf.exe'
         html = message.HTML_Body
+        From_name=message.From.split("<")
+        To_name=message.To.split("<")
+        #htmlnew="<table>  <tr>    <th>From</th>    <th>To</th> </tr>"  + "<tr> <td>"+a+d[1][:-1]+"</td>"+"<td>"+b+c[1][:-1]+"</td>  </tr>"+"</table>"
+        #Adding From and To fields in pdf
+        html_from_to="From :"+"&nbsp"+ From_name[0]+ From_name[1][:-1]+"<br>"+"To:"+"&nbsp"+To_name[0]+To_name[1][:-1]
         html_name = os.path.join(args.directory, args.mailbag_name,str(message.Mailbag_Message_ID )+".html")
         pdf_name =os.path.join(args.directory, args.mailbag_name,str(message.Mailbag_Message_ID )+".pdf")
         write_html = open(html_name, 'w')
+        write_html.write(html_from_to)
         write_html.write(html)
         write_html.close()
         #s = subprocess.run([wkhtmltopdf,html_name,pdf_name])
@@ -30,7 +34,7 @@ class ExampleDerivative(Derivative):
             print(stdout)
         if len(stderr) > 0:
             print(stderr)
-        #s = subprocess.Popen([wkhtmltopdf, html_name, pdf_name])
+
 
 
 
