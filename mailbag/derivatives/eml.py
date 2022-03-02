@@ -39,11 +39,14 @@ class ExampleDerivative(Derivative):
         msg['To'] = message.To
         msg['Cc'] = message.Cc
         msg['Bcc'] = message.Bcc
-        msg['content']=message.Content_Type
+
+
         if(message.Message is not None):
             msg.attach(message.Message)
         elif (message.Headers is not None):
-            msg.attach(message.Headers)
+           part=MIMEText(message.Text_Body)
+           msg.attach(part)
+           msg.attach(message.Headers)
 
 
 
@@ -51,7 +54,6 @@ class ExampleDerivative(Derivative):
 
         log.debug("Writing EML to " + str(new_path))
 
-            #print("Hello")
         name=str(message.Mailbag_Message_ID)+".eml"
         outfile_name = os.path.join(new_path, name)
         with open(outfile_name, 'w') as outfile:
