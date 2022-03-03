@@ -6,6 +6,33 @@ A tool for creating and managing Mailbags, a package for preserving email in mul
 
 `pip install mailbag`
 
+### Working with PST files
+
+Making mailbags from .pst files on Windows requires Visual Studio C++ Build Tools. This is also required for a development environment setup on Windows. 
+
+1. Install [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
+2. Using the Visual Studio installer, in the Workloads tab make sure to check "Desktop development with C++" and the VS 2019 C++ x64/x86 build tools in the Installation details optional settings on the right side.
+
+![Screenshot of checking the correct options using the Visual Studio Installer.](windows_install.png)
+
+### Development setup
+
+mailbag is set up to use pipfile
+
+```
+git clone git@github.com:UAlbanyArchives/mailbag.git
+cd mailbag
+pipenv shell
+pipenv install
+pip install -e .
+```
+
+### wxPython install on Ubuntu
+
+wxPython sometimes causes issues installing on some Linux distros. If you have issues on Ubuntu 20.04, try installing it directly with this package.
+
+`pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython` 
+
 ## Tools
 
 Mailbag contains multiple tools.
