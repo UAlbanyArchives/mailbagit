@@ -67,8 +67,8 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
             
-            if not self.args.dry_run and message.AttachmentNum>0:
-                helper.saveAttachmentOnDisk(attachments_dir,message)
+            if message.AttachmentNum>0:
+                helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
