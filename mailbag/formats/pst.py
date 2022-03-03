@@ -60,11 +60,8 @@ if not skip_registry:
                                 # attachment_content = ((messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())).decode('ascii',errors="ignore")
                                 attachment_content = (messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())
                                 attachments.append(attachment_content)
-                                attachmentNames.append(str(i))
-                                
-                                # Attachment content test
-                                # a_file = open(str(i), "wb")
-                                # a_file.write(attachment_content)
+                                attachmentNames.append(messageObj.get_attachment(i).get_name())
+
                         message = Email(
                             Message_ID=headers['Message-ID'],
                             Email_Folder=join(*path),
