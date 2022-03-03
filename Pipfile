@@ -49,6 +49,3 @@ win_unicode_console = "==0.5"
 wxPython = "==4.1.1"
 
 [dev-packages]
-
-[requires]
-python_version = "3.9"
