@@ -44,6 +44,7 @@ def test_reader_Mbox(cli_args):
 def test_reader_MSG(cli_args):
     cli_args.directory = os.path.join("data", "sample1.msg")
     cli_args.input = "msg"
+    cli_args.dry_run = True
 
     c = Controller(cli_args)
     data = c.generate_mailbag()
@@ -65,6 +66,7 @@ def test_reader_PST(cli_args):
         raise pytest.skip("PST format not installed")
     cli_args.directory = os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst")
     cli_args.input = "pst"
+    cli_args.dry_run = True
 
     c = Controller(cli_args)
     data = c.generate_mailbag()
