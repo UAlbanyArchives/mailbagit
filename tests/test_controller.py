@@ -14,6 +14,7 @@ def cli_args():
 def test_reader_Mbox(cli_args):
     cli_args.directory = os.path.join("data", "sample1.mbox")
     cli_args.input = "mbox"
+    cli_args.dry_run = True
 
     c = Controller(cli_args)
     data = c.generate_mailbag()
