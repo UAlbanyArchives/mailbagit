@@ -1,11 +1,15 @@
 import os
 import subprocess
+import distutils.spawn
 from mailbag.derivative import Derivative
 from structlog import get_logger
 
 log = get_logger()
 class ExampleDerivative(Derivative):
     derivative_name = 'pdf'
+    wkhtmltopdf = 'wkhtmltopdf.exe'
+    if not distutils.spawn.find_executable(wkhtmltopdf):
+        raise OSError("wkhtmltopdf.exe not found. Make sure wkhtmltopdf is installed and in PATH.")
 
     def __init__(self, email_account, **kwargs):
         print("Setup account")
@@ -15,7 +19,7 @@ class ExampleDerivative(Derivative):
         print(self.account.account_data())
 
     def do_task_per_message(self, message, args):
-        wkhtmltopdf = 'wkhtmltopdf.exe'
+        
         
         #check to see which body to use
         body = False
@@ -52,16 +56,16 @@ class ExampleDerivative(Derivative):
                 html_content = table + body
 
             pdf_path = os.path.join(args.directory, args.mailbag_name, "pdf")
-            if not os.path.isdir(pdf_path):
-                os.mkdir(pdf_path)
             html_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".html")
             pdf_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".pdf")
             log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
             if not args.dry_run:
+                if not os.path.isdir(pdf_path):
+                        os.mkdir(pdf_path)
                 write_html = open(html_name, 'w')
                 write_html.write(html_content)
                 write_html.close()
-                p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p = subprocess.Popen([self.wkhtmltopdf, html_name, pdf_name],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
                 if p.returncode == 0:
                     log.debug("Successfully created " + str(message.Mailbag_Message_ID )+".pdf")
