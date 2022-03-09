@@ -1,8 +1,9 @@
 import os
-from subprocess import Popen, PIPE
+import subprocess
 from mailbag.derivative import Derivative
+from structlog import get_logger
 
-
+log = get_logger()
 class ExampleDerivative(Derivative):
     derivative_name = 'pdf'
 
@@ -16,24 +17,36 @@ class ExampleDerivative(Derivative):
     def do_task_per_message(self, message, args):
         wkhtmltopdf = 'wkhtmltopdf.exe'
         html = message.HTML_Body
-        From_name=message.From.split("<")
-        To_name=message.To.split("<")
-        #htmlnew="<table>  <tr>    <th>From</th>    <th>To</th> </tr>"  + "<tr> <td>"+a+d[1][:-1]+"</td>"+"<td>"+b+c[1][:-1]+"</td>  </tr>"+"</table>"
-        #Adding From and To fields in pdf
-        html_from_to="From :"+"&nbsp"+ From_name[0]+ From_name[1][:-1]+"<br>"+"To:"+"&nbsp"+To_name[0]+To_name[1][:-1]
+        table="<table>"
+        headerFields=[]
+        #Getting all the required attributes of message except error and body
+        for attribute in message:
+            if(attribute[0] not in ("Error","Text_Body","HTML_Body","Message","Headers") ):
+                headerFields.append(attribute[0])
+        #Getting the values of the attrbutes and appending to HTML string
+        for headerField in headerFields:
+            if not getattr(message,headerField) is None:
+                table= table+"<tr>"
+                table= table+"<td>"+str(headerField)+"</td>"
+                table= table+"<td>"+str(getattr(message,headerField))+"</td>"
+                table= table+"</tr>"
+        table=table+"</table>"
+        table=table+html
         html_name = os.path.join(args.directory, args.mailbag_name,str(message.Mailbag_Message_ID )+".html")
-        pdf_name =os.path.join(args.directory, args.mailbag_name,str(message.Mailbag_Message_ID )+".pdf")
-        write_html = open(html_name, 'w')
-        write_html.write(html_from_to)
-        write_html.write(html)
-        write_html.close()
-        #s = subprocess.run([wkhtmltopdf,html_name,pdf_name])
-        p = Popen([wkhtmltopdf, html_name, pdf_name], stdout=PIPE, stderr=PIPE,universal_newlines=True)
-        stdout, stderr = p.communicate()
-        if len(stdout) > 0:
-            print(stdout)
-        if len(stderr) > 0:
-            print(stderr)
+        pdf_name = os.path.join(args.directory, args.mailbag_name,str(message.Mailbag_Message_ID )+".pdf")
+        log.debug("Writing HTML to " + str(html_name))
+        if not args.dry_run:
+            write_html = open(html_name, 'w')
+            write_html.write(table)
+            write_html.close()
+        p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        stdout, stderr=p.communicate()
+        if stdout:
+            log.debug(stdout)
+        if stderr:
+            log.debug("Error while creating pdf")
+            raise TypeError(stderr)
+
 
 
 
