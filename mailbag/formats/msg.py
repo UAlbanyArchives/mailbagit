@@ -56,8 +56,12 @@ class MSG(EmailAccount):
                 for attachment in mail.attachments:
                     if attachment.longFilename:
                         attachmentNames.append(attachment.longFilename)
-                        attachments.append(attachment.data)
-                
+                    elif attachment.shortFilename:
+                        attachmentNames.append(attachment.longFilename)
+                    else:
+                        attachmentNames.append(str(len(attachmentNames)))
+                    attachments.append(attachment.data)
+                        
                 message = Email(
                     Email_Folder=subFolder,
                     Date=mail.date,

@@ -41,12 +41,8 @@ class Controller:
 
         for message in messages:
             log.debug("Headers: " + str(type(message.Headers)))
-            log.debug("HTML: " + str(type(message.HTML_Body)))
-            log.debug("Text: " + str(type(message.Text_Body)))
+            log.debug("HTML: " + str(type(message.HTML_Body))+" "+str(message.HTML_Body)[0:100])
+            log.debug("Text: " + str(type(message.Text_Body))+" "+str(message.Text_Body)[0:100])
             log.debug("Message: " + str(type(message.Message)))
-            log.debug('message.AttachmentNum '+str(message.AttachmentNum))
-            for i in range(message.AttachmentNum):
-                log.debug(message.AttachmentNames[i])
-                # log.debug(message.AttachmentFiles[i])
 
         return messages

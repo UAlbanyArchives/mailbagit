@@ -47,7 +47,9 @@ class EML(EmailAccount):
                     attachmentName, attachment = helper.saveAttachments(attachment)
                     if attachmentName:
                         attachmentNames.append(attachmentName)
-                        attachments.append(attachment)
+                    else:
+                        attachmentNames.append(str(len(attachmentNames)))
+                    attachments.append(attachment)
 
             message = Email(
                     # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),

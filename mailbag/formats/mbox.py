@@ -37,12 +37,13 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 try:
+                    # mailObject = email.message_from_bytes(mail.as_bytes())
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
-                    print (dir(mail))
+
                     # Try to parse content
                     attachmentNames = []
                     attachments = []
-                    
+
                     body = mailObject.get_body(preferencelist=('related', 'html', 'plain')).__str__()
                     
                     # Extract Attachments

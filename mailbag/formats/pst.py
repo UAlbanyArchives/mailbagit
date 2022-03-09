@@ -53,14 +53,12 @@ if not skip_registry:
                         
                         attachmentNames = []
                         attachments = []
-                        if messageObj.number_of_attachments > 0:
-                            total_attachment_size_bytes = 0
-                            for i in range(messageObj.number_of_attachments):
-                                total_attachment_size_bytes = total_attachment_size_bytes + (messageObj.get_attachment(i)).get_size()
-                                # attachment_content = ((messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())).decode('ascii',errors="ignore")
-                                attachment_content = (messageObj.get_attachment(i)).read_buffer((messageObj.get_attachment(i)).get_size())
-                                attachments.append(attachment_content)
-                                attachmentNames.append(messageObj.get_attachment(i).get_name())
+                        total_attachment_size_bytes = 0
+                        for attachment in messageObj.attachments:
+                            total_attachment_size_bytes = total_attachment_size_bytes + attachment.get_size()
+                            attachment_content = attachment.read_buffer(attachment.get_size())
+                            attachments.append(attachment_content)
+                            attachmentNames.append(attachment.get_name())
 
                         message = Email(
                             Message_ID=headers['Message-ID'],
@@ -75,8 +73,8 @@ if not skip_registry:
                             Headers=headers,
                             # detecting encoding might be problematic but works for now
                             Body=str(messageObj.html_body),
-                            # Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
-                            # HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
+                            Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
+                            HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
                             AttachmentNum=int(messageObj.number_of_attachments),
                             Message=None,
                             AttachmentNames=attachmentNames,
