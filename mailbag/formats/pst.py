@@ -17,16 +17,17 @@ except:
 log = get_logger()
 
 if not skip_registry:
+
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
         format_name = 'pst'
 
-        def __init__(self,  target_account, args, **kwargs):
+        def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
 
             self.file = target_account
-            log.info("Reading :",File=self.file)
+            log.info("Reading :", File=self.file)
 
         def account_data(self):
             return account_data
@@ -40,45 +41,58 @@ if not skip_registry:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
                     yield from self.folders(subfolder, path)
-                if folder.number_of_sub_messages:
-                    log.debug("Reading folder: " + folder.name)
-                    path.append(folder.name)
-                    for index in range(folder.number_of_sub_messages):
-                        
-                        try:
-                            messageObj = folder.get_sub_message(index)
-                            headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
-                            message = Email(
-                                Message_ID=headers['Message-ID'],
-                                Email_Folder=join(*path),
-                                Date=headers["Date"],
-                                From=headers["From"],
-                                To=headers["To"],
-                                Cc=headers["To"],
-                                Bcc=headers["Bcc"],
-                                Subject=headers["Subject"],
-                                Content_Type=headers["Content-Type"],
-                                Headers=headers,
-                                # detecting encoding might be problematic but works for now
-                                Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
-                                HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
-                                Message=None,
-                                Error='False'
-                            )
-                        
-                        except (email.errors.MessageParseError, Exception) as e:
-                            log.error(e)
-                            message = Email(
-                                Error='True'
-                            )
+            if folder.number_of_sub_messages:
+                log.debug("Reading folder: " + folder.name)
+                path.append(folder.name)
+                for index in range(folder.number_of_sub_messages):
                     
-                        #log.debug(message.to_struct())
-                        yield message
-            else:
-                # gotta return empty directory to controller somehow
-                log.error("??--> " + folder.name)
+                    try:
+                        messageObj = folder.get_sub_message(index)
+                        headerParser = parser.HeaderParser()
+                        headers = headerParser.parsestr(messageObj.transport_headers)
+                        
+                        attachmentNames = []
+                        attachments = []
+                        total_attachment_size_bytes = 0
+                        for attachment in messageObj.attachments:
+                            total_attachment_size_bytes = total_attachment_size_bytes + attachment.get_size()
+                            attachment_content = attachment.read_buffer(attachment.get_size())
+                            attachments.append(attachment_content)
+                            attachmentNames.append(attachment.get_name())
 
+                        message = Email(
+                            Message_ID=headers['Message-ID'],
+                            Email_Folder=join(*path),
+                            Date=headers["Date"],
+                            From=headers["From"],
+                            To=headers["To"],
+                            Cc=headers["To"],
+                            Bcc=headers["Bcc"],
+                            Subject=headers["Subject"],
+                            Content_Type=headers["Content-Type"],
+                            Headers=headers,
+                            # detecting encoding might be problematic but works for now
+                            Body=str(messageObj.html_body),
+                            Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
+                            HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
+                            AttachmentNum=int(messageObj.number_of_attachments),
+                            Message=None,
+                            AttachmentNames=attachmentNames,
+                            AttachmentFiles=attachments,
+                            Error='False'
+                        )
+                    
+                    except (Exception) as e:
+                        log.error(e)
+                        message = Email(
+                            Error='True'
+                        )
+                
+                    # log.debug(message.to_struct())
+                    yield message
+            # else:
+            #     # gotta return empty directory to controller somehow
+            #     log.error("??--> " + folder.name)
 
         def messages(self):
             pst = pypff.file()
