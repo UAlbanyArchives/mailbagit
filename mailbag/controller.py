@@ -1,11 +1,11 @@
 from structlog import get_logger
-
+import csv
 from mailbag.email_account import EmailAccount
+from mailbag.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
-
 
 log = get_logger()
 
@@ -15,34 +15,96 @@ class Controller:
 
     def __init__(self, args):
         self.args = args
+        self.format = self.format_map[args.input]
+        self.derivatives_to_create = [self.derivative_map[d] for d in args.derivatives]
 
     @property
     def format_map(self):
         return EmailAccount.registry
 
-    def read(self, input, directory):
+    @property
+    def derivative_map(self):
+        return Derivative.registry
 
-        format = self.format_map[input]
+    def generate_mailbag(self):
+        mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
+        derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
-        if len(directory) > 1:
-            # checks that mailbag was only given one directory as input.
-            # bagit-python loops through all directory args, and we may have to
-            # handle multiple inputs at some point but for now just raise an error.
-            log.error("Mailbag currently only reads one input source.")
-            raise ValueError("Mailbag currently only reads one input source.")
+        # do stuff you ought to do with per-account info here
+        # mail_account.account_data()
+        #for d in derivatives:
+        #    d.do_task_per_account()
+
+        #Create folder mailbag folder before writing mailbag.csv
+        if os.path.isfile(self.args.directory):
+            parent_dir = os.path.dirname(self.args.directory)
         else:
-            path = directory[0]
-            self.reader(format,path)
+            parent_dir = self.args.directory
+        mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+        log.debug("Creating mailbag at " + str(mailbag_dir))
+        if not self.args.dry_run:
+            os.mkdir(mailbag_dir)
+        csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
-    def reader(self, format, path):
-        data = format(path, self.args)
-        messages = data.messages()
+        #Setting up mailbag.csv
+        header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
+                  'Content_Type', 'Error']
+        csv_data = []
+        mailbag_message_id = 0
+        csv_portion_count = 0
+        csv_portion = []
+        csv_portion.append(header)
 
-        for message in messages:
-            log.debug("Headers: " + str(type(message.Headers)))
-            log.debug("HTML: " + str(type(message.HTML_Body))+" "+str(message.HTML_Body)[0:100])
-            log.debug("Text: " + str(type(message.Text_Body))+" "+str(message.Text_Body)[0:100])
-            log.debug("Message: " + str(type(message.Message)))
 
-        return messages
+        for message in mail_account.messages():
+            # do stuff you ought to do per message here
+
+            # Generate mailbag_message_id
+            mailbag_message_id += 1
+            message.Mailbag_Message_ID = mailbag_message_id
+
+            # Setting up CSV data
+            # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
+            if csv_portion_count > 100000:
+                csv_data.append(csv_portion)
+                csv_portion = []
+                csv_portion.append(header)
+                csv_portion.append(
+                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
+                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+                csv_portion_count = 0
+            #if count is less than 100000 , appending the messages in one list
+            else:
+                csv_portion.append(
+                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
+                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+            csv_portion_count += 1
+
+            #Generate derivatives
+            for d in derivatives:
+                d.do_task_per_message(message, self.args)
+
+        # append any remaining csv portions < 100000
+        csv_data.append(csv_portion)
+
+        # Write CSV data to mailbag.csv
+        log.debug("Writing mailbag.csv to " + str(csv_dir))
+        if not self.args.dry_run:
+            #Creating csv
+            # checking if there are multiple portions in list or not
+            if len(csv_data) == 1:
+                filename = os.path.join(csv_dir, "mailbag.csv")
+                with open(filename, 'w', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csv_data[0])
+            else:
+                portion_count = 0
+                for portion in csv_data:
+                    portion_count += 1
+                    filename = os.path.join(csv_dir, "mailbag-" + str(portion_count) + ".csv")
+                    with open(filename, 'w', encoding='UTF8', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerows(portion)
+
+        return mail_account.messages()

@@ -22,3 +22,4 @@ class Email(models.Base):
     AttachmentNames = fields.ListField(str)
     AttachmentFiles = fields.ListField(bytes)
     Error = fields.StringField()
+    Mailbag_Message_ID=fields.IntField()
