@@ -50,7 +50,16 @@ class EML(EmailAccount):
                     else:
                         attachmentNames.append(str(len(attachmentNames)))
                     attachments.append(attachment)
-
+                
+                if msg.is_multipart():
+                        
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/html":
+                            html_body = part.get_payload()
+                        elif part.get_content_type() == "text/plain":
+                            text_body = part.get_payload()
+                            log.debug("Content-type "+part.get_content_maintype())
+                                
             message = Email(
                     # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),
                     Message_ID=msg["Message-id"],
@@ -60,9 +69,10 @@ class EML(EmailAccount):
                     Subject=msg["subject"],
                     Content_Type=msg["content-type"],
                     Body=body,
-                    AttachmentNum=len(attachmentNames),
+                    AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                     AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments
+                    AttachmentFiles=attachments,
+                    Error='False'
                 )
 
             yield message
