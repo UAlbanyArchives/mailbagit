@@ -59,14 +59,14 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
         
         file_new_path = os.path.join(folder_new, emailFolder, filename)
 
-        log.debug('Moving:', fullFilePath, 'to:', file_new_path, 'SubFolder:', emailFolder)
+        log.debug('Moving: ' + str(fullFilePath) + ' to: ' + str(file_new_path) + ' SubFolder: ' + str(emailFolder))
         if(not dry_run):
             moveFile(dry_run, fullFilePath, file_new_path)
             # clean up old directory structure
             p = fullFilePath.parents[0]
             while p != p.root and p != fullPath:
                 if not os.listdir(p):
-                    log.debug('Cleaning:', p)
+                    log.debug('Cleaning: ' + p)
                     os.rmdir(p)
                     # dirty hack since rmdir is not synchronous on Windows
                     if os.name == "nt":
