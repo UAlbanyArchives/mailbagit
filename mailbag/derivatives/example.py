@@ -1,5 +1,8 @@
 # This is an example derivative, meant to show how
 # to hook up a real parser
+from structlog import get_logger
+
+log = get_logger()
 
 # Does nothing currently
 from mailbag.derivative import Derivative
@@ -7,7 +10,7 @@ class ExampleDerivative(Derivative):
     derivative_name = 'example'
 
     def __init__(self, email_account, **kwargs):
-        print("Setup account")
+        log.debug("Setup account")
         super()
 
     def do_task_per_account(self):
@@ -15,6 +18,6 @@ class ExampleDerivative(Derivative):
 
     def do_task_per_message(self, message, args):
         if message.Message_ID:
-            print(message.Message_ID.strip())
+            log.debug(message.Message_ID.strip())
         else:
-            print(message.Subject)
+            log.debug(message.Subject)
