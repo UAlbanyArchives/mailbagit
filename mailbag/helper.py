@@ -1,6 +1,9 @@
 from pathlib import Path
 import os, shutil, glob
 
+# import glob, os
+# import extract_msg
+
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
@@ -70,5 +73,6 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
         return file_new_path
 
-
+def saveAttachments(part):
+    return (part.get_filename(),part.get_payload(decode=True))
     
