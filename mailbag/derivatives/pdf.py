@@ -20,7 +20,6 @@ class ExampleDerivative(Derivative):
 
     def do_task_per_message(self, message, args):
         
-        
         #check to see which body to use
         body = False
         if message.HTML_Body:
@@ -46,14 +45,21 @@ class ExampleDerivative(Derivative):
                     table += "</tr>"
             table += "</table>"
 
-            #add headers table to html
+
+            #Adding user-defined css
+            external_css= "<link rel="+"stylesheet"+" href=" + args.pdf_css + ">"
+
+            # add headers table to html
             if message.HTML_Body and "<body" in body.lower():
+                head_position = body.lower().index("<head>")
+                css_position = head_position + 1
                 body_position = body.lower().index("<body")
                 table_position = body_position + body[body_position:].index(">") + 1
-                html_content = body[:table_position] + table + body[table_position:]
+                html_content = body[:css_position] + external_css + body[css_position:table_position] + table + body[table_position:]
             else:
                 #fallback to just prepending the table
-                html_content = table + body
+                html_content = external_css+table + body
+
 
             pdf_path = os.path.join(args.directory, args.mailbag_name, "pdf")
             html_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".html")
