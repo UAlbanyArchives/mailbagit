@@ -31,6 +31,8 @@ class Controller:
 
         derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
+
+
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
         #for d in derivatives:
@@ -83,7 +85,8 @@ class Controller:
 
             #Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args)
+                if(d.derivative_name!="mbox"):
+                    d.do_task_per_message(message, self.args)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
@@ -106,5 +109,9 @@ class Controller:
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
+
+        for d in derivatives:
+            if (d.derivative_name == "mbox"):
+                d.do_task_per_account(mail_account, self.args)
 
         return mail_account.messages()
