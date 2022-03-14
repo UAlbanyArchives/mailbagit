@@ -1,19 +1,17 @@
 from pathlib import Path
 import os, shutil, glob
-
-# import glob, os
-# import extract_msg
 from structlog import get_logger
+
 log = get_logger()
 
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
-        print ("from: " + str(oldPath))
-        print ("to: " + str(newPath))
+        log.debug("from: " + str(oldPath))
+        log.debug("to: " + str(newPath))
         shutil.move(oldPath, newPath)
     except IOError as e:
-        print('Unable to move file. %s' % e)
+        log.error('Unable to move file. %s' % e)
 
 def emailFolder(mainPath, file):
         """
@@ -54,18 +52,18 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
         fullPath = Path(mainPath).resolve()
         fullFilePath = Path(file).resolve()
         filename = fullFilePath.name
-        folder_new = os.path.join(fullPath, mailbag_name, 'data', input)
+        folder_new = os.path.join(fullPath, mailbag_name, input)
         
         file_new_path = os.path.join(folder_new, emailFolder, filename)
 
-        print('Moving:', fullFilePath, 'to:', file_new_path, 'SubFolder:', emailFolder)
+        log.debug('Moving: ' + str(fullFilePath) + ' to: ' + str(file_new_path) + ' SubFolder: ' + str(emailFolder))
         if(not dry_run):
             moveFile(dry_run, fullFilePath, file_new_path)
             # clean up old directory structure
             p = fullFilePath.parents[0]
             while p != p.root and p != fullPath:
                 if not os.listdir(p):
-                    print ('Cleaning:', p)
+                    log.debug('Cleaning: ' + p)
                     os.rmdir(p)
                     # dirty hack since rmdir is not synchronous on Windows
                     if os.name == "nt":

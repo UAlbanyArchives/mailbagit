@@ -1,7 +1,6 @@
 from jsonmodels import models, fields, errors, validators
 from email.message import Message
 
-
 class Email(models.Base):
     """EmailModel - model class for email formats"""
     Message_ID = fields.StringField()
@@ -23,3 +22,4 @@ class Email(models.Base):
     AttachmentNames = fields.ListField(str)
     AttachmentFiles = fields.ListField(bytes)
     Error = fields.StringField()
+    Mailbag_Message_ID = fields.IntField()

@@ -32,7 +32,6 @@ class Controller:
         derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
         # do stuff you ought to do with per-account info here
-                
         # mail_account.account_data()
         #for d in derivatives:
         #    d.do_task_per_account()
@@ -67,7 +66,7 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
             
-            if message.AttachmentNum>0:
+            if message.AttachmentNum and message.AttachmentNum>0:
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data

@@ -39,7 +39,7 @@ class Mbox(EmailAccount):
             for mail in data.itervalues():
                 try:
                     mailObject = email.message_from_bytes(mail.as_bytes(), policy=email.policy.default)
-                    print (dir(mail))
+
                     # Try to parse content
                     attachmentNames = []
                     attachments = []
@@ -91,4 +91,4 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            # new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, subFolder, filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, subFolder, filePath)
