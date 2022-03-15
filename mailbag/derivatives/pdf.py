@@ -18,7 +18,7 @@ class ExampleDerivative(Derivative):
     def do_task_per_account(self):
         print(self.account.account_data())
 
-    def do_task_per_message(self, message, args):
+    def do_task_per_message(self, message, args, mailbag_dir):
         
         
         #check to see which body to use
@@ -55,7 +55,7 @@ class ExampleDerivative(Derivative):
                 #fallback to just prepending the table
                 html_content = table + body
 
-            pdf_path = os.path.join(args.directory, args.mailbag_name, "pdf")
+            pdf_path = os.path.join(mailbag_dir, "pdf")
             html_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".html")
             pdf_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".pdf")
             log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))

@@ -1,10 +1,11 @@
-from os.path import join
+import os, glob
 import mailbox
 import chardet
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
+import mailbag.helper as helper
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -35,7 +36,7 @@ if not skip_registry:
         def folders(self, folder, path):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
-            # path is a list that you can create the filepath with join()
+            # path is a list that you can create the filepath with os.path.join()
             if folder.number_of_sub_folders:
                 path.append(folder.name)
                 for folder_index in range(folder.number_of_sub_folders):
@@ -62,7 +63,7 @@ if not skip_registry:
 
                         message = Email(
                             Message_ID=headers['Message-ID'],
-                            Email_Folder=join(*path),
+                            Email_Folder=os.path.join(*path),
                             Date=headers["Date"],
                             From=headers["From"],
                             To=headers["To"],
@@ -95,13 +96,27 @@ if not skip_registry:
             #     log.error("??--> " + folder.name)
 
         def messages(self):
-            pst = pypff.file()
-            pst.open(self.file)
-            root = pst.get_root_folder()
-            count = 0
-            for folder in root.sub_folders:
-                if folder.number_of_sub_folders:
-                    return self.folders(folder, [])
-                else:
-                    # gotta return empty directory to controller somehow
-                    log.error("???--> " + folder.name)
+            if os.path.isfile(self.file):
+                files = self.file
+                parent_dir = os.path.dirname(self.file)
+            else:
+                files = os.path.join(self.file, "**", "*.mbox")
+                parent_dir = self.file
+            file_list = glob.glob(files, recursive=True)
+
+            for filePath in file_list:
+                subFolder = helper.emailFolder(parent_dir, filePath)
+
+                pst = pypff.file()
+                pst.open(self.file)
+                root = pst.get_root_folder()
+                count = 0
+                for folder in root.sub_folders:
+                    if folder.number_of_sub_folders:
+                        return self.folders(folder, [])
+                    else:
+                        # gotta return empty directory to controller somehow
+                        log.error("???--> " + folder.name)
+
+                # Move PST to new mailbag directory structure
+                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)

@@ -30,9 +30,15 @@ class Mbox(EmailAccount):
 
     def messages(self):
         
-        files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
-        for filePath in files:
-            subFolder = helper.emailFolder(self.file,filePath)
+        if os.path.isfile(self.file):
+            files = self.file
+            parent_dir = os.path.dirname(self.file)
+        else:
+            files = os.path.join(self.file, "**", "*.mbox")
+            parent_dir = self.file
+        file_list = glob.glob(files, recursive=True)
+        for filePath in file_list:
+            subFolder = helper.emailFolder(parent_dir, filePath)
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
@@ -91,4 +97,4 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)

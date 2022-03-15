@@ -25,7 +25,7 @@ class ExampleDerivative(Derivative):
     def do_task_per_account(self):
         print(self.account.account_data())
 
-    def do_task_per_message(self, message, args):
+    def do_task_per_message(self, message, args, mailbag_dir):
 
         html=message.HTML_Body
         part = MIMEText(html,'html')
@@ -36,7 +36,7 @@ class ExampleDerivative(Derivative):
         msg['Cc'] = message.Cc
         msg['Bcc'] = message.Bcc
         msg.attach(part)
-        new_path = os.path.join(args.directory,args.mailbag_name,"data")
+        new_path = os.path.join(mailbag_dir, "data")
 
         log.debug("Writing EML to " + str(new_path))
         if self.args.dry_run:

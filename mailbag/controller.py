@@ -83,7 +83,7 @@ class Controller:
 
             #Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args)
+                d.do_task_per_message(message, self.args, mailbag_dir)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
