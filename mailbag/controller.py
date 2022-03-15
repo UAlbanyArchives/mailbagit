@@ -48,7 +48,7 @@ class Controller:
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
         #Setting up mailbag.csv
-        header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
+        header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Original_Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type', 'Error']
         csv_data = []
         mailbag_message_id = 0
@@ -71,13 +71,13 @@ class Controller:
                 csv_portion = []
                 csv_portion.append(header)
                 csv_portion.append(
-                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
+                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Original_Filename, message.Date, message.From,
                      message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
                 csv_portion_count = 0
             #if count is less than 100000 , appending the messages in one list
             else:
                 csv_portion.append(
-                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
+                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Original_Filename, message.Date, message.From,
                      message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
             csv_portion_count += 1
 

@@ -35,44 +35,56 @@ class EML(EmailAccount):
 
         files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
-        for i in files:
-            attachmentNames = []
-            attachments = []
-            with open(i, 'r') as f:
-                msg = email.message_from_file(f, policy=policy.default)
-                body = msg.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+        for filePath in files:
 
-                # Extract Attachments                
-                for attachment in msg.iter_attachments():
-                    attachmentName, attachment = helper.saveAttachments(attachment)
-                    if attachmentName:
-                        attachmentNames.append(attachmentName)
-                    else:
-                        attachmentNames.append(str(len(attachmentNames)))
-                    attachments.append(attachment)
-                
-                if msg.is_multipart():
-                        
-                    for part in msg.walk():
-                        if part.get_content_type() == "text/html":
-                            html_body = part.get_payload()
-                        elif part.get_content_type() == "text/plain":
-                            text_body = part.get_payload()
-                            log.debug("Content-type "+part.get_content_maintype())
-                                
-            message = Email(
-                    # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file,i),
-                    Message_ID=msg["Message-id"],
-                    Date=msg["date"],
-                    From=msg["from"],
-                    To=msg["to"],
-                    Subject=msg["subject"],
-                    Content_Type=msg["content-type"],
-                    Body=body,
-                    AttachmentNum=len(attachmentNames) if attachmentNames else 0,
-                    AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments,
-                    Error='False'
+            try:
+                error = False
+
+                attachmentNames = []
+                attachments = []
+                with open(filePath, 'r') as f:
+                    msg = email.message_from_file(f, policy=policy.default)
+                    body = msg.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+
+                    # Extract Attachments                
+                    for attachment in msg.iter_attachments():
+                        attachmentName, attachment = helper.saveAttachments(attachment)
+                        if attachmentName:
+                            attachmentNames.append(attachmentName)
+                        else:
+                            attachmentNames.append(str(len(attachmentNames)))
+                        attachments.append(attachment)
+                    
+                    if msg.is_multipart():
+                            
+                        for part in msg.walk():
+                            if part.get_content_type() == "text/html":
+                                html_body = part.get_payload()
+                            elif part.get_content_type() == "text/plain":
+                                text_body = part.get_payload()
+                                log.debug("Content-type "+part.get_content_maintype())
+                                    
+                message = Email(
+                        # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file, filePath),
+                        Message_ID=msg["Message-id"],
+                        Original_Filename=str(os.path.basename(filePath)),
+                        Date=msg["date"],
+                        From=msg["from"],
+                        To=msg["to"],
+                        Subject=msg["subject"],
+                        Content_Type=msg["content-type"],
+                        Body=body,
+                        Text_Body=text_body,
+                        HTML_Body=html_body,
+                        AttachmentNum=len(attachmentNames) if attachmentNames else 0,
+                        AttachmentNames=attachmentNames,
+                        AttachmentFiles=attachments,
+                        Error=str(error)
+                    )
+
+            except (email.errors.MessageParseError, Exception) as e:
+                message = Email(
+                    Error='True'
                 )
 
             yield message

@@ -70,6 +70,7 @@ class Mbox(EmailAccount):
                     message = Email(
                         Message_ID=mail['Message-ID'],
                         Email_Folder=subFolder,
+                        Original_Filename=str(os.path.basename(filePath)),
                         Date=mail['Date'],
                         From=mail['From'],
                         To=mail['To'],

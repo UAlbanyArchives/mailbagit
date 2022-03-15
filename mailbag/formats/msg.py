@@ -68,7 +68,9 @@ class MSG(EmailAccount):
                     attachments.append(attachment.data)
                 
                 message = Email(
+                    Message_ID = mail.messageId.strip(),
                     Email_Folder=subFolder,
+                    Original_Filename=str(os.path.basename(filePath)),
                     Date=mail.date,
                     From=mail.sender,
                     To=mail.to,
@@ -95,6 +97,6 @@ class MSG(EmailAccount):
                     Error='True'
                 )
  
-            # Move MBOX to new mailbag directory structure
+            # Move MSG to new mailbag directory structure
             new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
             yield message

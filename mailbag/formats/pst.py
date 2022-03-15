@@ -64,6 +64,7 @@ if not skip_registry:
                         message = Email(
                             Message_ID=headers['Message-ID'],
                             Email_Folder=os.path.join(*path),
+                            Original_Filename=path[-1],
                             Date=headers["Date"],
                             From=headers["From"],
                             To=headers["To"],
