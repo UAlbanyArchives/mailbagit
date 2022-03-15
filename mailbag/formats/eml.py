@@ -24,8 +24,8 @@ class EML(EmailAccount):
         account_data = {}
 
         self.file = target_account
-        # self.dry_run = dry_run
-        # self.mailbag_name = mailbag_name
+        self.dry_run = args.dry_run
+        self.mailbag_name = args.mailbag_name
         log.info("Reading : ", File=self.file)
 
     def account_data(self):
@@ -37,54 +37,76 @@ class EML(EmailAccount):
 
         for filePath in files:
 
+            subFolder = helper.emailFolder(self.file, filePath)
+
             try:
-                error = False
+                error = []
 
                 attachmentNames = []
                 attachments = []
-                with open(filePath, 'r') as f:
-                    msg = email.message_from_file(f, policy=policy.default)
-                    body = msg.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+                with open(filePath, 'rb') as f:
+                    msg = email.message_from_binary_file(f, policy=policy.default)
 
-                    # Extract Attachments                
-                    for attachment in msg.iter_attachments():
-                        attachmentName, attachment = helper.saveAttachments(attachment)
-                        if attachmentName:
-                            attachmentNames.append(attachmentName)
+                    try:
+                        html_body = None
+                        text_body = None
+                        if msg.is_multipart():
+                            for part in msg.walk():
+                                content_type = part.get_content_type()
+                                content_disposition = part.get_content_disposition()
+                                #character_set = part.get_charsets()
+                                if content_type == "text/html" and content_disposition != "attachment":
+                                    html_body = part.get_payload(decode=True)
+                                if content_type == "text/plain" and content_disposition != "attachment":
+                                    text_body = part.get_payload(decode=True)
                         else:
-                            attachmentNames.append(str(len(attachmentNames)))
-                        attachments.append(attachment)
-                    
-                    if msg.is_multipart():
-                            
-                        for part in msg.walk():
-                            if part.get_content_type() == "text/html":
-                                html_body = part.get_payload()
-                            elif part.get_content_type() == "text/plain":
-                                text_body = part.get_payload()
-                                log.debug("Content-type "+part.get_content_maintype())
+                            content_type = msg.get_content_type()
+                            content_disposition = msg.get_content_disposition()
+                            if content_type == "text/html" and content_disposition != "attachment":
+                                html_body = part.get_payload(decode=True)
+                            if content_type == "text/plain" and content_disposition != "attachment":
+                                text_body = part.get_payload(decode=True)
+                    except Exception as e:
+                        log.error(e)
+                        error.append("Error parsing message body.")
+
+                    try:
+                        # Extract Attachments                
+                        for attachment in msg.iter_attachments():
+                            attachmentName, attachment = helper.saveAttachments(attachment)
+                            if attachmentName:
+                                attachmentNames.append(attachmentName)
+                            else:
+                                attachmentNames.append(str(len(attachmentNames)))
+                            attachments.append(attachment)
+                    except Exception as e:
+                        log.error(e)
+                        error.append("Error parsing attachments.")
                                     
-                message = Email(
-                        # Email_Folder=helper.emailFolder(self.dry_run, self.mailbag_name, self.format_name, self.file, filePath),
-                        Message_ID=msg["Message-id"],
-                        Original_Filename=str(os.path.basename(filePath)),
-                        Date=msg["date"],
-                        From=msg["from"],
-                        To=msg["to"],
-                        Subject=msg["subject"],
-                        Content_Type=msg["content-type"],
-                        Body=body,
-                        Text_Body=text_body,
-                        HTML_Body=html_body,
-                        AttachmentNum=len(attachmentNames) if attachmentNames else 0,
-                        AttachmentNames=attachmentNames,
-                        AttachmentFiles=attachments,
-                        Error=str(error)
-                    )
+                    message = Email(
+                            Error=error,
+                            Message_ID=msg["message-id"].strip(),
+                            Message_Path=subFolder,
+                            Original_Filename=str(os.path.basename(filePath)),
+                            Date=msg["date"],
+                            From=msg["from"],
+                            To=msg["to"],
+                            Subject=msg["subject"],
+                            Content_Type=msg.get_content_type(),
+                            Headers=msg,
+                            Text_Bytes=text_body,
+                            HTML_Bytes=html_body,
+                            Message=msg,
+                            AttachmentNum=len(attachmentNames) if attachmentNames else 0,
+                            AttachmentNames=attachmentNames,
+                            AttachmentFiles=attachments
+                        )
 
             except (email.errors.MessageParseError, Exception) as e:
                 message = Email(
-                    Error='True'
+                    Error=['Error parsing message.']
                 )
 
+            # Move EML to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
             yield message

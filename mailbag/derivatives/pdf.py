@@ -55,7 +55,10 @@ class ExampleDerivative(Derivative):
                 #fallback to just prepending the table
                 html_content = table + body
 
-            pdf_path = os.path.join(mailbag_dir, "pdf")
+            if message.Message_Path is None:
+                pdf_path = os.path.join(mailbag_dir, self.derivative_format)
+            else:
+                pdf_path = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
             html_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".html")
             pdf_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".pdf")
             log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))

@@ -19,10 +19,10 @@ class TxtDerivative(Derivative):
 
     def do_task_per_message(self, message, args, mailbag_dir):
 
-        if message.Email_Folder is None:
+        if message.Message_Path is None:
             out_dir = os.path.join(mailbag_dir, self.derivative_format)
         else:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Email_Folder)
+            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + "." + self.derivative_format)
 
         if message.Text_Body is None:
@@ -32,6 +32,11 @@ class TxtDerivative(Derivative):
             if not args.dry_run:
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
-                with open(filename, "w") as f:
-                    f.write(message.Text_Body)
+                if message.Text_Bytes:
+                    with open(filename, "wb") as f:
+                        f.write(message.Text_Bytes)
+                    f.close()
+                elif message.Text_Body:
+                    with open(filename, "w") as f:
+                        f.write(message.Text_Body)
                     f.close()

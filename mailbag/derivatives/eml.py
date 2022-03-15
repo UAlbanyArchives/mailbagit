@@ -27,6 +27,11 @@ class ExampleDerivative(Derivative):
 
     def do_task_per_message(self, message, args, mailbag_dir):
 
+        if message.Message_Path is None:
+            out_dir = os.path.join(mailbag_dir, self.derivative_format)
+        else:
+            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
+
         html=message.HTML_Body
         part = MIMEText(html,'html')
         msg = MIMEMultipart('alternative')
@@ -36,7 +41,7 @@ class ExampleDerivative(Derivative):
         msg['Cc'] = message.Cc
         msg['Bcc'] = message.Bcc
         msg.attach(part)
-        new_path = os.path.join(mailbag_dir, "data")
+        new_path = os.path.join(out_dir, "data")
 
         log.debug("Writing EML to " + str(new_path))
         if self.args.dry_run:

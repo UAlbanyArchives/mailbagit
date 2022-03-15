@@ -66,7 +66,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
             p = fullFilePath.parents[0]
             while p != p.root and p != fullPath:
                 if not os.listdir(p):
-                    log.debug('Cleaning: ' + p)
+                    log.debug('Cleaning: ' + str(p))
                     os.rmdir(p)
                     # dirty hack since rmdir is not synchronous on Windows
                     if os.name == "nt":
