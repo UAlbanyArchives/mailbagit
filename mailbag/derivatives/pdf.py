@@ -8,11 +8,11 @@ log = get_logger()
 class ExampleDerivative(Derivative):
     derivative_name = 'pdf'
     wkhtmltopdf = 'wkhtmltopdf.exe'
-    if not distutils.spawn.find_executable(wkhtmltopdf):
-        raise OSError("wkhtmltopdf.exe not found. Make sure wkhtmltopdf is installed and in PATH.")
-
+    
     def __init__(self, email_account, **kwargs):
         print("Setup account")
+        if not distutils.spawn.find_executable(self.wkhtmltopdf):
+            raise OSError("wkhtmltopdf.exe not found. To create PDF derivatives, ensure that wkhtmltopdf is installed and in PATH.")
         super()
 
     def do_task_per_account(self):
