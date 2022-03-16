@@ -28,70 +28,104 @@ if not skip_registry:
             # code goes here to set up mailbox and pull out any relevant account_data
 
             self.file = target_account
+            self.dry_run = args.dry_run
+            self.mailbag_name = args.mailbag_name
             log.info("Reading :", File=self.file)
 
         def account_data(self):
             return account_data
 
-        def folders(self, folder, path):
+        def folders(self, folder, path, original_filename):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is a list that you can create the filepath with os.path.join()
-            if folder.number_of_sub_folders:
-                path.append(folder.name)
-                for folder_index in range(folder.number_of_sub_folders):
-                    subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path)
             if folder.number_of_sub_messages:
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
                     
                     try:
+                        error = []
                         messageObj = folder.get_sub_message(index)
-                        headerParser = parser.HeaderParser()
-                        headers = headerParser.parsestr(messageObj.transport_headers)
+
+                        try:
+                            headerParser = parser.HeaderParser()
+                            headers = headerParser.parsestr(messageObj.transport_headers)
+                        except Exception as e:
+                            log.error(e)
+                            error.append("Error parsing headers.")
+
+                        try:
+                            html_body = None
+                            html_bytes = None
+                            text_body = None
+                            text_bytes = None
+                            if messageObj.html_body:
+                                html_bytes = messageObj.html_body
+                                try:
+                                    html_body = messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding'])
+                                except:
+                                    pass
+                            if messageObj.plain_text_body:
+                                text_bytes = messageObj.plain_text_body
+                                try:
+                                    text_body = messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding'])
+                                except:
+                                    pass
+                        except Exception as e:
+                            log.error(e)
+                            error.append("Error parsing message body.")
                         
-                        attachmentNames = []
-                        attachments = []
-                        total_attachment_size_bytes = 0
-                        for attachment in messageObj.attachments:
-                            total_attachment_size_bytes = total_attachment_size_bytes + attachment.get_size()
-                            attachment_content = attachment.read_buffer(attachment.get_size())
-                            attachments.append(attachment_content)
-                            attachmentNames.append(attachment.get_name())
+                        try:
+                            attachmentNames = []
+                            attachments = []
+                            total_attachment_size_bytes = 0
+                            for attachment in messageObj.attachments:
+                                total_attachment_size_bytes = total_attachment_size_bytes + attachment.get_size()
+                                attachment_content = attachment.read_buffer(attachment.get_size())
+                                attachments.append(attachment_content)
+                                attachmentNames.append(attachment.get_name())
+                        except Exception as e:
+                            log.error(e)
+                            error.append("Error parsing attachments.")
 
                         message = Email(
-                            Message_ID=headers['Message-ID'],
-                            Message_Path=os.path.join(*path),
-                            Original_Filename=path[-1],
+                            Error=error,
+                            Message_ID=headers['Message-ID'].strip(),
+                            Message_Path=os.path.join(os.path.splitext(original_filename)[0], *path),
+                            Original_Filename=original_filename,
                             Date=headers["Date"],
                             From=headers["From"],
                             To=headers["To"],
                             Cc=headers["To"],
                             Bcc=headers["Bcc"],
                             Subject=headers["Subject"],
-                            Content_Type=headers["Content-Type"],
+                            Content_Type=headers.get_content_type(),
                             Headers=headers,
-                            # detecting encoding might be problematic but works for now
-                            Body=str(messageObj.html_body),
-                            Text_Body=messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding']),
-                            HTML_Body=messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding']),
+                            HTML_Bytes=html_bytes,
+                            HTML_Body=html_body,
+                            Text_Bytes=text_bytes,
+                            Text_Body=text_body,
                             AttachmentNum=int(messageObj.number_of_attachments),
                             Message=None,
                             AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments,
-                            Error='False'
+                            AttachmentFiles=attachments
                         )
                     
                     except (Exception) as e:
                         log.error(e)
                         message = Email(
-                            Error='True'
+                            Error=['Error parsing message.']
                         )
                 
                     # log.debug(message.to_struct())
                     yield message
+
+            # iterate over any subfolders too       
+            if folder.number_of_sub_folders:
+                for folder_index in range(folder.number_of_sub_folders):
+                    subfolder = folder.get_sub_folder(folder_index)
+                    yield from self.folders(subfolder, path, original_filename)
             # else:
             #     # gotta return empty directory to controller somehow
             #     log.error("??--> " + folder.name)
@@ -109,15 +143,16 @@ if not skip_registry:
                 subFolder = helper.emailFolder(parent_dir, filePath)
 
                 pst = pypff.file()
-                pst.open(self.file)
+                pst.open(filePath)
                 root = pst.get_root_folder()
-                count = 0
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
-                        return self.folders(folder, [])
+                        # call recursive function to parse email folder
+                         yield from self.folders(folder, os.path.normpath(subFolder).split(os.sep), os.path.basename(filePath))
                     else:
                         # gotta return empty directory to controller somehow
                         log.error("???--> " + folder.name)
+                pst.close()
 
                 # Move PST to new mailbag directory structure
                 new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)

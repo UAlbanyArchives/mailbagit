@@ -49,23 +49,29 @@ class Mbox(EmailAccount):
                     # Try to parse content
                     try:
                         html_body = None
+                        html_bytes = None
                         text_body = None
+                        text_bytes = None
                         if mailObject.is_multipart():
                             for part in mailObject.walk():
                                 content_type = part.get_content_type()
                                 content_disposition = part.get_content_disposition()
                                 #character_set = part.get_charsets()
                                 if content_type == "text/html" and content_disposition != "attachment":
-                                    html_body = part.get_payload(decode=True)
+                                    html_bytes = part.get_payload(decode=True)
+                                    html_body = part.get_payload()
                                 if content_type == "text/plain" and content_disposition != "attachment":
-                                    text_body = part.get_payload(decode=True)
+                                    text_bytes = part.get_payload(decode=True)
+                                    text_body = part.get_payload()
                         else:
                             content_type = mailObject.get_content_type()
                             content_disposition = mailObject.get_content_disposition()
                             if content_type == "text/html" and content_disposition != "attachment":
-                                html_body = part.get_payload(decode=True)
+                                html_bytes = part.get_payload(decode=True)
+                                html_body = part.get_payload()
                             if content_type == "text/plain" and content_disposition != "attachment":
-                                text_body = part.get_payload(decode=True)
+                                text_bytes = part.get_payload(decode=True)
+                                text_body = part.get_payload()
                     except Exception as e:
                         log.error(e)
                         error.append("Error parsing message body.")
@@ -96,8 +102,10 @@ class Mbox(EmailAccount):
                         Subject=mail['Subject'],
                         Content_Type=mailObject.get_content_type(),
                         Headers=mail,
-                        Text_Bytes=text_body,
-                        HTML_Bytes=html_body,
+                        HTML_Bytes=html_bytes,
+                        HTML_Body=html_body,
+                        Text_Bytes=text_bytes,
+                        Text_Body=text_body,
                         Message=mailObject,
                         AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                         AttachmentNames=attachmentNames,

@@ -1,3 +1,4 @@
+import urllib.parse
 from pathlib import Path
 import os, shutil, glob
 from structlog import get_logger
@@ -79,3 +80,23 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 def saveAttachments(part):
     return (part.get_filename(),part.get_payload(decode=True))
     
+
+def normalizePath(path):
+    # this is not sufficent yet
+    if os.name == "nt":
+        specials = ["<", ">", ":", "\"", "/", "|", "?", "*"]
+        special_names = ["CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", \
+        "COM", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"]
+        new_path = []
+        for name in os.path.normpath(path).split(os.sep):
+            illegal = False
+            for char in specials:
+                if char in name:
+                    illegal = True
+            if illegal:
+                new_path.append(urllib.parse.quote_plus(name))
+            else:
+                new_path.append(name)
+        return os.path.join(*new_path)
+    else:
+        return path

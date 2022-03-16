@@ -49,23 +49,29 @@ class EML(EmailAccount):
 
                     try:
                         html_body = None
+                        html_bytes = None
                         text_body = None
+                        text_bytes = None
                         if msg.is_multipart():
                             for part in msg.walk():
                                 content_type = part.get_content_type()
                                 content_disposition = part.get_content_disposition()
                                 #character_set = part.get_charsets()
                                 if content_type == "text/html" and content_disposition != "attachment":
-                                    html_body = part.get_payload(decode=True)
+                                    html_bytes = part.get_payload(decode=True)
+                                    html_body = part.get_payload()
                                 if content_type == "text/plain" and content_disposition != "attachment":
-                                    text_body = part.get_payload(decode=True)
+                                    text_bytes = part.get_payload(decode=True)
+                                    text_body = part.get_payload()
                         else:
                             content_type = msg.get_content_type()
                             content_disposition = msg.get_content_disposition()
                             if content_type == "text/html" and content_disposition != "attachment":
-                                html_body = part.get_payload(decode=True)
+                                html_bytes= part.get_payload(decode=True)
+                                html_body = part.get_payload()
                             if content_type == "text/plain" and content_disposition != "attachment":
-                                text_body = part.get_payload(decode=True)
+                                text_bytes = part.get_payload(decode=True)
+                                text_body = part.get_payload()
                     except Exception as e:
                         log.error(e)
                         error.append("Error parsing message body.")
@@ -94,8 +100,10 @@ class EML(EmailAccount):
                             Subject=msg["subject"],
                             Content_Type=msg.get_content_type(),
                             Headers=msg,
-                            Text_Bytes=text_body,
-                            HTML_Bytes=html_body,
+                            HTML_Bytes=html_bytes,
+                            HTML_Body=html_body,
+                            Text_Bytes=text_bytes,
+                            Text_Body=text_body,
                             Message=msg,
                             AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                             AttachmentNames=attachmentNames,

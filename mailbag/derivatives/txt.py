@@ -1,5 +1,6 @@
 # Makes txt file derivatives just containing message bodies
 import os
+import mailbag.helper as helper
 from structlog import get_logger
 
 log = get_logger()
@@ -25,18 +26,20 @@ class TxtDerivative(Derivative):
             out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + "." + self.derivative_format)
 
+        norm_dir = helper.normalizePath(out_dir)
+        norm_filename = helper.normalizePath(filename)
         if message.Text_Body is None:
             log.warn("Error writing txt derivative for " + str(message.Mailbag_Message_ID))
         else:
-            log.debug("Writing txt derivative to " + filename)
+            log.debug("Writing txt derivative to " + norm_filename)
             if not args.dry_run:
-                if not os.path.isdir(out_dir):
-                    os.makedirs(out_dir)
+                if not os.path.isdir(norm_dir):
+                    os.makedirs(norm_dir)
                 if message.Text_Bytes:
-                    with open(filename, "wb") as f:
+                    with open(norm_filename, "wb") as f:
                         f.write(message.Text_Bytes)
                     f.close()
                 elif message.Text_Body:
-                    with open(filename, "w") as f:
+                    with open(norm_filename, "w") as f:
                         f.write(message.Text_Body)
                     f.close()

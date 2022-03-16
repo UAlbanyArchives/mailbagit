@@ -1,5 +1,6 @@
 # Makes html derivatives just containing message bodies
 import os
+import mailbag.helper as helper
 from structlog import get_logger
 
 log = get_logger()
@@ -25,24 +26,26 @@ class HtmlDerivative(Derivative):
             out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
 
-        log.debug("Writing html derivative to " + filename)
+        norm_dir = helper.normalizePath(out_dir)
+        norm_filename = helper.normalizePath(filename)
+        log.debug("Writing html derivative to " + norm_filename)
         if not args.dry_run:
-            if not os.path.isdir(out_dir):
-                os.makedirs(out_dir)
+            if not os.path.isdir(norm_dir):
+                os.makedirs(norm_dir)
             if message.HTML_Bytes:
-                with open(filename + ".html", "wb") as f:
+                with open(norm_filename + ".html", "wb") as f:
                     f.write(message.HTML_Bytes)
                 f.close()
             elif message.HTML_Body:
-                with open(filename + ".html", "w") as f:
+                with open(norm_filename + ".html", "w") as f:
                     f.write(message.HTML_Body)
                 f.close()
             elif message.Text_Bytes:
-                with open(filename + ".txt", "wb") as f:
+                with open(norm_filename + ".txt", "wb") as f:
                     f.write(message.Text_Bytes)
                 f.close()
             elif message.Text_Body:
-                with open(filename + ".txt", "w") as f:
+                with open(norm_filename + ".txt", "w") as f:
                     f.write(message.Text_Body)
                 f.close()
             else:

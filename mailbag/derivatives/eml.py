@@ -13,6 +13,7 @@ from email.mime.text import MIMEText
 from email import generator
 from mailbag.derivative import Derivative
 #from mailbag.controller import Controller
+import mailbag.helper as helper
 
 log = get_logger()
 class ExampleDerivative(Derivative):
@@ -45,8 +46,9 @@ class ExampleDerivative(Derivative):
 
         log.debug("Writing EML to " + str(new_path))
         if self.args.dry_run:
-            outfile_name = os.path.join(new_path,"derivative.eml")
-            with open(outfile_name,'w') as outfile:
+            outfile_name = os.path.join(new_path, "derivative.eml")
+            norm_filename = helper.normalizePath(outfile_name)
+            with open(norm_filename,'w') as outfile:
                 gen = generator.Generator(outfile)
                 gen.flatten(msg)
 
