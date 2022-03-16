@@ -19,7 +19,7 @@ class ExampleDerivative(Derivative):
     derivative_name = 'eml'
 
     def __init__(self,email_account, **kwargs):
-        print("Setup account")
+        log.debug("Setup account")
         super()
 
     def do_task_per_account(self):
