@@ -20,6 +20,7 @@ if not skip_registry:
 
     class ExampleDerivative(Derivative):
         derivative_name = 'pdf'
+        derivative_format = 'pdf'
         wkhtmltopdf = 'wkhtmltopdf.exe'
         
         def __init__(self, email_account, **kwargs):
