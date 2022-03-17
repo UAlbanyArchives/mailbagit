@@ -76,7 +76,7 @@ if not skip_registry:
                 log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
                 if not args.dry_run:
                     if not os.path.isdir(pdf_path):
-                            os.mkdir(pdf_path)
+                        os.makedirs(pdf_path)
                     write_html = open(html_name, 'w')
                     write_html.write(html_content)
                     write_html.close()
