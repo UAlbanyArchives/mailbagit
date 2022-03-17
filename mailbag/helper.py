@@ -78,8 +78,9 @@ def saveAttachments(part):
 
 def saveAttachmentOnDisk(dry_run,attachments_dir,message):
     
-    message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
-    os.mkdir(message_attachments_dir)
+    if not dry_run:
+        message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
+        os.mkdir(message_attachments_dir)
     for i in range(message.AttachmentNum):
         log.debug('Saving Attachment:'+str(message.AttachmentNames[i]))
         if not dry_run:
