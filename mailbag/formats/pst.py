@@ -44,8 +44,8 @@ if not skip_registry:
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
                     
+                    error = []
                     try:
-                        error = []
                         messageObj = folder.get_sub_message(index)
 
                         try:
@@ -115,7 +115,7 @@ if not skip_registry:
                     except (Exception) as e:
                         log.error(e)
                         message = Email(
-                            Error=['Error parsing message.']
+                            Error=error.append('Error parsing message.')
                         )
                 
                     # log.debug(message.to_struct())

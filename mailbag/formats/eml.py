@@ -39,8 +39,8 @@ class EML(EmailAccount):
 
             subFolder = helper.emailFolder(self.file, filePath)
 
+            error = []
             try:
-                error = []
 
                 attachmentNames = []
                 attachments = []
@@ -112,7 +112,7 @@ class EML(EmailAccount):
 
             except (email.errors.MessageParseError, Exception) as e:
                 message = Email(
-                    Error=['Error parsing message.']
+                    Error=error.append('Error parsing message.')
                 )
 
             # Move EML to new mailbag directory structure

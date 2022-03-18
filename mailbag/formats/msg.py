@@ -36,10 +36,10 @@ class MSG(EmailAccount):
             
             subFolder = helper.emailFolder(self.file, filePath)
             
+            error = []
             try:
                 mail = extract_msg.openMsg(filePath)
                 html_body = None
-                error = []
                 
                 # Extract HTML from RTF if no HTML body
                 try:
@@ -97,7 +97,7 @@ class MSG(EmailAccount):
             
             except (email.errors.MessageParseError, Exception) as e:
                 message = Email(
-                    Error=['Error parsing message.']
+                    Error=error.append('Error parsing message.')
                 )
  
             # Move MSG to new mailbag directory structure

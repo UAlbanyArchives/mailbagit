@@ -42,8 +42,8 @@ class Mbox(EmailAccount):
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
+                error = []
                 try:
-                    error = []
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
 
                     # Try to parse content
@@ -114,7 +114,7 @@ class Mbox(EmailAccount):
                 except (email.errors.MessageParseError, Exception) as e:
                     log.error(e)
                     message = Email(
-                        Error=['Error parsing message.']
+                        Error=error.append('Error parsing message.')
                     )
                 yield message
 
