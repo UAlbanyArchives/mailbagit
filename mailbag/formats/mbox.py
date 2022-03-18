@@ -38,7 +38,7 @@ class Mbox(EmailAccount):
             parent_dir = self.file
         file_list = glob.glob(files, recursive=True)
         for filePath in file_list:
-            subFolder = helper.emailFolder(parent_dir, filePath, True)
+            subFolder = helper.emailFolder(parent_dir, filePath)
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
