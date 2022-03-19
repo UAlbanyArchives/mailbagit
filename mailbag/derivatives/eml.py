@@ -12,12 +12,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email import generator
 from mailbag.derivative import Derivative
-#from mailbag.controller import Controller
+from mailbag.controller import Controller
 import mailbag.helper as helper
 
 log = get_logger()
 class ExampleDerivative(Derivative):
     derivative_name = 'eml'
+    derivative_format = 'eml'
 
     def __init__(self,email_account, **kwargs):
         log.debug("Setup account")
@@ -42,12 +43,14 @@ class ExampleDerivative(Derivative):
         msg['Cc'] = message.Cc
         msg['Bcc'] = message.Bcc
         msg.attach(part)
-        new_path = os.path.join(out_dir, "data")
+        norm_dir=helper.normalizePath(out_dir)
 
-        log.debug("Writing EML to " + str(new_path))
-        if self.args.dry_run:
-            outfile_name = os.path.join(new_path, "derivative.eml")
+        log.debug("Writing EML to " + str(norm_dir))
+        if not args.dry_run:
+            outfile_name = os.path.join(out_dir,str(message.Mailbag_Message_ID) + "." + self.derivative_format)
             norm_filename = helper.normalizePath(outfile_name)
+            if not os.path.isdir(norm_dir):
+                os.makedirs(norm_dir)
             with open(norm_filename,'w') as outfile:
                 gen = generator.Generator(outfile)
                 gen.flatten(msg)
