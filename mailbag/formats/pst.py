@@ -135,7 +135,7 @@ if not skip_registry:
                 files = self.file
                 parent_dir = os.path.dirname(self.file)
             else:
-                files = os.path.join(self.file, "**", "*.mbox")
+                files = os.path.join(self.file, "**", "*.pst")
                 parent_dir = self.file
             file_list = glob.glob(files, recursive=True)
 
