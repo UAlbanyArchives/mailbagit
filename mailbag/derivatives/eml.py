@@ -1,7 +1,4 @@
-# This is an example derivative, meant to show how
-# to hook up a real parser
-
-# Does nothing currently
+#This is Eml derivative
 from os.path import join
 import mailbag.helper as helper
 import os,glob
@@ -12,8 +9,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email import generator
 from mailbag.derivative import Derivative
-from mailbag.controller import Controller
+#from mailbag.controller import Controller
+
 import mailbag.helper as helper
+
 
 log = get_logger()
 class ExampleDerivative(Derivative):
@@ -26,6 +25,7 @@ class ExampleDerivative(Derivative):
 
     def do_task_per_account(self):
         print(self.account.account_data())
+
 
     def do_task_per_message(self, message, args, mailbag_dir):
 
@@ -54,5 +54,6 @@ class ExampleDerivative(Derivative):
             with open(norm_filename,'w') as outfile:
                 gen = generator.Generator(outfile)
                 gen.flatten(msg)
+
 
 
