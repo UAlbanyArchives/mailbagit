@@ -50,8 +50,8 @@ class Controller:
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
         #Setting up mailbag.csv
-        header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
-                  'Content_Type', 'Error']
+        header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
+                  'Content_Type']
         csv_data = []
         mailbag_message_id = 0
         csv_portion_count = 0
@@ -76,19 +76,19 @@ class Controller:
                 csv_portion = []
                 csv_portion.append(header)
                 csv_portion.append(
-                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, message.Message_Path, message.Original_Filename, message.Date, message.From,
+                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
                 csv_portion_count = 0
             #if count is less than 100000 , appending the messages in one list
             else:
                 csv_portion.append(
-                    [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, message.Message_Path, message.Original_Filename, message.Date, message.From,
+                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
             csv_portion_count += 1
 
             #Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args)
+                d.do_task_per_message(message, self.args, mailbag_dir)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)

@@ -36,45 +36,51 @@ class MSG(EmailAccount):
             
             subFolder = helper.emailFolder(self.file, filePath)
             
+            error = []
             try:
                 mail = extract_msg.openMsg(filePath)
-                
                 html_body = None
-                error = False
                 
                 # Extract HTML from RTF if no HTML body
                 try:
                     if mail.htmlBody:
                         html_body = mail.htmlBody
-                    else:
+                    elif mail.rtfBody:
                         rtf_obj = DeEncapsulator(mail.rtfBody)
                         rtf_obj.deencapsulate()
                         if rtf_obj.content_type == 'html':
                             html_body = rtf_obj.html
                 except Exception as e:
                     log.error(e)
-                    error = True
+                    error.append("Error parsing message body.")
 
-                attachmentNames = []
-                attachments = []
-                                
-                for attachment in mail.attachments:
-                    if attachment.longFilename:
-                        attachmentNames.append(attachment.longFilename)
-                    elif attachment.shortFilename:
-                        attachmentNames.append(attachment.shortFilename)
-                    else:
-                        attachmentNames.append(str(len(attachmentNames)))
-                    attachments.append(attachment.data)
-                
+                try:
+                    attachmentNames = []
+                    attachments = []             
+                    for attachment in mail.attachments:
+                        if attachment.longFilename:
+                            attachmentNames.append(attachment.longFilename)
+                        elif attachment.shortFilename:
+                            attachmentNames.append(attachment.shortFilename)
+                        else:
+                            attachmentNames.append(str(len(attachmentNames)))
+                        attachments.append(attachment.data)
+                except Exception as e:
+                    log.error(e)
+                    error.append("Error parsing attachments.")
+
                 message = Email(
-                    Email_Folder=subFolder,
+                    Error= error,
+                    Message_ID = mail.messageId.strip(),
+                    Message_Path=subFolder,
+                    Original_Filename=str(os.path.basename(filePath)),
                     Date=mail.date,
                     From=mail.sender,
                     To=mail.to,
                     Cc=mail.cc,
                     Bcc=mail.bcc ,
                     Subject=mail.subject,
+                    Content_Type=mail.header.get_content_type(),
                     # mail.header appears to be a headers object oddly enough
                     Headers=mail.header,
                     Body=html_body,
@@ -84,15 +90,14 @@ class MSG(EmailAccount):
                     Message=None,
                     AttachmentNum=len(attachmentNames),
                     AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments,
-                    Error=str(error)
+                    AttachmentFiles=attachments
                 )
                 # Make sure the MSG file is closed
                 mail.close()
             
             except (email.errors.MessageParseError, Exception) as e:
                 message = Email(
-                    Error='True'
+                    Error=error.append('Error parsing message.')
                 )
  
             # Move MBOX to new mailbag directory structure

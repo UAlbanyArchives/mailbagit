@@ -3,8 +3,10 @@ from email.message import Message
 
 class Email(models.Base):
     """EmailModel - model class for email formats"""
+    Error = fields.ListField(str)
+    Mailbag_Message_ID=fields.IntField()
     Message_ID = fields.StringField()
-    Email_Folder = fields.StringField()
+    Message_Path = fields.StringField()
     Original_Filename = fields.StringField()
     Date = fields.StringField()
     From = fields.StringField()
@@ -14,12 +16,11 @@ class Email(models.Base):
     Subject = fields.StringField()
     Content_Type = fields.StringField()
     Headers = fields.EmbeddedField(Message)
-    Body = fields.StringField()
     HTML_Body = fields.StringField()
+    HTML_Bytes = fields.EmbeddedField(bytes)
     Text_Body = fields.StringField()
+    Text_Bytes = fields.EmbeddedField(bytes)
     Message = fields.EmbeddedField(Message)
     AttachmentNum = fields.IntField()
     AttachmentNames = fields.ListField(str)
     AttachmentFiles = fields.ListField(bytes)
-    Error = fields.StringField()
-    Mailbag_Message_ID = fields.IntField()
