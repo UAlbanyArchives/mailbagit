@@ -5,9 +5,6 @@ from structlog import get_logger
 
 log = get_logger()
 
-# import glob, os
-# import extract_msg
-
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
@@ -79,7 +76,20 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
 def saveAttachments(part):
     return (part.get_filename(),part.get_payload(decode=True))
+
+
+def saveAttachmentOnDisk(dry_run,attachments_dir,message):
     
+    if not dry_run:
+        message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
+        os.mkdir(message_attachments_dir)
+    for i in range(message.AttachmentNum):
+        log.debug('Saving Attachment:'+str(message.AttachmentNames[i]))
+        if not dry_run:
+            attachment_path = os.path.join(message_attachments_dir,message.AttachmentNames[i])
+            f = open(attachment_path, "wb")
+            f.write(message.AttachmentFiles[i])
+            f.close()
 
 def normalizePath(path):
     # this is not sufficent yet

@@ -100,6 +100,6 @@ class MSG(EmailAccount):
                     Error=error.append('Error parsing message.')
                 )
  
-            # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            # Move MBOX to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, subFolder, filePath)
             yield message

@@ -23,4 +23,4 @@ class Email(models.Base):
     Message = fields.EmbeddedField(Message)
     AttachmentNum = fields.IntField()
     AttachmentNames = fields.ListField(str)
-    AttachmentFiles = fields.ListField(bytes)    
+    AttachmentFiles = fields.ListField(bytes)

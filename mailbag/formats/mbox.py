@@ -11,6 +11,7 @@ import mailbag.helper as helper
 
 log = get_logger()
 
+
 class Mbox(EmailAccount):
     """Mbox - This concrete class parses mbox file format"""
     format_name = 'mbox'

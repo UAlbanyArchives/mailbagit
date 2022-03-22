@@ -42,9 +42,11 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+        attachments_dir = os.path.join(str(mailbag_dir),'attachments') 
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
+            os.mkdir(attachments_dir)
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
         #Setting up mailbag.csv
@@ -63,7 +65,10 @@ class Controller:
             # Generate mailbag_message_id
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
-
+            
+            if message.AttachmentNum and message.AttachmentNum>0:
+                helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
+            
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
