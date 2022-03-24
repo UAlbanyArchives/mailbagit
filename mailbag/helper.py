@@ -1,11 +1,16 @@
 from pathlib import Path
 import os, shutil, glob
 from structlog import get_logger
+from warcio.capture_http import capture_http
+from warcio import WARCWriter
+import requests  # requests *must* be imported after capture_http
+
+import http.server
+import socketserver
+import sys
 
 log = get_logger()
 
-# import glob, os
-# import extract_msg
 
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
@@ -15,6 +20,7 @@ def moveFile(dry_run, oldPath, newPath):
         shutil.move(oldPath, newPath)
     except IOError as e:
         log.error('Unable to move file. %s' % e)
+
 
 def emailFolder(mainPath, file):
         """
@@ -34,6 +40,7 @@ def emailFolder(mainPath, file):
         
         subFolders = str(fullFilePath.relative_to(fullPath).parents[0])
         return subFolders
+
         
 def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFolder, file):
         """
@@ -76,6 +83,40 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
         return file_new_path
 
+
 def saveAttachments(part):
-    return (part.get_filename(),part.get_payload(decode=True))
+    return (part.get_filename(), part.get_payload(decode=True))
+
+
+def saveFile(filePath, text):
+    with open(filePath, 'w') as f:
+        f.write(text)
+
+
+def deleteFile(filePath): 
+    if os.path.exists(filePath):
+        os.remove(filePath)
+
+
+def startServer(port=5000):
+    try:
+        Handler = http.server.SimpleHTTPRequestHandler
+        with socketserver.TCPServer(("", port), Handler) as httpd:
+            httpd.serve_forever()
+    # Stopped the server
+    except KeyboardInterrupt:
+        httpd.server_close()
+        log.debug("The server is stopped.")
+
+                        
+def saveWARC(dry_run, warc_dir, message, port=5000):
+    message_warc_dir = os.path.join(warc_dir, str(message.Mailbag_Message_ID))
+    filename = os.path.join(message_warc_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
+    log.debug('Saving WARC:' + filename)
     
+    if not dry_run:
+        os.mkdir(message_warc_dir)
+        with capture_http(filename):
+            saveFile('tmp.html', message.HTML_Body)            
+            requests.get('http://localhost:' + str(port) + '/tmp.html')
+        deleteFile('tmp.html')

@@ -6,6 +6,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
+import _thread
 
 log = get_logger()
 
@@ -42,9 +43,11 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+        warc_dir = os.path.join(str(mailbag_dir),'warc')
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
+            os.mkdir(warc_dir)
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
         #Setting up mailbag.csv
@@ -56,7 +59,10 @@ class Controller:
         csv_portion = []
         csv_portion.append(header)
 
-
+        port = 5000
+        if not self.args.dry_run:
+            _thread.start_new_thread(helper.startServer,())
+            
         for message in mail_account.messages():
             # do stuff you ought to do per message here
 
@@ -64,6 +70,9 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
 
+            if message.HTML_Body:
+                helper.saveWARC(self.args.dry_run,warc_dir,message,port)
+                
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
@@ -85,6 +94,7 @@ class Controller:
             for d in derivatives:
                 d.do_task_per_message(message, self.args)
 
+        _thread.exit_thread()
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 
