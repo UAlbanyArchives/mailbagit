@@ -1,0 +1,92 @@
+I"�<h1 id="mailbag-branching-workflow">Mailbag Branching Workflow</h1>
+
+<h2 id="find-an-issue">Find an Issue</h2>
+
+<ul>
+  <li>Review the <a href="https://github.com/UAlbanyArchives/mailbag/projects/1">project</a></li>
+  <li>Select an <a href="https://github.com/UAlbanyArchives/mailbag/issues">issue</a></li>
+  <li>Identify the Issue number</li>
+</ul>
+
+<p><img src="persona_images/issue_number.png" alt="Screenshot showing where the issue number is on Github" width="500px" /></p>
+
+<h2 id="viewing-branches">Viewing Branches</h2>
+
+<ul>
+  <li>View local branches</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch
+</code></pre></div></div>
+
+<ul>
+  <li>View local and remote branches</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch <span class="nt">-a</span>
+</code></pre></div></div>
+
+<h2 id="creating-a-new-feature-to-address-the-issue">Creating a new feature to address the issue</h2>
+
+<ol>
+  <li>Move the issue to “in progress” in the <a href="https://github.com/UAlbanyArchives/mailbag/projects/1">project</a></li>
+  <li>Create a new branch named <code class="language-plaintext highlighter-rouge">feature-[issue number]</code></li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> feature-[issue number]
+</code></pre></div></div>
+
+<ol>
+  <li>Edit the branch locally</li>
+  <li>Run local tests</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>black <span class="nb">.</span>
+pytest
+</code></pre></div></div>
+
+<ol>
+  <li>Push branch to remote</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin feature-[issue number]
+</code></pre></div></div>
+
+<ol>
+  <li><a href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">Create a Pull Request</a> from your branch to develop</li>
+  <li>Move the Issue in the <a href="https://github.com/UAlbanyArchives/mailbag/projects/1">project</a> to “Ready for Review”</li>
+</ol>
+
+<h2 id="reviewing">Reviewing</h2>
+
+<ol>
+  <li>View the “Ready for Review” column in the <a href="https://github.com/UAlbanyArchives/mailbag/projects/1">project</a> and identify the issue number</li>
+  <li>View the original <a href="https://github.com/UAlbanyArchives/mailbag/issues">issue</a> and the <a href="https://github.com/UAlbanyArchives/mailbag/pulls">pull request</a></li>
+  <li>Checkout the</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git fetch
+git checkout feature-[issue number]
+</code></pre></div></div>
+
+<ol>
+  <li>Review the code and ensure it effectively addresses the issue</li>
+  <li>Run local tests</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>black <span class="nb">.</span>
+pytest
+</code></pre></div></div>
+
+<ol>
+  <li>Merge the branch to develop</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout develop
+git merge feature-[issue number]
+</code></pre></div></div>
+
+<ol>
+  <li>Move Move the Issue in the <a href="https://github.com/UAlbanyArchives/mailbag/projects/1">project</a> to “Reviewer Approved”</li>
+</ol>
+:ET
