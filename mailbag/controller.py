@@ -50,9 +50,8 @@ class Controller:
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
             os.mkdir(attachments_dir)
-
-        #Creating a bag
-        bag = bagit.make_bag(mailbag_dir)
+            #Creating a bagit-python style bag
+            bag = bagit.make_bag(mailbag_dir)
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
