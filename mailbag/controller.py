@@ -6,7 +6,6 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
-import _thread
 
 log = get_logger()
 
@@ -28,29 +27,28 @@ class Controller:
         return Derivative.registry
 
     def generate_mailbag(self):
-        mail_account: EmailAccount = self.format(self.args.directory, self.args)
-
-        derivatives = [d(mail_account) for d in self.derivatives_to_create]
-
+        
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
-        #for d in derivatives:
+        # for d in derivatives:
         #    d.do_task_per_account()
 
-        #Create folder mailbag folder before writing mailbag.csv
+        # Create folder mailbag folder before writing mailbag.csv
         if os.path.isfile(self.args.directory):
             parent_dir = os.path.dirname(self.args.directory)
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
-        warc_dir = os.path.join(str(mailbag_dir),'warc')
+        
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
-            os.mkdir(warc_dir)
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
-        #Setting up mailbag.csv
+        mail_account: EmailAccount = self.format(self.args.directory, self.args)
+        derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
+    
+        # Setting up mailbag.csv
         header = ['Mailbag-Message-ID', 'Message_ID', 'Email_Folder', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type', 'Error']
         csv_data = []
@@ -58,10 +56,6 @@ class Controller:
         csv_portion_count = 0
         csv_portion = []
         csv_portion.append(header)
-
-        port = 5000
-        if not self.args.dry_run:
-            _thread.start_new_thread(helper.startServer,())
             
         for message in mail_account.messages():
             # do stuff you ought to do per message here
@@ -70,9 +64,6 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
 
-            if message.HTML_Body:
-                helper.saveWARC(self.args.dry_run,warc_dir,message,port)
-                
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
@@ -81,27 +72,26 @@ class Controller:
                 csv_portion.append(header)
                 csv_portion.append(
                     [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+                     message.To, message.Cc, message.Bcc, message.Subject, message.Content_Type, message.Error])
                 csv_portion_count = 0
-            #if count is less than 100000 , appending the messages in one list
+            # if count is less than 100000 , appending the messages in one list
             else:
                 csv_portion.append(
                     [message.Mailbag_Message_ID, message.Message_ID, message.Email_Folder, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type, message.Error])
+                     message.To, message.Cc, message.Bcc, message.Subject, message.Content_Type, message.Error])
             csv_portion_count += 1
 
-            #Generate derivatives
+            # Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args)
+                d.do_task_per_message(message, self.args, mailbag_dir)
 
-        _thread.exit_thread()
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 
         # Write CSV data to mailbag.csv
         log.debug("Writing mailbag.csv to " + str(csv_dir))
         if not self.args.dry_run:
-            #Creating csv
+            # Creating csv
             # checking if there are multiple portions in list or not
             if len(csv_data) == 1:
                 filename = os.path.join(csv_dir, "mailbag.csv")

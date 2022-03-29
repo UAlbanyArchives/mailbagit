@@ -1,9 +1,6 @@
 from pathlib import Path
 import os, shutil, glob
 from structlog import get_logger
-from warcio.capture_http import capture_http
-from warcio import WARCWriter
-import requests  # requests *must* be imported after capture_http
 
 import http.server
 import socketserver
@@ -98,25 +95,16 @@ def deleteFile(filePath):
         os.remove(filePath)
 
 
-def startServer(port=5000):
-    try:
+def startServer(dry_run, httpdShared, port=5000):
+    log.debug("Starting Server")
+    if not dry_run:
         Handler = http.server.SimpleHTTPRequestHandler
         with socketserver.TCPServer(("", port), Handler) as httpd:
+            httpdShared.append(httpd)
             httpd.serve_forever()
-    # Stopped the server
-    except KeyboardInterrupt:
-        httpd.server_close()
-        log.debug("The server is stopped.")
 
-                        
-def saveWARC(dry_run, warc_dir, message, port=5000):
-    message_warc_dir = os.path.join(warc_dir, str(message.Mailbag_Message_ID))
-    filename = os.path.join(message_warc_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
-    log.debug('Saving WARC:' + filename)
-    
+
+def stopServer(dry_run, httpdShared):
+    log.debug("Stopping Server")
     if not dry_run:
-        os.mkdir(message_warc_dir)
-        with capture_http(filename):
-            saveFile('tmp.html', message.HTML_Body)            
-            requests.get('http://localhost:' + str(port) + '/tmp.html')
-        deleteFile('tmp.html')
+        httpdShared.server_close()

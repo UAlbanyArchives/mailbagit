@@ -28,7 +28,7 @@ class Derivative(ABC):
 
 
     @abstractmethod
-    def __init__(self, email_account, **kwargs):
+    def __init__(self, email_account, test1, test2, test3, **kwargs):
         """Set up email account for use in processing methods.
 
         If not taking any other steps, the implementation of this can simple be `super()`
