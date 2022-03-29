@@ -99,7 +99,7 @@ def startServer(dry_run, httpdShared, port=5000):
     log.debug("Starting Server")
     if not dry_run:
         Handler = http.server.SimpleHTTPRequestHandler
-        with socketserver.TCPServer(("", port), Handler) as httpd:
+        with socketserver.TCPServer(("127.0.0.1", port), Handler) as httpd:
             httpdShared.append(httpd)
             httpd.serve_forever()
 
