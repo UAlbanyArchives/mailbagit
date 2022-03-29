@@ -48,7 +48,7 @@ RTFDE = "==0.0.2"
 win_unicode_console = "==0.5"
 wxPython = "==4.1.1"
 pytest = "==7.0.1"
-warcio = "*"
-requests = "*"
+warcio = "==1.7.4"
+requests = "==2.27.1"
 
 [dev-packages]

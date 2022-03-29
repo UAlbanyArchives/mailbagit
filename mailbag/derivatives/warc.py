@@ -32,7 +32,7 @@ class WarcDerivative(Derivative):
             _thread.start_new_thread(helper.startServer,(self.args.dry_run,self.httpd,5000))
 
     def __del__(self):
-        log.debug("Calling warc destructor")
+        log.debug("Calling server destructor")
         helper.stopServer(self.args.dry_run,self.httpd[0])
         
         # Terminate the process
@@ -48,7 +48,7 @@ class WarcDerivative(Derivative):
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message, args):
         if message.HTML_Body is None:
             log.warn("Error writing warc derivative for " + str(message.Mailbag_Message_ID))
         else:
@@ -64,8 +64,6 @@ class WarcDerivative(Derivative):
         if not dry_run:
             os.mkdir(message_warc_dir)
             with capture_http(filename):
-                with open('tmp.html', 'w') as f:
-                    f.write(message.HTML_Body)            
+                helper.saveFile('tmp.html',message.HTML_Body)
                 requests.get('http://localhost:' + str(port) + '/tmp.html')
-            if os.path.exists('tmp.html'):
-                os.remove('tmp.html')
+            helper.deleteFile('tmp.html')
