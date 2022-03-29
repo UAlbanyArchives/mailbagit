@@ -1,7 +1,6 @@
 from structlog import get_logger
-import email
 import mailbox
-import sys, os, string, re
+import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -10,7 +9,7 @@ log = get_logger()
 from mailbag.derivative import Derivative
 class MboxDerivative(Derivative):
     derivative_name = 'mbox'
-    derivative_format='mbox'
+    derivative_format = 'mbox'
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -22,7 +21,7 @@ class MboxDerivative(Derivative):
 
     def do_task_per_message(self, message, args, mailbag_dir):
 
-        if message.Message_Path is None:
+        if message.Message_Path is None or message.Message_Path == ".":
             out_dir = os.path.join(mailbag_dir, self.derivative_format)
             # works for now, we probably need the new implementaion of Original-File and Derivatives-Path for this
             filename = args.mailbag_name
@@ -32,7 +31,7 @@ class MboxDerivative(Derivative):
 
         norm_dir = helper.normalizePath(out_dir)
         norm_filename = helper.normalizePath(filename)
-        new_path = os.path.join(norm_dir,str(norm_filename)+".mbox")
+        new_path = os.path.join(norm_dir,str(norm_filename) + ".mbox")
         log.debug("Writing message to " + str(new_path))
         if not args.dry_run:
             if not os.path.isdir(norm_dir):
@@ -57,8 +56,8 @@ class MboxDerivative(Derivative):
                     body = True
                     msg.attach(MIMEText(message.Text_Body))
                 if body == False:
-                    log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body.")
-
+                    log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Added message to MBOX without message body.")
+                
                 mbox.add(msg)
                 # Attachments
                 #Missing
