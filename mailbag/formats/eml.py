@@ -116,5 +116,6 @@ class EML(EmailAccount):
                 )
 
             # Move EML to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            mailbag_name = os.path.join(self.mailbag_name, "data")
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,mailbag_name,self.format_name,subFolder,filePath)
             yield message

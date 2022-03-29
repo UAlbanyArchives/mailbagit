@@ -1,3 +1,4 @@
+import bagit
 from structlog import get_logger
 import csv
 from mailbag.email_account import EmailAccount
@@ -6,6 +7,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
+
 
 log = get_logger()
 
@@ -42,13 +44,16 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
-        attachments_dir = os.path.join(str(mailbag_dir),'attachments') 
+        attachments_dir = os.path.join(str(mailbag_dir),'attachments')
         log.debug("Creating mailbag at " + str(mailbag_dir))
+
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
             os.mkdir(attachments_dir)
-        csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
+        #Creating a bag
+        bag = bagit.make_bag(mailbag_dir)
+        csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type']
@@ -67,6 +72,7 @@ class Controller:
             message.Mailbag_Message_ID = mailbag_message_id
             
             if message.AttachmentNum and message.AttachmentNum>0:
+                attachments_dir=os.path.join(mailbag_dir,"data","attachments")
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data
@@ -111,5 +117,9 @@ class Controller:
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
+
+        #Loading the bag and saving manifests
+        bag = bagit.Bag(mailbag_dir)
+        bag.save(manifests=True)
 
         return mail_account.messages()
