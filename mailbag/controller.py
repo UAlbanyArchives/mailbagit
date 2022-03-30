@@ -53,7 +53,6 @@ class Controller:
             bag = bagit.make_bag(mailbag_dir)
             os.mkdir(attachments_dir)
 
-        csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type']
@@ -99,12 +98,12 @@ class Controller:
         csv_data.append(csv_portion)
 
         # Write CSV data to mailbag.csv
-        log.debug("Writing mailbag.csv to " + str(csv_dir))
+        log.debug("Writing mailbag.csv to " + str(mailbag_dir))
         if not self.args.dry_run:
             #Creating csv
             # checking if there are multiple portions in list or not
             if len(csv_data) == 1:
-                filename = os.path.join(csv_dir, "mailbag.csv")
+                filename = os.path.join(mailbag_dir, "mailbag.csv")
                 with open(filename, 'w', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerows(csv_data[0])
@@ -112,7 +111,7 @@ class Controller:
                 portion_count = 0
                 for portion in csv_data:
                     portion_count += 1
-                    filename = os.path.join(csv_dir, "mailbag-" + str(portion_count) + ".csv")
+                    filename = os.path.join(mailbag_dir, "mailbag-" + str(portion_count) + ".csv")
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
