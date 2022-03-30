@@ -27,9 +27,9 @@ class ExampleDerivative(Derivative):
     def do_task_per_message(self, message, args, mailbag_dir):
 
         if message.Message_Path is None:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format)
+            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
         else:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
+            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format, message.Message_Path)
         norm_dir=helper.normalizePath(out_dir)
 
         # Build msg

@@ -53,7 +53,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
         fullPath = Path(mainPath).resolve()
         fullFilePath = Path(file).resolve()
         filename = fullFilePath.name
-        folder_new = os.path.join(fullPath, mailbag_name, input)
+        folder_new = os.path.join(fullPath, mailbag_name,'data', input)
         
         file_new_path = os.path.join(folder_new, emailFolder, filename)
 

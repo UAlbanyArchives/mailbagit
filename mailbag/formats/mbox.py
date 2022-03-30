@@ -123,3 +123,4 @@ class Mbox(EmailAccount):
             data.close()
             # Move MBOX to new mailbag directory structure
             new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)
+

@@ -68,9 +68,9 @@ if not skip_registry:
                     html_content = table + body
 
                 if message.Message_Path is None:
-                    pdf_path = helper.normalizePath(os.path.join(mailbag_dir, self.derivative_format))
+                    pdf_path = helper.normalizePath(os.path.join(mailbag_dir, "data", self.derivative_format))
                 else:
-                    pdf_path = helper.normalizePath(os.path.join(mailbag_dir, self.derivative_format, message.Message_Path))
+                    pdf_path = helper.normalizePath(os.path.join(mailbag_dir, "data", self.derivative_format, message.Message_Path))
                 html_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".html")
                 pdf_name = os.path.join(pdf_path, str(message.Mailbag_Message_ID )+".pdf")
                 log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
