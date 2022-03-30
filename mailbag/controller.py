@@ -44,14 +44,15 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
-        attachments_dir = os.path.join(str(mailbag_dir),'attachments')
+        attachments_dir = os.path.join(str(mailbag_dir),'data','attachments')
         log.debug("Creating mailbag at " + str(mailbag_dir))
 
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
-            os.mkdir(attachments_dir)
-            #Creating a bagit-python style bag
+            # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir)
+            os.mkdir(attachments_dir)
+
         csv_dir = os.path.join(parent_dir, self.args.mailbag_name)
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
@@ -71,7 +72,6 @@ class Controller:
             message.Mailbag_Message_ID = mailbag_message_id
             
             if message.AttachmentNum and message.AttachmentNum>0:
-                attachments_dir=os.path.join(mailbag_dir,"data","attachments")
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data
@@ -117,8 +117,7 @@ class Controller:
                         writer = csv.writer(f)
                         writer.writerows(portion)
 
-        #Loading the bag and saving manifests
-        bag = bagit.Bag(mailbag_dir)
-        bag.save(manifests=True)
+        if not self.args.dry_run:
+            bag.save(manifests=True)
 
         return mail_account.messages()

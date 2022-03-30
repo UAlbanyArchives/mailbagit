@@ -155,5 +155,4 @@ if not skip_registry:
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                mailbag_name = os.path.join(self.mailbag_name, "data")
-                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,mailbag_name,self.format_name,subFolder,filePath)
+                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)
