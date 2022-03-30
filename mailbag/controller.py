@@ -1,6 +1,3 @@
-import tarfile
-import zipfile
-
 from structlog import get_logger
 import csv
 from mailbag.email_account import EmailAccount
