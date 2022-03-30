@@ -1,3 +1,6 @@
+import tarfile
+import zipfile
+
 from structlog import get_logger
 import csv
 from mailbag.email_account import EmailAccount
@@ -28,7 +31,6 @@ class Controller:
 
     def generate_mailbag(self):
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
-
         derivatives = [d(mail_account) for d in self.derivatives_to_create]
 
         # do stuff you ought to do with per-account info here
@@ -111,5 +113,16 @@ class Controller:
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
+
+        if self.args.compress and not self.args.dry_run:
+            compress=self.args.compress.lower()
+            if compress=="tar":
+                shutil.make_archive(mailbag_dir, 'tar', mailbag_dir)
+            elif compress== "zip":
+                shutil.make_archive(mailbag_dir, 'zip', mailbag_dir)
+            elif compress == "tar.gz":
+                shutil.make_archive(mailbag_dir, 'gztar', mailbag_dir)
+            else:
+                log.error("Invalid compression format")
 
         return mail_account.messages()
