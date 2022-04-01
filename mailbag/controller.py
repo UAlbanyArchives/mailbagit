@@ -1,3 +1,5 @@
+import argparse
+
 from structlog import get_logger
 import csv
 from mailbag.email_account import EmailAccount
@@ -112,14 +114,14 @@ class Controller:
                         writer.writerows(portion)
 
         if self.args.compress and not self.args.dry_run:
-            compress=self.args.compress.lower()
-            if compress=="tar":
+            log.info("Compressing Mailbag")
+            if self.args.compress=="tar":
                 shutil.make_archive(mailbag_dir, 'tar', mailbag_dir)
-            elif compress== "zip":
+            if self.args.compress== "zip":
                 shutil.make_archive(mailbag_dir, 'zip', mailbag_dir)
-            elif compress == "tar.gz":
+            if self.args.compress == "tar.gz":
                 shutil.make_archive(mailbag_dir, 'gztar', mailbag_dir)
-            else:
-                log.error("Invalid compression format")
+            if mailbag_dir:
+                shutil.rmtree(mailbag_dir)
 
         return mail_account.messages()
