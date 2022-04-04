@@ -15,31 +15,28 @@ class TxtDerivative(Derivative):
         log.debug("Setup account")
         super()
 
+        self.args = kwargs["args"]
+        mailbag_dir = kwargs["mailbag_dir"]
+        self.txt_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        if not self.args.dry_run:
+            os.makedirs(self.txt_dir)
+
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message):
 
-        if message.Message_Path is None:
-            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        else:
-            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format, message.Message_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + "." + self.derivative_format)
+        out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
 
-        norm_dir = helper.normalizePath(out_dir)
-        norm_filename = helper.normalizePath(filename)
         if message.Text_Body is None:
-            log.warn("Error writing txt derivative for " + str(message.Mailbag_Message_ID))
+            log.warn("No plain text body for " + str(message.Mailbag_Message_ID))
         else:
-            log.debug("Writing txt derivative to " + norm_filename)
-            if not args.dry_run:
-                if not os.path.isdir(norm_dir):
-                    os.makedirs(norm_dir)
-                if message.Text_Bytes:
-                    with open(norm_filename, "wb") as f:
-                        f.write(message.Text_Bytes)
-                    f.close()
-                elif message.Text_Body:
-                    with open(norm_filename, "w") as f:
+            log.debug("Writing txt derivative to " + filename)
+            if not self.args.dry_run:
+                if not os.path.isdir(out_dir):
+                    os.makedirs(out_dir)
+                if message.Text_Body:
+                    with open(filename, "w", encoding=message.Text_Encoding) as f:
                         f.write(message.Text_Body)
-                    f.close()
+                        f.close()

@@ -31,13 +31,6 @@ class Controller:
     def generate_mailbag(self):
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
-        derivatives = [d(mail_account) for d in self.derivatives_to_create]
-
-        # do stuff you ought to do with per-account info here
-        # mail_account.account_data()
-        #for d in derivatives:
-        #    d.do_task_per_account()
-
         #Create folder mailbag folder before writing mailbag.csv
         if os.path.isfile(self.args.directory):
             parent_dir = os.path.dirname(self.args.directory)
@@ -53,8 +46,16 @@ class Controller:
             bag = bagit.make_bag(mailbag_dir)
             os.mkdir(attachments_dir)
 
+        # Instantiate derivatives
+        derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
+
+        # do stuff you ought to do with per-account info here
+        # mail_account.account_data()
+        #for d in derivatives:
+        #    d.do_task_per_account()
+
         #Setting up mailbag.csv
-        header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
+        header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Original-File', 'Message-Path', 'Derivatives-Path', 'Attachments', 'Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
                   'Content_Type']
         csv_data = []
         mailbag_message_id = 0
@@ -80,19 +81,21 @@ class Controller:
                 csv_portion = []
                 csv_portion.append(header)
                 csv_portion.append(
-                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, message.Message_Path, message.Original_Filename, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
+                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, \
+                    message.Original_File, message.Message_Path, message.Derivatives_Path, str(message.AttachmentNum), \
+                    message.Date, message.From, message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
                 csv_portion_count = 0
             #if count is less than 100000 , appending the messages in one list
             else:
                 csv_portion.append(
-                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, message.Message_Path, message.Original_Filename, message.Date, message.From,
-                     message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
+                    [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, \
+                    message.Original_File, message.Message_Path, message.Derivatives_Path, str(message.AttachmentNum), \
+                    message.Date, message.From, message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
             csv_portion_count += 1
 
             #Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args, mailbag_dir)
+                d.do_task_per_message(message)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
@@ -104,7 +107,7 @@ class Controller:
             # checking if there are multiple portions in list or not
             if len(csv_data) == 1:
                 filename = os.path.join(mailbag_dir, "mailbag.csv")
-                with open(filename, 'w', encoding='UTF8', newline='') as f:
+                with open(filename, 'w', encoding='utf-8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerows(csv_data[0])
             else:
@@ -112,7 +115,7 @@ class Controller:
                 for portion in csv_data:
                     portion_count += 1
                     filename = os.path.join(mailbag_dir, "mailbag-" + str(portion_count) + ".csv")
-                    with open(filename, 'w', encoding='UTF8', newline='') as f:
+                    with open(filename, 'w', encoding='utf-8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
 
