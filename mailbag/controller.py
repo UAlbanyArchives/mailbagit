@@ -115,13 +115,19 @@ class Controller:
 
         if self.args.compress and not self.args.dry_run:
             log.info("Compressing Mailbag")
-            if self.args.compress=="tar":
-                shutil.make_archive(mailbag_dir, 'tar', mailbag_dir)
-            if self.args.compress== "zip":
-                shutil.make_archive(mailbag_dir, 'zip', mailbag_dir)
-            if self.args.compress == "tar.gz":
-                shutil.make_archive(mailbag_dir, 'gztar', mailbag_dir)
-            if mailbag_dir:
+            Dict = dict({'tar': 'tar', 'zip': 'zip', 'tar.gz': 'gztar'})
+            compress=self.args.compress
+            for extension in compress:
+                for key in Dict:
+                    if(key==extension):
+                        shutil.make_archive(mailbag_dir, Dict[key], mailbag_dir)
+            #Checking if the files with all the given extensions are present
+            isFile=True
+            for extension in compress:
+                path=os.path.join(self.args.directory,str(self.args.mailbag_name)+'.'+extension)
+                isFile = isFile and os.path.isfile(path)
+            #Deleting the mailbag if compressed files are present
+            if isFile:
                 shutil.rmtree(mailbag_dir)
 
         return mail_account.messages()
