@@ -56,7 +56,7 @@ mailbagit_options.add_argument("-l", "--crawl_links", help="will attempt to capt
 mailbagit_options.add_argument("-a", "--crawl-attached-links", help="will attempt to capture links attached to messages and include them in WARC output", action='store_true')
 mailbagit_options.add_argument("-n", "--no-headers", help="will not include email headers in mailbag.csv", action='store_true')
 mailbagit_options.add_argument("--pdf-css", help="Path to a CSS file to customize PDF derivatives.",nargs=None)
-mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ",nargs='*',choices=['tar', 'zip', 'tar.gz'])
+mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ",nargs=None,choices=['tar', 'zip', 'tar.gz'])
 mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
 mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
