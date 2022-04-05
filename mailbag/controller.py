@@ -8,7 +8,7 @@ from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
 
-
+import traceback
 log = get_logger()
 
 
@@ -45,6 +45,7 @@ class Controller:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
         attachments_dir = os.path.join(str(mailbag_dir),'data','attachments')
+        error_dir=os.path.join(parent_dir,str(self.args.mailbag_name)+'errors')
         log.debug("Creating mailbag at " + str(mailbag_dir))
 
         if not self.args.dry_run:
@@ -52,6 +53,7 @@ class Controller:
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir)
             os.mkdir(attachments_dir)
+            os.mkdir(error_dir)
 
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
@@ -61,6 +63,9 @@ class Controller:
         csv_portion_count = 0
         csv_portion = []
         csv_portion.append(header)
+        error_csv = []
+        error_header = [ 'Mailbag-Message-ID','Original_Filename','Error']
+        error_csv.append(error_header)
 
 
         for message in mail_account.messages():
@@ -90,6 +95,16 @@ class Controller:
                      message.To, message.Cc,message.Bcc, message.Subject, message.Content_Type])
             csv_portion_count += 1
 
+            #creating text file filr and csv if error is present
+            if len(message.Error) > 0:
+                list=[message.Mailbag_Message_ID,message.Original_Filename,message.Error]
+                error_csv.append(list)
+                filename=os.path.join(error_dir,str(message.Mailbag_Message_ID)+'.txt')
+                c=traceback.extract_stack()
+                with open(filename, 'w') as f:
+                    f.write(str(c))
+
+
             #Generate derivatives
             for d in derivatives:
                 d.do_task_per_message(message, self.args, mailbag_dir)
@@ -115,6 +130,17 @@ class Controller:
                     with open(filename, 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
+
+        log.debug("Writing error.csv to " + str(error_dir))
+        if not self.args.dry_run:
+            if len(error_csv) > 0:
+                filename = os.path.join(error_dir, "error.csv")
+                with open(filename, 'w', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(error_csv)
+
+
+
 
         if not self.args.dry_run:
             bag.save(manifests=True)
