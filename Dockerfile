@@ -15,6 +15,8 @@ RUN apt-get install -y python
 RUN apt-get install -y python3-pip
 RUN apt-get install -y curl
 RUN apt-get install -y libgtk-3-dev
+
+# Install Python dependancies
 RUN pip install pipenv
 RUN pipenv run pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
 RUN pipenv install

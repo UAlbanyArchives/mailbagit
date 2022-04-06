@@ -27,6 +27,13 @@ pipenv install
 pip install -e .
 ```
 
+#### Docker setip
+
+```
+docker build -t mailbag:dev .
+docker run -i -t mailbag:dev /bin/bash
+```
+
 ### wxPython install on Ubuntu
 
 wxPython sometimes causes issues installing on some Linux distros. If you have issues on Ubuntu 20.04, try installing it directly with this package.
