@@ -15,29 +15,34 @@ class MboxDerivative(Derivative):
         log.debug("Setup account")
         super()
 
+        self.args = kwargs["args"]
+        mailbag_dir = kwargs["mailbag_dir"]
+        self.mbox_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        if not self.args.dry_run:
+            os.makedirs(self.mbox_dir)
+
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message):
 
-        if message.Message_Path is None or message.Message_Path == ".":
-            out_dir = os.path.join(mailbag_dir, self.derivative_format)
-            # works for now, we probably need the new implementaion of Original-File and Derivatives-Path for this
-            filename = args.mailbag_name
+        if len(message.Derivatives_Path) < 1:
+            out_dir = self.mbox_dir
+            filename = os.path.join(out_dir, self.args.mailbag_name + ".mbox")
+        elif len(message.Derivatives_Path.strip(os.sep).split(os.sep)) == 1:
+            out_dir = self.mbox_dir
+            filename = os.path.join(out_dir, message.Derivatives_Path.strip(os.sep) + ".mbox")
         else:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Message_Path)
-            filename = os.path.basename(message.Message_Path)
+            out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip(os.sep)))
+            filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")
 
-        norm_dir = helper.normalizePath(out_dir)
-        norm_filename = helper.normalizePath(filename)
-        new_path = os.path.join(norm_dir,str(norm_filename) + ".mbox")
-        log.debug("Writing message to " + str(new_path))
-        if not args.dry_run:
-            if not os.path.isdir(norm_dir):
-                os.makedirs(norm_dir)
+        log.debug("Writing message to " + str(filename))
+        if not self.args.dry_run:
+            if not os.path.isdir(out_dir):
+                os.makedirs(out_dir)
 
-            mbox = mailbox.mbox(new_path)
+            mbox = mailbox.mbox(filename)
             mbox.lock()
             if message.Message:
                 mbox.add(message.Message)
@@ -51,10 +56,10 @@ class MboxDerivative(Derivative):
                 body = False
                 if message.HTML_Body:
                     body = True
-                    msg.attach(MIMEText(message.HTML_Body, 'html'))
+                    msg.attach(MIMEText(message.HTML_Body, 'html', message.HTML_Encoding))
                 if message.Text_Body:
                     body = True
-                    msg.attach(MIMEText(message.Text_Body))
+                    msg.attach(MIMEText(message.Text_Body, 'plain', message.Text_Encoding))
                 if body == False:
                     log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Added message to MBOX without message body.")
                 

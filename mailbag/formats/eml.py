@@ -37,47 +37,56 @@ class EML(EmailAccount):
 
         for filePath in files:
 
-            subFolder = helper.emailFolder(self.file, filePath)
+            originalFile = helper.relativePath(self.file, filePath)
 
             error = []
             try:
-
-                attachmentNames = []
-                attachments = []
                 with open(filePath, 'rb') as f:
                     msg = email.message_from_binary_file(f, policy=policy.default)
 
                     try:
+                        # Parse message bodies
                         html_body = None
-                        html_bytes = None
                         text_body = None
-                        text_bytes = None
+                        html_encoding = None
+                        text_encoding = None
                         if msg.is_multipart():
                             for part in msg.walk():
                                 content_type = part.get_content_type()
                                 content_disposition = part.get_content_disposition()
-                                #character_set = part.get_charsets()
                                 if content_type == "text/html" and content_disposition != "attachment":
-                                    html_bytes = part.get_payload(decode=True)
-                                    html_body = part.get_payload()
+                                    html_encoding = part.get_charsets()[0]
+                                    html_body = part.get_payload(decode=True).decode(html_encoding)
                                 if content_type == "text/plain" and content_disposition != "attachment":
-                                    text_bytes = part.get_payload(decode=True)
-                                    text_body = part.get_payload()
+                                    text_encoding = part.get_charsets()[0]
+                                    text_body = part.get_payload(decode=True).decode(text_encoding)
                         else:
                             content_type = msg.get_content_type()
                             content_disposition = msg.get_content_disposition()
                             if content_type == "text/html" and content_disposition != "attachment":
-                                html_bytes= part.get_payload(decode=True)
-                                html_body = part.get_payload()
+                                html_encoding = part.get_charsets()[0]
+                                html_body = part.get_payload(decode=True).decode(html_encoding)
                             if content_type == "text/plain" and content_disposition != "attachment":
-                                text_bytes = part.get_payload(decode=True)
-                                text_body = part.get_payload()
+                                text_encoding = part.get_charsets()[0]
+                                text_body = part.get_payload(decode=True).decode(text_encoding)
                     except Exception as e:
                         log.error(e)
                         error.append("Error parsing message body.")
 
+                    # Look for message arrangement
                     try:
-                        # Extract Attachments                
+                        messagePath = helper.messagePath(msg)
+                        unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
+                        derivativesPath = helper.normalizePath(unsafePath)
+                    except Exception as e:
+                        log.error(e)
+                        error.append("Error reading message path from headers.")
+
+
+                    try:
+                        # Extract Attachments
+                        attachmentNames = []
+                        attachments = []                
                         for attachment in msg.iter_attachments():
                             attachmentName, attachment = helper.saveAttachments(attachment)
                             if attachmentName:
@@ -92,18 +101,19 @@ class EML(EmailAccount):
                     message = Email(
                             Error=error,
                             Message_ID=msg["message-id"].strip(),
-                            Message_Path=subFolder,
-                            Original_Filename=str(os.path.basename(filePath)),
+                            Original_File=originalFile,
+                            Message_Path=messagePath,
+                            Derivatives_Path=derivativesPath,
                             Date=msg["date"],
                             From=msg["from"],
                             To=msg["to"],
                             Subject=msg["subject"],
                             Content_Type=msg.get_content_type(),
                             Headers=msg,
-                            HTML_Bytes=html_bytes,
                             HTML_Body=html_body,
-                            Text_Bytes=text_bytes,
+                            HTML_Encoding=html_encoding,
                             Text_Body=text_body,
+                            Text_Encoding=text_encoding,
                             Message=msg,
                             AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                             AttachmentNames=attachmentNames,
@@ -116,5 +126,5 @@ class EML(EmailAccount):
                 )
 
             # Move EML to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,filePath)
             yield message
