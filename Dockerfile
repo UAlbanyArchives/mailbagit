@@ -7,7 +7,7 @@ ENV TZ=America/New_York \
 
 RUN mkdir /mailbag
 WORKDIR /mailbag
-ADD Pipfile /mailbag/
+ADD requirements.txt /mailbag/
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
@@ -21,8 +21,7 @@ RUN apt-get install -y libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0 lib
 RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
 
 # Install Python dependancies
-RUN pip install pipenv
-RUN pipenv install --deploy
+RUN pip install -r requirements.txt
 
 # Install wkhtmltopdf
 RUN apt-get install -y curl
