@@ -43,7 +43,8 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
-                    
+
+                    stack_trace=[]
                     error = []
                     try:
                         messageObj = folder.get_sub_message(index)
@@ -74,6 +75,7 @@ if not skip_registry:
                                     pass
                         except Exception as e:
                             log.error(e)
+                            stack_trace.append(e)
                             error.append("Error parsing message body.")
                         
                         try:
@@ -87,6 +89,7 @@ if not skip_registry:
                                 attachmentNames.append(attachment.get_name())
                         except Exception as e:
                             log.error(e)
+                            stack_trace.append(e)
                             error.append("Error parsing attachments.")
 
                         message = Email(
@@ -109,13 +112,16 @@ if not skip_registry:
                             AttachmentNum=int(messageObj.number_of_attachments),
                             Message=None,
                             AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            AttachmentFiles=attachments,
+                            StackTrace=stack_trace
+
                         )
                     
                     except (Exception) as e:
                         log.error(e)
                         message = Email(
-                            Error=error.append('Error parsing message.')
+                            Error=error.append('Error parsing message.'),
+                            StackTrace=stack_trace.append(e)
                         )
                 
                     # log.debug(message.to_struct())

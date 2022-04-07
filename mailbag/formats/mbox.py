@@ -44,6 +44,7 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 error = []
+                stack_trace=[]
                 try:
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
 
@@ -75,6 +76,7 @@ class Mbox(EmailAccount):
                                 text_body = part.get_payload()
                     except Exception as e:
                         log.error(e)
+                        stack_trace.append(e)
                         error.append("Error parsing message body.")
                     
                     # Extract Attachments
@@ -88,6 +90,7 @@ class Mbox(EmailAccount):
                                 attachments.append(attachment)
                     except Exception as e:
                         log.error(e)
+                        stack_trace.append(e)
                         error.append("Error parsing attachments.")
 
                     message = Email(
@@ -110,12 +113,14 @@ class Mbox(EmailAccount):
                         Message=mailObject,
                         AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                         AttachmentNames=attachmentNames,
-                        AttachmentFiles=attachments
+                        AttachmentFiles=attachments,
+                        StackTrace = stack_trace
                     )
                 except (email.errors.MessageParseError, Exception) as e:
                     log.error(e)
                     message = Email(
-                        Error=error.append('Error parsing message.')
+                        Error=error.append('Error parsing message.'),
+                        StackTrace = stack_trace.append(e)
                     )
                 yield message
 

@@ -45,7 +45,7 @@ class Controller:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
         attachments_dir = os.path.join(str(mailbag_dir),'data','attachments')
-        error_dir=os.path.join(parent_dir,str(self.args.mailbag_name)+'errors')
+        error_dir=os.path.join(parent_dir,str(self.args.mailbag_name)+'_errors')
         log.debug("Creating mailbag at " + str(mailbag_dir))
 
         if not self.args.dry_run:
@@ -53,7 +53,7 @@ class Controller:
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir)
             os.mkdir(attachments_dir)
-            os.mkdir(error_dir)
+
 
         #Setting up mailbag.csv
         header = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Message-Path', 'Original-Filename','Date', 'From', 'To', 'Cc', 'Bcc', 'Subject',
@@ -97,12 +97,14 @@ class Controller:
 
             #creating text file filr and csv if error is present
             if len(message.Error) > 0:
-                list=[message.Mailbag_Message_ID,message.Original_Filename,message.Error]
-                error_csv.append(list)
+                if not os.path.isdir(error_dir):
+                    #making error directory if error is present
+                    os.mkdir(error_dir)
+                error_row=[message.Mailbag_Message_ID,message.Original_Filename,message.Error]
+                error_csv.append(error_row)
                 filename=os.path.join(error_dir,str(message.Mailbag_Message_ID)+'.txt')
-                c=traceback.extract_stack()
                 with open(filename, 'w') as f:
-                    f.write(str(c))
+                    f.write("\n".join(str(error) for error in message.StackTrace))
 
 
             #Generate derivatives
@@ -133,7 +135,7 @@ class Controller:
 
         log.debug("Writing error.csv to " + str(error_dir))
         if not self.args.dry_run:
-            if len(error_csv) > 0:
+            if len(error_csv) > 1:
                 filename = os.path.join(error_dir, "error.csv")
                 with open(filename, 'w', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)

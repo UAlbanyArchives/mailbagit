@@ -35,7 +35,8 @@ class MSG(EmailAccount):
         for filePath in files:
             
             subFolder = helper.emailFolder(self.file, filePath)
-            
+
+            stack_trace=[]
             error = []
             try:
                 mail = extract_msg.openMsg(filePath)
@@ -52,6 +53,7 @@ class MSG(EmailAccount):
                             html_body = rtf_obj.html
                 except Exception as e:
                     log.error(e)
+                    stack_trace.append(e)
                     error.append("Error parsing message body.")
 
                 try:
@@ -67,6 +69,7 @@ class MSG(EmailAccount):
                         attachments.append(attachment.data)
                 except Exception as e:
                     log.error(e)
+                    stack_trace.append(e)
                     error.append("Error parsing attachments.")
 
                 message = Email(
@@ -90,15 +93,18 @@ class MSG(EmailAccount):
                     Message=None,
                     AttachmentNum=len(attachmentNames),
                     AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments
+                    AttachmentFiles=attachments,
+                    StackTrace=stack_trace
                 )
                 # Make sure the MSG file is closed
                 mail.close()
             
             except (email.errors.MessageParseError, Exception) as e:
+
                 message = Email(
-                    Error=error.append('Error parsing message.')
-                )
+                    Error=error.append('Error parsing message.'),
+                    StackTrace=stack_trace.append(e)
+                    )
  
             # Move MBOX to new mailbag directory structure
             new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, subFolder, filePath)

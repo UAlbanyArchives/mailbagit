@@ -38,7 +38,7 @@ class EML(EmailAccount):
         for filePath in files:
 
             subFolder = helper.emailFolder(self.file, filePath)
-
+            stack_trace=[]
             error = []
             try:
 
@@ -74,6 +74,7 @@ class EML(EmailAccount):
                                 text_body = part.get_payload()
                     except Exception as e:
                         log.error(e)
+                        stack_trace.append(e)
                         error.append("Error parsing message body.")
 
                     try:
@@ -87,6 +88,7 @@ class EML(EmailAccount):
                             attachments.append(attachment)
                     except Exception as e:
                         log.error(e)
+                        stack_trace.append(e)
                         error.append("Error parsing attachments.")
                                     
                     message = Email(
@@ -107,12 +109,14 @@ class EML(EmailAccount):
                             Message=msg,
                             AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                             AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            AttachmentFiles=attachments,
+                            StackTrace=stack_trace
                         )
 
             except (email.errors.MessageParseError, Exception) as e:
                 message = Email(
-                    Error=error.append('Error parsing message.')
+                    Error=error.append('Error parsing message.'),
+                    StackTrace=stack_trace.append(e)
                 )
 
             # Move EML to new mailbag directory structure
