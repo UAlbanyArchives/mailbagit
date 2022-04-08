@@ -54,6 +54,7 @@ if not skip_registry:
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
                             log.error(e)
+                            stack_trace.append(e)
                             error.append("Error parsing headers.")
 
                         try:
