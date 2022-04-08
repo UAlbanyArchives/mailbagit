@@ -32,13 +32,6 @@ class Controller:
 
     def generate_mailbag(self):
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
-        derivatives = [d(mail_account) for d in self.derivatives_to_create]
-
-        # do stuff you ought to do with per-account info here
-        # mail_account.account_data()
-        #for d in derivatives:
-        #    d.do_task_per_account()
-
 
         #Create folder mailbag folder before writing mailbag.csv
         if os.path.isfile(self.args.directory):
