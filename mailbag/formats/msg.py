@@ -6,7 +6,7 @@ from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
 
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbag.models import Email, Attachment
 import mailbag.helper as helper
 from extract_msg import attachment
 
@@ -37,6 +37,8 @@ class MSG(EmailAccount):
             subFolder = helper.emailFolder(self.file, filePath)
             
             error = []
+            attachments = []
+            
             try:
                 mail = extract_msg.openMsg(filePath)
                 html_body = None
@@ -55,20 +57,23 @@ class MSG(EmailAccount):
                     error.append("Error parsing message body.")
 
                 try:
-                    attachmentNames = []
-                    attachments = []             
-                    for attachment in mail.attachments:
-                        if attachment.longFilename:
-                            attachmentNames.append(attachment.longFilename)
-                        elif attachment.shortFilename:
-                            attachmentNames.append(attachment.shortFilename)
+                    for mailAttachment in mail.attachments:
+                        if mailAttachment.longFilename:
+                            attachmentName = mailAttachment.longFilename
+                        elif mailAttachment.shortFilename:
+                            attachmentName = mailAttachment.shortFilename
                         else:
-                            attachmentNames.append(str(len(attachmentNames)))
-                        attachments.append(attachment.data)
+                            attachmentName = str(len(attachments))
+                        attachment = Attachment(
+                                                Name=attachmentName,
+                                                File=mailAttachment.data
+                                                )
+                        attachments.append(attachment)
+
                 except Exception as e:
                     log.error(e)
                     error.append("Error parsing attachments.")
-
+                
                 message = Email(
                     Error= error,
                     Message_ID = mail.messageId.strip(),
@@ -88,9 +93,7 @@ class MSG(EmailAccount):
                     HTML_Body=html_body,
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg
                     Message=None,
-                    AttachmentNum=len(attachmentNames),
-                    AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments
+                    Attachments=attachments
                 )
                 # Make sure the MSG file is closed
                 mail.close()

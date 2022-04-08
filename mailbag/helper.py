@@ -83,12 +83,13 @@ def saveAttachmentOnDisk(dry_run,attachments_dir,message):
     if not dry_run:
         message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
         os.mkdir(message_attachments_dir)
-    for i in range(message.AttachmentNum):
-        log.debug('Saving Attachment:'+str(message.AttachmentNames[i]))
+
+    for attachment in message.Attachments:
+        log.debug('Saving Attachment:'+str(attachment.Name))
         if not dry_run:
-            attachment_path = os.path.join(message_attachments_dir,message.AttachmentNames[i])
+            attachment_path = os.path.join(message_attachments_dir,attachment.Name)
             f = open(attachment_path, "wb")
-            f.write(message.AttachmentFiles[i])
+            f.write(attachment.File)
             f.close()
 
 def normalizePath(path):

@@ -4,7 +4,7 @@ import chardet
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbag.models import Email, Attachment
 import mailbag.helper as helper
 
 # only create format if pypff is successfully importable -
@@ -45,6 +45,8 @@ if not skip_registry:
                 for index in range(folder.number_of_sub_messages):
                     
                     error = []
+                    attachments = []
+                    
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -77,14 +79,16 @@ if not skip_registry:
                             error.append("Error parsing message body.")
                         
                         try:
-                            attachmentNames = []
-                            attachments = []
                             total_attachment_size_bytes = 0
-                            for attachment in messageObj.attachments:
-                                total_attachment_size_bytes = total_attachment_size_bytes + attachment.get_size()
-                                attachment_content = attachment.read_buffer(attachment.get_size())
-                                attachments.append(attachment_content)
-                                attachmentNames.append(attachment.get_name())
+                            for attachmentObj in messageObj.attachments:
+                                total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
+                                attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
+                        
+                                attachment = Attachment(
+                                                        Name=attachmentObj.get_name(),
+                                                        File=attachment_content
+                                            )
+                                attachments.append(attachment)
                         except Exception as e:
                             log.error(e)
                             error.append("Error parsing attachments.")
@@ -106,10 +110,8 @@ if not skip_registry:
                             HTML_Body=html_body,
                             Text_Bytes=text_bytes,
                             Text_Body=text_body,
-                            AttachmentNum=int(messageObj.number_of_attachments),
                             Message=None,
-                            AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            Attachments=attachments
                         )
                     
                     except (Exception) as e:
@@ -135,7 +137,7 @@ if not skip_registry:
                 files = self.file
                 parent_dir = os.path.dirname(self.file)
             else:
-                files = os.path.join(self.file, "**", "*.mbox")
+                files = os.path.join(self.file, "**", "*.pst")
                 parent_dir = self.file
             file_list = glob.glob(files, recursive=True)
 

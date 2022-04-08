@@ -6,7 +6,7 @@ import os, shutil, glob
 import email.errors
 
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbag.models import Email,Attachment
 import mailbag.helper as helper
 
 log = get_logger()
@@ -78,14 +78,17 @@ class Mbox(EmailAccount):
                         error.append("Error parsing message body.")
                     
                     # Extract Attachments
-                    attachmentNames = []
                     attachments = []
                     try:
                         for attached in mailObject.iter_attachments():
-                            attachmentName,attachment = helper.saveAttachments(attached)
+                            attachmentName,attachmentFile = helper.saveAttachments(attached)
                             if attachmentName:
-                                attachmentNames.append(attachmentName)
+                                attachment = Attachment(
+                                                        Name=attachmentName,
+                                                        File=attachmentFile
+                                                        )
                                 attachments.append(attachment)
+                                
                     except Exception as e:
                         log.error(e)
                         error.append("Error parsing attachments.")
@@ -108,9 +111,7 @@ class Mbox(EmailAccount):
                         Text_Bytes=text_bytes,
                         Text_Body=text_body,
                         Message=mailObject,
-                        AttachmentNum=len(attachmentNames) if attachmentNames else 0,
-                        AttachmentNames=attachmentNames,
-                        AttachmentFiles=attachments
+                        Attachments=attachments
                     )
                 except (email.errors.MessageParseError, Exception) as e:
                     log.error(e)

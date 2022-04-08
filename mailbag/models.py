@@ -1,10 +1,16 @@
 from jsonmodels import models, fields, errors, validators
 from email.message import Message
 
+
+class Attachment(models.Base):
+    Name = fields.StringField()
+    File = fields.EmbeddedField(bytes)
+
+    
 class Email(models.Base):
     """EmailModel - model class for email formats"""
     Error = fields.ListField(str)
-    Mailbag_Message_ID=fields.IntField()
+    Mailbag_Message_ID = fields.IntField()
     Message_ID = fields.StringField()
     Message_Path = fields.StringField()
     Original_Filename = fields.StringField()
@@ -21,6 +27,4 @@ class Email(models.Base):
     Text_Body = fields.StringField()
     Text_Bytes = fields.EmbeddedField(bytes)
     Message = fields.EmbeddedField(Message)
-    AttachmentNum = fields.IntField()
-    AttachmentNames = fields.ListField(str)
-    AttachmentFiles = fields.ListField(bytes)
+    Attachments = fields.ListField(Attachment)

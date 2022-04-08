@@ -70,7 +70,9 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
             
-            if message.AttachmentNum and message.AttachmentNum>0:
+            # if message.Attachments is None:
+            #     print("None")
+            if len(message.Attachments)>0:
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data

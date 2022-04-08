@@ -6,7 +6,7 @@ import mailbox
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbag.models import Email, Attachment
 import email
 import glob, os
 from email import policy
@@ -40,10 +40,9 @@ class EML(EmailAccount):
             subFolder = helper.emailFolder(self.file, filePath)
 
             error = []
+            attachments = []
+            
             try:
-
-                attachmentNames = []
-                attachments = []
                 with open(filePath, 'rb') as f:
                     msg = email.message_from_binary_file(f, policy=policy.default)
 
@@ -56,7 +55,7 @@ class EML(EmailAccount):
                             for part in msg.walk():
                                 content_type = part.get_content_type()
                                 content_disposition = part.get_content_disposition()
-                                #character_set = part.get_charsets()
+                                # character_set = part.get_charsets()
                                 if content_type == "text/html" and content_disposition != "attachment":
                                     html_bytes = part.get_payload(decode=True)
                                     html_body = part.get_payload()
@@ -67,7 +66,7 @@ class EML(EmailAccount):
                             content_type = msg.get_content_type()
                             content_disposition = msg.get_content_disposition()
                             if content_type == "text/html" and content_disposition != "attachment":
-                                html_bytes= part.get_payload(decode=True)
+                                html_bytes = part.get_payload(decode=True)
                                 html_body = part.get_payload()
                             if content_type == "text/plain" and content_disposition != "attachment":
                                 text_bytes = part.get_payload(decode=True)
@@ -80,15 +79,16 @@ class EML(EmailAccount):
                         # Extract Attachments                
                         for attachment in msg.iter_attachments():
                             attachmentName, attachment = helper.saveAttachments(attachment)
-                            if attachmentName:
-                                attachmentNames.append(attachmentName)
-                            else:
-                                attachmentNames.append(str(len(attachmentNames)))
+                            attachment = Attachment(
+                                                    Name=attachmentName if attachmentName else str(len(attachments)),
+                                                    File=attachment
+                                                    )
                             attachments.append(attachment)
+                            
                     except Exception as e:
                         log.error(e)
                         error.append("Error parsing attachments.")
-                                    
+                                        
                     message = Email(
                             Error=error,
                             Message_ID=msg["message-id"].strip(),
@@ -105,9 +105,7 @@ class EML(EmailAccount):
                             Text_Bytes=text_bytes,
                             Text_Body=text_body,
                             Message=msg,
-                            AttachmentNum=len(attachmentNames) if attachmentNames else 0,
-                            AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            Attachments=attachments
                         )
 
             except (email.errors.MessageParseError, Exception) as e:
