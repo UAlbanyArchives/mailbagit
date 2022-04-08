@@ -96,8 +96,7 @@ class Controller:
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
                 csv_data.append(csv_portion)
-                csv_portion = []
-                csv_portion.append(header)
+                csv_portion = [self.csv_headers]
                 csv_portion.append(self.message_to_csv(message))
                 csv_portion_count = 0
             #if count is less than 100000 , appending the messages in one list
