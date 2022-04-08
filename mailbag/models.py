@@ -5,6 +5,7 @@ from email.message import Message
 class Attachment(models.Base):
     Name = fields.StringField()
     File = fields.EmbeddedField(bytes)
+    MimeType = fields.StringField()
 
     
 class Email(models.Base):

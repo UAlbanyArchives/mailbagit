@@ -2,6 +2,7 @@ import urllib.parse
 from pathlib import Path
 import os, shutil, glob
 from structlog import get_logger
+import mimetypes
 
 log = get_logger()
 
@@ -86,11 +87,15 @@ def saveAttachmentOnDisk(dry_run,attachments_dir,message):
 
     for attachment in message.Attachments:
         log.debug('Saving Attachment:'+str(attachment.Name))
+        log.debug('Type:'+str(attachment.MimeType))
         if not dry_run:
             attachment_path = os.path.join(message_attachments_dir,attachment.Name)
             f = open(attachment_path, "wb")
             f.write(attachment.File)
             f.close()
+
+def mimeType(file):
+    return mimetypes.guess_type(file)[0]
 
 def normalizePath(path):
     # this is not sufficent yet

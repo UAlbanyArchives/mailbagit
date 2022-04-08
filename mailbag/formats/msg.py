@@ -64,9 +64,11 @@ class MSG(EmailAccount):
                             attachmentName = mailAttachment.shortFilename
                         else:
                             attachmentName = str(len(attachments))
+                            
                         attachment = Attachment(
                                                 Name=attachmentName,
-                                                File=mailAttachment.data
+                                                File=mailAttachment.data,
+                                                MimeType=helper.mimeType(attachmentName)
                                                 )
                         attachments.append(attachment)
 

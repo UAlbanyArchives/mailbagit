@@ -3,6 +3,7 @@ import mailbox
 import chardet
 from structlog import get_logger
 from email import parser
+import mimetypes
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
@@ -83,12 +84,14 @@ if not skip_registry:
                             for attachmentObj in messageObj.attachments:
                                 total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
                                 attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
-                        
+                                
                                 attachment = Attachment(
                                                         Name=attachmentObj.get_name(),
-                                                        File=attachment_content
+                                                        File=attachment_content,
+                                                        MimeType=helper.mimeType(attachmentObj.get_name())
                                             )
                                 attachments.append(attachment)
+                                
                         except Exception as e:
                             log.error(e)
                             error.append("Error parsing attachments.")

@@ -77,11 +77,12 @@ class EML(EmailAccount):
 
                     try:
                         # Extract Attachments                
-                        for attachment in msg.iter_attachments():
-                            attachmentName, attachment = helper.saveAttachments(attachment)
+                        for msgAttachment in msg.iter_attachments():
+                            attachmentName, attachmentFile = helper.saveAttachments(msgAttachment)
                             attachment = Attachment(
                                                     Name=attachmentName if attachmentName else str(len(attachments)),
-                                                    File=attachment
+                                                    File=attachmentFile,
+                                                    MimeType=msgAttachment.get_content_type()
                                                     )
                             attachments.append(attachment)
                             
