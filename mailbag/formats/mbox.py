@@ -1,5 +1,7 @@
 import email
 import mailbox
+import traceback
+
 from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
@@ -75,9 +77,12 @@ class Mbox(EmailAccount):
                                 text_bytes = part.get_payload(decode=True)
                                 text_body = part.get_payload()
                     except Exception as e:
-                        log.error(e)
-                        stack_trace.append(e)
-                        error.append("Error parsing message body.")
+                        desc = "Error parsing message body"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
+
                     
                     # Extract Attachments
                     attachmentNames = []
@@ -89,9 +94,12 @@ class Mbox(EmailAccount):
                                 attachmentNames.append(attachmentName)
                                 attachments.append(attachment)
                     except Exception as e:
-                        log.error(e)
-                        stack_trace.append(e)
-                        error.append("Error parsing attachments.")
+                        desc = "Error parsing attachments"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
+
 
                     message = Email(
                         Error=error,
@@ -117,11 +125,14 @@ class Mbox(EmailAccount):
                         StackTrace = stack_trace
                     )
                 except (email.errors.MessageParseError, Exception) as e:
-                    log.error(e)
+                    desc = 'Error parsing message'
+                    error_msg = desc + ": " + repr(e)
                     message = Email(
-                        Error=error.append('Error parsing message.'),
-                        StackTrace = stack_trace.append(e)
+                        Error=error.append(error_msg),
+                        StackTrace=stack_trace.append(traceback.format_exc())
                     )
+                    log.error(error_msg)
+
                 yield message
 
             # Make sure the MBOX file is closed

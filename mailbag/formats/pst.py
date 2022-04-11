@@ -1,5 +1,7 @@
 import os, glob
 import mailbox
+import traceback
+
 import chardet
 from structlog import get_logger
 from email import parser
@@ -53,9 +55,12 @@ if not skip_registry:
                             headerParser = parser.HeaderParser()
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
-                            log.error(e)
-                            stack_trace.append(e)
-                            error.append("Error parsing headers.")
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         try:
                             html_body = None
@@ -75,10 +80,13 @@ if not skip_registry:
                                 except:
                                     pass
                         except Exception as e:
-                            log.error(e)
-                            stack_trace.append(e)
-                            error.append("Error parsing message body.")
-                        
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
+
                         try:
                             attachmentNames = []
                             attachments = []
@@ -89,9 +97,12 @@ if not skip_registry:
                                 attachments.append(attachment_content)
                                 attachmentNames.append(attachment.get_name())
                         except Exception as e:
-                            log.error(e)
-                            stack_trace.append(e)
-                            error.append("Error parsing attachments.")
+                            desc = "Error parsing attachments"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         message = Email(
                             Error=error,
@@ -119,11 +130,13 @@ if not skip_registry:
                         )
                     
                     except (Exception) as e:
-                        log.error(e)
+                        desc = 'Error parsing message'
+                        error_msg = desc + ": " + repr(e)
                         message = Email(
-                            Error=error.append('Error parsing message.'),
-                            StackTrace=stack_trace.append(e)
+                            Error=error.append(error_msg),
+                            StackTrace=stack_trace.append(traceback.format_exc())
                         )
+                        log.error(error_msg)
                 
                     # log.debug(message.to_struct())
                     yield message
