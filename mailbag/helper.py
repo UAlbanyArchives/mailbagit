@@ -14,7 +14,7 @@ def moveFile(dry_run, oldPath, newPath):
     except IOError as e:
         log.error('Unable to move file. %s' % e)
 
-def emailFolder(mainPath, file):
+def relativePath(mainPath, file):
         """
         Gets the relative path of an input file within the input directory structure
         Useful for getting the path of messages within an email account
@@ -29,11 +29,31 @@ def emailFolder(mainPath, file):
 
         fullPath = Path(mainPath).resolve()
         fullFilePath = Path(file).resolve()
+        relPath = str(fullFilePath.relative_to(fullPath))
+        if relPath == ".":
+            return ""
+        else:
+            return relPath
+
+def messagePath(headers):
+        """
+        Tries to read any email folder arragement from headers
+        Useful for getting the path of messages within an email account
+            
+        Parameters:
+            headers (email.message.Message): Can be used as a dict of email headers
+            
+        Returns:
+            String: messagePath (must at least return an empty string)
+        """
+
+        if headers["X-Folder"]:
+            messagePath = headers["X-Folder"].replace("\\", "/")
+        else:
+            messagePath = ""
+        return messagePath
         
-        subFolders = str(fullFilePath.relative_to(fullPath).parents[0])
-        return subFolders
-        
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFolder, file):
+def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         """
         Create new mailbag directory structure while maintaining the input data's directory structure.
         Useful for MBOX, EML, and MSG files.
@@ -52,12 +72,13 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, emailFold
 
         fullPath = Path(mainPath).resolve()
         fullFilePath = Path(file).resolve()
+        relPath = fullFilePath.relative_to(fullPath).parents[0]
         filename = fullFilePath.name
         folder_new = os.path.join(fullPath, mailbag_name,'data', input)
         
-        file_new_path = os.path.join(folder_new, emailFolder, filename)
+        file_new_path = os.path.join(folder_new, relPath, filename)
 
-        log.debug('Moving: ' + str(fullFilePath) + ' to: ' + str(file_new_path) + ' SubFolder: ' + str(emailFolder))
+        log.debug('Moving: ' + str(fullFilePath) + ' to: ' + str(file_new_path) + ' SubFolder: ' + str(relPath))
         if(not dry_run):
             moveFile(dry_run, fullFilePath, file_new_path)
             # clean up old directory structure

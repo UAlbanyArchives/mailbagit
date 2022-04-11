@@ -12,7 +12,7 @@ from mailbag.derivative import Derivative
 
 
 log = get_logger()
-class ExampleDerivative(Derivative):
+class EmlDerivative(Derivative):
     derivative_name = 'eml'
     derivative_format = 'eml'
 
@@ -20,17 +20,20 @@ class ExampleDerivative(Derivative):
         log.debug("Setup account")
         super()
 
+        self.args = kwargs["args"]
+        mailbag_dir = kwargs["mailbag_dir"]
+        self.eml_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        if not self.args.dry_run:
+            os.makedirs(self.eml_dir)
+
     def do_task_per_account(self):
         print(self.account.account_data())
 
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message):
 
-        if message.Message_Path is None:
-            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        else:
-            out_dir = os.path.join(mailbag_dir, "data", self.derivative_format, message.Message_Path)
-        norm_dir=helper.normalizePath(out_dir)
+        out_dir = os.path.join(self.eml_dir, message.Derivatives_Path)
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
 
         # Build msg
         if not message.Message and not message.Headers:
@@ -48,10 +51,10 @@ class ExampleDerivative(Derivative):
                 body = False
                 if message.HTML_Body:
                     body = True
-                    msg.attach(MIMEText(message.HTML_Body, 'html'))
+                    msg.attach(MIMEText(message.HTML_Body, 'html', message.HTML_Encoding))
                 if message.Text_Body:
                     body = True
-                    msg.attach(MIMEText(message.Text_Body))
+                    msg.attach(MIMEText(message.Text_Body, 'plain', message.Text_Encoding))
                 if body == False:
                     log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body.")
 
@@ -61,12 +64,11 @@ class ExampleDerivative(Derivative):
                 log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
 
             # Write EML to disk
-            log.debug("Writing EML to " + str(norm_dir))
-            if not args.dry_run:
-                outfile_name = os.path.join(out_dir,str(message.Mailbag_Message_ID) + "." + self.derivative_format)
-                norm_filename = helper.normalizePath(outfile_name)
-                if not os.path.isdir(norm_dir):
-                    os.makedirs(norm_dir)
-                with open(norm_filename,'w') as outfile:
+            log.debug("Writing EML to " + str(out_dir))
+            if not self.args.dry_run:
+                if not os.path.isdir(out_dir):
+                    os.makedirs(out_dir)
+                with open(filename + ".eml",'w') as outfile:
                     gen = generator.Generator(outfile)
                     gen.flatten(msg)
+                    outfile.close()

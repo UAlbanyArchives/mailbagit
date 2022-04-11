@@ -16,7 +16,7 @@ class ExampleDerivative(Derivative):
     def do_task_per_account(self):
         print(self.account.account_data())
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message):
         if message.Message_ID:
             log.debug(message.Message_ID.strip())
         else:
