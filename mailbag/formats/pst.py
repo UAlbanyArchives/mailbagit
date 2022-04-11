@@ -1,5 +1,7 @@
 import os, glob
 import mailbox
+import traceback
+
 import chardet
 from structlog import get_logger
 from email import parser
@@ -43,7 +45,8 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
-                    
+
+                    stack_trace=[]
                     error = []
                     try:
                         messageObj = folder.get_sub_message(index)
@@ -52,8 +55,12 @@ if not skip_registry:
                             headerParser = parser.HeaderParser()
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing headers.")
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         try:
                             # Parse message bodies
@@ -68,16 +75,22 @@ if not skip_registry:
                                 text_encoding = chardet.detect(messageObj.plain_text_body)['encoding']
                                 text_body = messageObj.plain_text_body.decode(text_encoding)
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing message body.")
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
 
                         # Build message and derivatives paths
                         try:
                             messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
                             derivativesPath = helper.normalizePath(messagePath)
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error reading message path.")
+                            desc = "Error reading message path"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
                         
                         try:
                             attachmentNames = []
@@ -89,8 +102,12 @@ if not skip_registry:
                                 attachments.append(attachment_content)
                                 attachmentNames.append(attachment.get_name())
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing attachments.")
+                            desc = "Error parsing attachments"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         message = Email(
                             Error=error,
@@ -113,14 +130,19 @@ if not skip_registry:
                             Message=None,
                             AttachmentNum=int(messageObj.number_of_attachments),
                             AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            AttachmentFiles=attachments,
+                            StackTrace=stack_trace
+
                         )
                 
                     except (Exception) as e:
-                        log.error(e)
+                        desc = 'Error parsing message'
+                        error_msg = desc + ": " + repr(e)
                         message = Email(
-                            Error=error.append('Error parsing message.')
+                            Error=error.append(error_msg),
+                            StackTrace=stack_trace.append(traceback.format_exc())
                         )
+                        log.error(error_msg)
                 
                     yield message
 

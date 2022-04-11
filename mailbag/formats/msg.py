@@ -4,7 +4,7 @@ from email import parser
 from structlog import get_logger
 from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
-
+import traceback
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email
 import mailbag.helper as helper
@@ -37,6 +37,7 @@ class MSG(EmailAccount):
             originalFile = helper.relativePath(self.file, filePath)
             
             error = []
+            stack_trace = []
             try:
                 mail = extract_msg.openMsg(filePath)
 
@@ -53,8 +54,11 @@ class MSG(EmailAccount):
                         text_body = mail.body
                         text_encoding = mail.stringEncoding
                 except Exception as e:
-                    log.error(e)
-                    error.append("Error parsing message body.")
+                    desc = "Error parsing message body"
+                    error_msg = desc + ": " + repr(e)
+                    error.append(error_msg)
+                    stack_trace.append(traceback.format_exc())
+                    log.error(error_msg)
 
                 # Look for message arrangement
                 try:
@@ -67,7 +71,7 @@ class MSG(EmailAccount):
 
                 try:
                     attachmentNames = []
-                    attachments = []             
+                    attachments = []      
                     for attachment in mail.attachments:
                         if attachment.longFilename:
                             attachmentNames.append(attachment.longFilename)
@@ -77,11 +81,14 @@ class MSG(EmailAccount):
                             attachmentNames.append(str(len(attachmentNames)))
                         attachments.append(attachment.data)
                 except Exception as e:
-                    log.error(e)
-                    error.append("Error parsing attachments.")
+                    desc = "Error parsing attachments"
+                    error_msg = desc + ": " + repr(e)
+                    error.append(error_msg)
+                    stack_trace.append(traceback.format_exc())
+                    log.error(error_msg)
 
                 message = Email(
-                    Error= error,
+                    Error = error,
                     Message_ID = mail.messageId.strip(),
                     Original_File=originalFile,
                     Message_Path=messagePath,
@@ -103,15 +110,22 @@ class MSG(EmailAccount):
                     Message=None,
                     AttachmentNum=len(attachmentNames),
                     AttachmentNames=attachmentNames,
-                    AttachmentFiles=attachments
+                    AttachmentFiles=attachments,
+                    StackTrace=stack_trace
                 )
                 # Make sure the MSG file is closed
                 mail.close()
             
             except (email.errors.MessageParseError, Exception) as e:
+                desc = 'Error parsing message'
+                error_msg = desc + ": " + repr(e)
                 message = Email(
-                    Error=error.append('Error parsing message.')
-                )
+                    Error=error.append(error_msg),
+                    StackTrace=stack_trace.append(traceback.format_exc())
+                    )
+                log.error(error_msg)
+                # Make sure the MSG file is closed
+                mail.close()
  
             # Move MSG to new mailbag directory structure
             new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)

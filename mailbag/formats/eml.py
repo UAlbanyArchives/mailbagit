@@ -1,5 +1,6 @@
 import datetime
 import json
+import traceback
 from os.path import join
 import mailbag.helper as helper
 import mailbox
@@ -40,6 +41,7 @@ class EML(EmailAccount):
             originalFile = helper.relativePath(self.file, filePath)
 
             error = []
+            stack_trace=[]
             try:
                 with open(filePath, 'rb') as f:
                     msg = email.message_from_binary_file(f, policy=policy.default)
@@ -70,8 +72,12 @@ class EML(EmailAccount):
                                 text_encoding = part.get_charsets()[0]
                                 text_body = part.get_payload(decode=True).decode(text_encoding)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error parsing message body.")
+                        desc = "Error parsing message body"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
+
 
                     # Look for message arrangement
                     try:
@@ -95,8 +101,12 @@ class EML(EmailAccount):
                                 attachmentNames.append(str(len(attachmentNames)))
                             attachments.append(attachment)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error parsing attachments.")
+                        desc = "Error parsing attachments"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
+
                                     
                     message = Email(
                             Error=error,
@@ -117,13 +127,19 @@ class EML(EmailAccount):
                             Message=msg,
                             AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                             AttachmentNames=attachmentNames,
-                            AttachmentFiles=attachments
+                            AttachmentFiles=attachments,
+                            StackTrace=stack_trace
                         )
 
             except (email.errors.MessageParseError, Exception) as e:
+                desc = 'Error parsing message'
+                error_msg = desc + ": " + repr(e)
                 message = Email(
-                    Error=error.append('Error parsing message.')
+                    Error=error.append(error_msg),
+                    StackTrace=stack_trace.append(traceback.format_exc())
                 )
+                log.error(error_msg)
+
 
             # Move EML to new mailbag directory structure
             new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,filePath)

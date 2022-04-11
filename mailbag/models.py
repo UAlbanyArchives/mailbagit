@@ -25,3 +25,4 @@ class Email(models.Base):
     AttachmentNum = fields.IntField()
     AttachmentNames = fields.ListField(str)
     AttachmentFiles = fields.ListField(bytes)
+    StackTrace=fields.ListField(str)

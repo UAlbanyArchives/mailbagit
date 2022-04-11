@@ -1,5 +1,7 @@
 import email
 import mailbox
+import traceback
+
 from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
@@ -44,6 +46,7 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
                 error = []
+                stack_trace=[]
                 try:
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
 
@@ -73,8 +76,11 @@ class Mbox(EmailAccount):
                                 text_encoding = part.get_charsets()[0]
                                 text_body = part.get_payload(decode=True).decode(text_encoding)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error parsing message body.")
+                        desc = "Error parsing message body"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
 
                     # Look for message arrangement
                     try:
@@ -82,8 +88,11 @@ class Mbox(EmailAccount):
                         unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error reading message path from headers.")
+                        desc = "Error reading message path from headers"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
                     
                     # Extract Attachments
                     attachmentNames = []
@@ -95,8 +104,12 @@ class Mbox(EmailAccount):
                                 attachmentNames.append(attachmentName)
                                 attachments.append(attachment)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error parsing attachments.")
+                        desc = "Error parsing attachments"
+                        error_msg = desc + ": " + repr(e)
+                        error.append(error_msg)
+                        stack_trace.append(traceback.format_exc())
+                        log.error(error_msg)
+
 
                     message = Email(
                         Error=error,
@@ -119,13 +132,18 @@ class Mbox(EmailAccount):
                         Message=mailObject,
                         AttachmentNum=len(attachmentNames) if attachmentNames else 0,
                         AttachmentNames=attachmentNames,
-                        AttachmentFiles=attachments
+                        AttachmentFiles=attachments,
+                        StackTrace = stack_trace
                     )
                 except (email.errors.MessageParseError, Exception) as e:
-                    log.error(e)
+                    desc = 'Error parsing message'
+                    error_msg = desc + ": " + repr(e)
                     message = Email(
-                        Error=error.append('Error parsing message.')
+                        Error=error.append(error_msg),
+                        StackTrace=stack_trace.append(traceback.format_exc())
                     )
+                    log.error(error_msg)
+
                 yield message
 
             # Make sure the MBOX file is closed
