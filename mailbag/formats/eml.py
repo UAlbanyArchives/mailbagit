@@ -62,6 +62,22 @@ class EML(EmailAccount):
                                 if content_type == "text/plain" and content_disposition != "attachment":
                                     text_bytes = part.get_payload(decode=True)
                                     text_body = part.get_payload()
+                                    
+                                # Extract Attachment using walk
+                                if part.get_content_maintype() == 'multipart': continue
+                                if content_disposition is None: continue
+                                try:
+                                    attachmentName = part.get_filename()
+                                    attachmentFile = part.get_payload(decode=True)
+                                    attachment = Attachment(
+                                                            Name=attachmentName if attachmentName else str(len(attachments)),
+                                                            File=attachmentFile,
+                                                            MimeType=helper.mimeType(attachmentName)
+                                                            )
+                                    attachments.append(attachment)
+                                except Exception as e:
+                                    log.error(e)
+                                    error.append("Error parsing attachments.")
                         else:
                             content_type = msg.get_content_type()
                             content_disposition = msg.get_content_disposition()
@@ -75,21 +91,6 @@ class EML(EmailAccount):
                         log.error(e)
                         error.append("Error parsing message body.")
 
-                    try:
-                        # Extract Attachments                
-                        for msgAttachment in msg.iter_attachments():
-                            attachmentName, attachmentFile = helper.saveAttachments(msgAttachment)
-                            attachment = Attachment(
-                                                    Name=attachmentName if attachmentName else str(len(attachments)),
-                                                    File=attachmentFile,
-                                                    MimeType=msgAttachment.get_content_type()
-                                                    )
-                            attachments.append(attachment)
-                            
-                    except Exception as e:
-                        log.error(e)
-                        error.append("Error parsing attachments.")
-                                        
                     message = Email(
                             Error=error,
                             Message_ID=msg["message-id"].strip(),
