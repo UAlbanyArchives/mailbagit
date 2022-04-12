@@ -1,4 +1,6 @@
+import argparse
 import bagit
+
 from structlog import get_logger
 import csv
 from mailbag.email_account import EmailAccount
@@ -156,7 +158,19 @@ class Controller:
 
 
 
+
+        if self.args.compress and not self.args.dry_run:
+            log.info("Compressing Mailbag")
+            compressionFormats = {'tar': 'tar', 'zip': 'zip', 'tar.gz': 'gztar'}        
+            shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
+
+            #Checking if the files with all the given extensions are present
+            if os.path.isfile(mailbag_dir + "." + self.args.compress):
+                #Deleting the mailbag if compressed files are present
+                shutil.rmtree(mailbag_dir)
+
         if not self.args.dry_run:
             bag.save(manifests=True)
+
 
         return mail_account.messages()
