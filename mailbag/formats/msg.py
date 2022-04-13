@@ -4,7 +4,7 @@ from email import parser
 from structlog import get_logger
 from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
-
+import traceback
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
@@ -34,36 +34,50 @@ class MSG(EmailAccount):
         files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
         for filePath in files:
             
-            subFolder = helper.emailFolder(self.file, filePath)
+            originalFile = helper.relativePath(self.file, filePath)
             
-            error = []
             attachments = []
-            
+            error = []
+            stack_trace = []
             try:
                 mail = extract_msg.openMsg(filePath)
+
+                # Parse message bodies
                 html_body = None
-                
-                # Extract HTML from RTF if no HTML body
+                text_body = None
+                html_encoding = None
+                text_encoding = None
                 try:
                     if mail.htmlBody:
-                        html_body = mail.htmlBody
-                    elif mail.rtfBody:
-                        rtf_obj = DeEncapsulator(mail.rtfBody)
-                        rtf_obj.deencapsulate()
-                        if rtf_obj.content_type == 'html':
-                            html_body = rtf_obj.html
+                        html_body = mail.htmlBody.decode("utf-8").strip()
+                        html_encoding = "utf-8"
+                    if mail.body:
+                        text_body = mail.body
+                        text_encoding = mail.stringEncoding
+                except Exception as e:
+                    desc = "Error parsing message body"
+                    error_msg = desc + ": " + repr(e)
+                    error.append(error_msg)
+                    stack_trace.append(traceback.format_exc())
+                    log.error(error_msg)
+
+                # Look for message arrangement
+                try:
+                    messagePath = helper.messagePath(mail.header)
+                    unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
+                    derivativesPath = helper.normalizePath(unsafePath)
                 except Exception as e:
                     log.error(e)
-                    error.append("Error parsing message body.")
+                    error.append("Error reading message path from headers.")
 
-                try:
+                try:   
                     for mailAttachment in mail.attachments:
                         if mailAttachment.longFilename:
                             attachmentName = mailAttachment.longFilename
                         elif mailAttachment.shortFilename:
-                            attachmentName = mailAttachment.shortFilename
+                            attachmentNames = mailAttachment.shortFilename
                         else:
-                            attachmentName = str(len(attachments))
+                            attachmentNames = str(len(attachments))
                             
                         attachment = Attachment(
                                                 Name=attachmentName,
@@ -73,14 +87,19 @@ class MSG(EmailAccount):
                         attachments.append(attachment)
 
                 except Exception as e:
-                    log.error(e)
-                    error.append("Error parsing attachments.")
-                
+                    desc = "Error parsing attachments"
+                    error_msg = desc + ": " + repr(e)
+                    error.append(error_msg)
+                    stack_trace.append(traceback.format_exc())
+                    log.error(error_msg)
+
+
                 message = Email(
-                    Error= error,
+                    Error = error,
                     Message_ID = mail.messageId.strip(),
-                    Message_Path=subFolder,
-                    Original_Filename=str(os.path.basename(filePath)),
+                    Original_File=originalFile,
+                    Message_Path=messagePath,
+                    Derivatives_Path=derivativesPath,
                     Date=mail.date,
                     From=mail.sender,
                     To=mail.to,
@@ -90,21 +109,29 @@ class MSG(EmailAccount):
                     Content_Type=mail.header.get_content_type(),
                     # mail.header appears to be a headers object oddly enough
                     Headers=mail.header,
-                    Body=html_body,
-                    Text_Body=mail.body,
                     HTML_Body=html_body,
+                    HTML_Encoding=html_encoding,
+                    Text_Body=text_body,
+                    Text_Encoding=text_encoding,
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg
                     Message=None,
-                    Attachments=attachments
+                    Attachments=attachments,
+                    StackTrace=stack_trace
                 )
                 # Make sure the MSG file is closed
                 mail.close()
             
             except (email.errors.MessageParseError, Exception) as e:
+                desc = 'Error parsing message'
+                error_msg = desc + ": " + repr(e)
                 message = Email(
-                    Error=error.append('Error parsing message.')
-                )
+                    Error=error.append(error_msg),
+                    StackTrace=stack_trace.append(traceback.format_exc())
+                    )
+                log.error(error_msg)
+                # Make sure the MSG file is closed
+                mail.close()
  
-            # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, subFolder, filePath)
+            # Move MSG to new mailbag directory structure
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
             yield message

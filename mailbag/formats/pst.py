@@ -1,5 +1,7 @@
 import os, glob
 import mailbox
+import traceback
+
 import chardet
 from structlog import get_logger
 from email import parser
@@ -36,7 +38,7 @@ if not skip_registry:
         def account_data(self):
             return account_data
 
-        def folders(self, folder, path, original_filename):
+        def folders(self, folder, path, originalFile):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is a list that you can create the filepath with os.path.join()
@@ -44,7 +46,8 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
-                    
+
+                    stack_trace=[]
                     error = []
                     attachments = []
                     
@@ -55,29 +58,42 @@ if not skip_registry:
                             headerParser = parser.HeaderParser()
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing headers.")
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         try:
+                            # Parse message bodies
                             html_body = None
-                            html_bytes = None
                             text_body = None
-                            text_bytes = None
+                            html_encoding = None
+                            text_encoding = None
                             if messageObj.html_body:
-                                html_bytes = messageObj.html_body
-                                try:
-                                    html_body = messageObj.html_body.decode(chardet.detect(messageObj.html_body)['encoding'])
-                                except:
-                                    pass
+                                html_encoding = chardet.detect(messageObj.html_body)['encoding']
+                                html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
-                                text_bytes = messageObj.plain_text_body
-                                try:
-                                    text_body = messageObj.plain_text_body.decode(chardet.detect(messageObj.plain_text_body)['encoding'])
-                                except:
-                                    pass
+                                text_encoding = chardet.detect(messageObj.plain_text_body)['encoding']
+                                text_body = messageObj.plain_text_body.decode(text_encoding)
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing message body.")
+                            desc = "Error parsing message body"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
+                        # Build message and derivatives paths
+                        try:
+                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            derivativesPath = helper.normalizePath(messagePath)
+                        except Exception as e:
+                            desc = "Error reading message path"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
                         
                         try:
                             total_attachment_size_bytes = 0
@@ -93,44 +109,52 @@ if not skip_registry:
                                 attachments.append(attachment)
                                 
                         except Exception as e:
-                            log.error(e)
-                            error.append("Error parsing attachments.")
+                            desc = "Error parsing attachments"
+                            error_msg = desc + ": " + repr(e)
+                            error.append(error_msg)
+                            stack_trace.append(traceback.format_exc())
+                            log.error(error_msg)
+
 
                         message = Email(
                             Error=error,
                             Message_ID=headers['Message-ID'].strip(),
-                            Message_Path=os.path.join(os.path.splitext(original_filename)[0], *path),
-                            Original_Filename=original_filename,
+                            Original_File=originalFile,
+                            Message_Path=messagePath,
+                            Derivatives_Path=derivativesPath,
                             Date=headers["Date"],
                             From=headers["From"],
                             To=headers["To"],
-                            Cc=headers["To"],
+                            Cc=headers["Cc"],
                             Bcc=headers["Bcc"],
                             Subject=headers["Subject"],
                             Content_Type=headers.get_content_type(),
                             Headers=headers,
-                            HTML_Bytes=html_bytes,
                             HTML_Body=html_body,
-                            Text_Bytes=text_bytes,
+                            HTML_Encoding=html_encoding,
                             Text_Body=text_body,
+                            Text_Encoding=text_encoding,
                             Message=None,
-                            Attachments=attachments
-                        )
-                    
-                    except (Exception) as e:
-                        log.error(e)
-                        message = Email(
-                            Error=error.append('Error parsing message.')
+                            Attachments=attachments,
+                            StackTrace=stack_trace
                         )
                 
-                    # log.debug(message.to_struct())
+                    except (Exception) as e:
+                        desc = 'Error parsing message'
+                        error_msg = desc + ": " + repr(e)
+                        message = Email(
+                            Error=error.append(error_msg),
+                            StackTrace=stack_trace.append(traceback.format_exc())
+                        )
+                        log.error(error_msg)
+                
                     yield message
 
             # iterate over any subfolders too       
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path, original_filename)
+                    yield from self.folders(subfolder, path, originalFile)
             # else:
             #     # gotta return empty directory to controller somehow
             #     log.error("??--> " + folder.name)
@@ -145,7 +169,11 @@ if not skip_registry:
             file_list = glob.glob(files, recursive=True)
 
             for filePath in file_list:
-                subFolder = helper.emailFolder(parent_dir, filePath)
+                originalFile = helper.relativePath(self.file, filePath)
+                if len(originalFile) < 1:
+                    pathList = []
+                else:
+                    pathList = os.path.normpath(originalFile).split(os.sep)
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -153,11 +181,11 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                         yield from self.folders(folder, os.path.normpath(subFolder).split(os.sep), os.path.basename(filePath))
+                         yield from self.folders(folder, pathList, os.path.basename(filePath))
                     else:
                         # gotta return empty directory to controller somehow
                         log.error("???--> " + folder.name)
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,subFolder,filePath)
+                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,filePath)

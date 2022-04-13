@@ -27,11 +27,41 @@ pipenv install
 pip install -e .
 ```
 
+#### Docker setup
+
+Build and run image
+```
+docker build -t mailbag:dev .
+docker run -it mailbag:dev bash
+```
+
+Build with access to host filesystem. Mailbagit will have access to the directory listed in the `source=` argument.
+
+Examples:
+```
+docker run -it --mount type=bind,source="path/to/data",target=/data mailbag:dev bash
+docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data mailbag:dev bash
+```
+
+List running containers: `docker ps`
+List images: `docker images`
+Delete image: `docker image rm <image id> -f`
+
+
 ### wxPython install on Ubuntu
 
 wxPython sometimes causes issues installing on some Linux distros. If you have issues on Ubuntu 20.04, try installing it directly with this package.
 
 `pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython` 
+
+#### wxPython dependencies
+
+wxPython has dependencies that you may or may not have installed already. So if you get errors, you may need these:
+
+```
+sudo apt-get install libgtk-3-dev libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0 libnotify-dev
+```
+
 
 ## Tools
 
