@@ -42,16 +42,9 @@ if not skip_registry:
 
         def do_task_per_message(self, message):
 
-                if self.args.pdf_css:
-                    external_css = self.args.pdf_css
-                else:
-                    external_css=False
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.pdf_css)
 
-                html_encoded=helper.htmlformatting(message,external_css)
-
-
-
-                if html_encoded:
+                if html_formatted:
 
                     out_dir = os.path.join(self.pdf_dir, message.Derivatives_Path)
                     filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
@@ -62,8 +55,8 @@ if not skip_registry:
                     if not self.args.dry_run:
                         if not os.path.isdir(out_dir):
                             os.makedirs(out_dir)
-                        write_html = open(html_name, 'w')
-                        write_html.write(html_encoded)
+                        write_html = open(html_name, 'w', encoding=encoding)
+                        write_html.write(html_formatted)
                         write_html.close()
                         p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name], stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE)

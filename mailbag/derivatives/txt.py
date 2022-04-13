@@ -27,7 +27,7 @@ class TxtDerivative(Derivative):
     def do_task_per_message(self, message):
 
         out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
 
         if message.Text_Body is None:
             log.warn("No plain text body for " + str(message.Mailbag_Message_ID))

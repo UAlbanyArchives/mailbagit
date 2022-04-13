@@ -136,27 +136,23 @@ def normalizePath(path):
         return path
 
 
-def htmlformatting(message,external_css):
+def htmlFormatting(message, external_css):
 
     # check to see which body to use
-    body = False
-    encoding=False
+    html_content = False
+    encoding = False
     if message.HTML_Body:
-        body = message.HTML_Body
+        html_content = message.HTML_Body
         encoding = message.HTML_Encoding
-
-
     elif message.Text_Body:
         #  converting text body to html body
-        body = "<html>" + "<body>" + message.Text_Body + "</body></html>"
+        html_content = "<html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
         encoding = message.Text_Encoding
-
     else:
         log.debug("Unable to create PDF, no body found for " + str(message.Mailbag_Message_ID))
-        return body
 
-    if body:
-        table = "<table>"
+    if html_content:
+        table = "<table class='headersTable'>"
         headerFields = []
         # Getting all the required attributes of message except error and body
         for attribute in message:
@@ -173,44 +169,28 @@ def htmlformatting(message,external_css):
         table += "</table>"
 
         # add headers table to html
-        if message.HTML_Body and "<body" in body.lower():
-            body_position = body.lower().index("<body")
-            table_position = body_position + body[body_position:].index(">") + 1
-            html_content = body[:table_position] + table + body[table_position:]
+        if "<body" in html_content.lower():
+            body_position = html_content.lower().index("<body")
+            table_position = body_position + html_content[body_position:].index(">") + 1
+            html_content = html_content[:table_position] + table + html_content[table_position:]
         else:
             # fallback to just prepending the table
-            html_content = table+body
+            html_content = table + html_content
 
+        default_css = "<style>img {padding: 10px;} table.headersTable {margin-bottom: 20px;}</style>"
         # add encoding
         meta = "<meta charset=\"" + encoding + "\">"
-        if message.HTML_Encoding and "<head" in html_content.lower():
+        if "<head" in html_content.lower():
             head_position = html_content.lower().index("<head")
             meta_position = head_position + html_content[head_position:].index(">") + 1
-            html_encoded = html_content[:meta_position] + meta + html_content[meta_position:]
+            html_content = html_content[:meta_position] + meta + default_css + html_content[meta_position:]
         else:
             # fallback to just prepending the tag
-            html_encoded = meta + html_content
+            html_content = meta + html_content
 
-
-
+        
         #Formatting HTML with beautiful soup
-        soup = bs4.BeautifulSoup(html_content, 'html.parser')
-
-        #Handling line-breaks
-        tag = soup.head
-        if tag:
-            # Create new tag for style
-            style = soup.new_tag("style")
-            style.string = "body{ white-space: pre;}"
-            soup.head.insert(1, style)
-        else:
-            # create new head tag with style embedded
-            head = soup.new_tag("head")
-            soup.html.body.insert_before(head)
-            # Create new tag for style
-            style = soup.new_tag("style")
-            style.string="body{ white-space: pre;}"
-            soup.head.insert(1, style)
+        soup = bs4.BeautifulSoup(html_content, 'html.parser', from_encoding=encoding)
 
         #Embedding table styling
         tag = soup.table
@@ -252,7 +232,8 @@ def htmlformatting(message,external_css):
 
             # If we found anything, inject it.
             if data:
-                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
+                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode(encoding)
 
-        return soup.prettify()
+        html_content = str(soup)
 
+    return html_content, encoding
