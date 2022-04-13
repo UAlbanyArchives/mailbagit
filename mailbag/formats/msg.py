@@ -77,10 +77,9 @@ class MSG(EmailAccount):
                             attachmentName = mailAttachment.shortFilename
                         else:
                             attachmentName = str(len(attachments))
-                            nameMsg = "No filename found for attachment " + attachmentName + \
+                            desc = "No filename found for attachment " + attachmentName + \
                                 " for message " + str(message.Mailbag_Message_ID)
-                            log.error(nameMsg)
-                            error.append(nameMsg)
+                            errors = helper.handle_error(errors, e, desc)
                             
                         attachment = Attachment(
                                                 Name=attachmentName,
