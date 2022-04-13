@@ -66,8 +66,12 @@ class MSG(EmailAccount):
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                     derivativesPath = helper.normalizePath(unsafePath)
                 except Exception as e:
-                    log.error(e)
-                    error.append("Error reading message path from headers.")
+                    desc = "Error reading message path from headers."
+                    error_msg = desc + ": " + repr(e)
+                    error.append(error_msg)
+                    stack_trace.append(traceback.format_exc())
+                    log.error(error_msg)
+
 
                 try:
                     attachmentNames = []

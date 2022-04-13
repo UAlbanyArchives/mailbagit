@@ -1,6 +1,9 @@
+import base64
 import urllib.parse
 from pathlib import Path
 import os, shutil, glob
+
+import bs4
 from structlog import get_logger
 
 log = get_logger()
@@ -131,3 +134,125 @@ def normalizePath(path):
         return os.path.join(*new_path)
     else:
         return path
+
+
+def htmlformatting(message,external_css):
+
+    # check to see which body to use
+    body = False
+    encoding=False
+    if message.HTML_Body:
+        body = message.HTML_Body
+        encoding = message.HTML_Encoding
+
+
+    elif message.Text_Body:
+        #  converting text body to html body
+        body = "<html>" + "<body>" + message.Text_Body + "</body></html>"
+        encoding = message.Text_Encoding
+
+    else:
+        log.debug("Unable to create PDF, no body found for " + str(message.Mailbag_Message_ID))
+        return body
+
+    if body:
+        table = "<table>"
+        headerFields = []
+        # Getting all the required attributes of message except error and body
+        for attribute in message:
+            if (attribute[0] not in (
+            "Error", "Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message", "Headers", "AttachmentFiles")):
+                headerFields.append(attribute[0])
+        # Getting the values of the attrbutes and appending to HTML string
+        for headerField in headerFields:
+            if not getattr(message, headerField) is None:
+                table += "<tr>"
+                table += "<td>" + str(headerField) + "</td>"
+                table += "<td>" + str(getattr(message, headerField)) + "</td>"
+                table += "</tr>"
+        table += "</table>"
+
+        # add headers table to html
+        if message.HTML_Body and "<body" in body.lower():
+            body_position = body.lower().index("<body")
+            table_position = body_position + body[body_position:].index(">") + 1
+            html_content = body[:table_position] + table + body[table_position:]
+        else:
+            # fallback to just prepending the table
+            html_content = table+body
+
+        # add encoding
+        meta = "<meta charset=\"" + encoding + "\">"
+        if message.HTML_Encoding and "<head" in html_content.lower():
+            head_position = html_content.lower().index("<head")
+            meta_position = head_position + html_content[head_position:].index(">") + 1
+            html_encoded = html_content[:meta_position] + meta + html_content[meta_position:]
+        else:
+            # fallback to just prepending the tag
+            html_encoded = meta + html_content
+
+
+
+        #Formatting HTML with beautiful soup
+        soup = bs4.BeautifulSoup(html_content, 'html.parser')
+
+        #Handling line-breaks
+        tag = soup.head
+        if tag:
+            # Create new tag for style
+            style = soup.new_tag("style")
+            style.string = "body{ white-space: pre;}"
+            soup.head.insert(1, style)
+        else:
+            # create new head tag with style embedded
+            head = soup.new_tag("head")
+            soup.html.body.insert_before(head)
+            # Create new tag for style
+            style = soup.new_tag("style")
+            style.string="body{ white-space: pre;}"
+            soup.head.insert(1, style)
+
+        #Embedding table styling
+        tag = soup.table
+        tag['border'] = 1
+        tag['cellspacing'] = 10
+        tag['cellpadding'] = 10
+        tag['align'] = 'center'
+        tag['style']="width:500px;"
+
+        #Adding external_css
+        if external_css:
+            tag=soup.head
+            if tag:
+                # Create new tag for link
+                link = soup.new_tag("link")
+                link["rel"] = "stylesheet"
+                link['href'] = external_css
+                soup.head.insert(1, link)
+            else:
+                # create new head tag with style embedded
+                head = soup.new_tag("head")
+                soup.html.body.insert_before(head)
+                #Create new tag for link
+                link=soup.new_tag("link")
+                link["rel"]="stylesheet"
+                link['href']=external_css
+                soup.head.insert(1,link)
+
+        # Embedding Images
+        tags = (tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
+        data = None
+        for tag in tags:
+            # Iterate through the attachments until we get the right one.
+            cid = tag['src'][4:]
+
+            for i in range(message.AttachmentNum):
+                if message.AttachmentNames[i] in cid:
+                    data = message.AttachmentFiles[i]
+
+            # If we found anything, inject it.
+            if data:
+                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
+
+        return soup.prettify()
+
