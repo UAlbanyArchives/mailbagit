@@ -1,11 +1,9 @@
 import os, glob
 import mailbox
-import traceback
 
 import chardet
 from structlog import get_logger
 from email import parser
-import mimetypes
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
@@ -47,10 +45,10 @@ if not skip_registry:
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
 
-                    stack_trace=[]
-                    error = []
                     attachments = []
-                    
+                    errors = {}
+                    errors["msg"] = []
+                    errors["stack_trace"] = []
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -59,10 +57,7 @@ if not skip_registry:
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
                             desc = "Error parsing message body"
-                            error_msg = desc + ": " + repr(e)
-                            error.append(error_msg)
-                            stack_trace.append(traceback.format_exc())
-                            log.error(error_msg)
+                            errors = helper.handle_error(errors, e, desc)
 
 
                         try:
@@ -79,10 +74,7 @@ if not skip_registry:
                                 text_body = messageObj.plain_text_body.decode(text_encoding)
                         except Exception as e:
                             desc = "Error parsing message body"
-                            error_msg = desc + ": " + repr(e)
-                            error.append(error_msg)
-                            stack_trace.append(traceback.format_exc())
-                            log.error(error_msg)
+                            errors = helper.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
@@ -90,34 +82,36 @@ if not skip_registry:
                             derivativesPath = helper.normalizePath(messagePath)
                         except Exception as e:
                             desc = "Error reading message path"
-                            error_msg = desc + ": " + repr(e)
-                            error.append(error_msg)
-                            stack_trace.append(traceback.format_exc())
-                            log.error(error_msg)
+                            errors = helper.handle_error(errors, e, desc)
                         
                         try:
                             total_attachment_size_bytes = 0
                             for attachmentObj in messageObj.attachments:
                                 total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
                                 attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
+
+                                try:
+                                    attachmentName = attachmentObj.get_name()
+                                except:
+                                    attachmentName = str(len(attachments))
+                                    desc = "No filename found for attachment " + attachmentName + \
+                                    " for message " + str(message.Mailbag_Message_ID)
+                                    errors = helper.handle_error(errors, e, desc)
                                 
                                 attachment = Attachment(
-                                                        Name=attachmentObj.get_name(),
+                                                        Name=attachmentName,
                                                         File=attachment_content,
-                                                        MimeType=helper.mimeType(attachmentObj.get_name())
+                                                        MimeType=helper.guessMimeType(attachmentName)
                                             )
                                 attachments.append(attachment)
                                 
                         except Exception as e:
                             desc = "Error parsing attachments"
-                            error_msg = desc + ": " + repr(e)
-                            error.append(error_msg)
-                            stack_trace.append(traceback.format_exc())
-                            log.error(error_msg)
+                            errors = helper.handle_error(errors, e, desc)
 
 
                         message = Email(
-                            Error=error,
+                            Error=errors["msg"],
                             Message_ID=headers['Message-ID'].strip(),
                             Original_File=originalFile,
                             Message_Path=messagePath,
@@ -136,17 +130,16 @@ if not skip_registry:
                             Text_Encoding=text_encoding,
                             Message=None,
                             Attachments=attachments,
-                            StackTrace=stack_trace
+                            StackTrace=errors["stack_trace"]
                         )
                 
                     except (Exception) as e:
                         desc = 'Error parsing message'
-                        error_msg = desc + ": " + repr(e)
+                        errors = helper.handle_error(errors, e, desc)
                         message = Email(
-                            Error=error.append(error_msg),
-                            StackTrace=stack_trace.append(traceback.format_exc())
+                            Error=errors["msg"],
+                            StackTrace=errors["stack_trace"]
                         )
-                        log.error(error_msg)
                 
                     yield message
 

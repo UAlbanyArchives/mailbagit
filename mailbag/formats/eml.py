@@ -1,6 +1,5 @@
 import datetime
 import json
-import traceback
 from os.path import join
 import mailbag.helper as helper
 import mailbox
@@ -41,60 +40,29 @@ class EML(EmailAccount):
             originalFile = helper.relativePath(self.file, filePath)
 
             attachments = []
-            error = []
-            stack_trace=[]
+            errors = {}
+            errors["msg"] = []
+            errors["stack_trace"] = []
             try:
                 with open(filePath, 'rb') as f:
                     msg = email.message_from_binary_file(f, policy=policy.default)
 
                     try:
                         # Parse message bodies
-                        html_body = None
-                        text_body = None
-                        html_encoding = None
-                        text_encoding = None
+                        bodies = {}
+                        bodies["html_body"] = None
+                        bodies["text_body"] = None
+                        bodies["html_encoding"] = None
+                        bodies["text_encoding"] = None
                         if msg.is_multipart():
                             for part in msg.walk():
-                                content_type = part.get_content_type()
-                                content_disposition = part.get_content_disposition()
-                                if content_type == "text/html" and content_disposition != "attachment":
-                                    html_encoding = part.get_charsets()[0]
-                                    html_body = part.get_payload(decode=True).decode(html_encoding)
-                                if content_type == "text/plain" and content_disposition != "attachment":
-                                    text_encoding = part.get_charsets()[0]
-                                    text_body = part.get_payload(decode=True).decode(text_encoding)
-                                    
-                                # Extract Attachment using walk
-                                if part.get_content_maintype() == 'multipart': continue
-                                if content_disposition is None: continue
-                                try:
-                                    attachmentName = part.get_filename()
-                                    attachmentFile = part.get_payload(decode=True)
-                                    attachment = Attachment(
-                                                            Name=attachmentName if attachmentName else str(len(attachments)),
-                                                            File=attachmentFile,
-                                                            MimeType=helper.mimeType(attachmentName)
-                                                            )
-                                    attachments.append(attachment)
-                                except Exception as e:
-                                    log.error(e)
-                                    error.append("Error parsing attachments.")
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            content_type = msg.get_content_type()
-                            content_disposition = msg.get_content_disposition()
-                            if content_type == "text/html" and content_disposition != "attachment":
-                                html_encoding = part.get_charsets()[0]
-                                html_body = part.get_payload(decode=True).decode(html_encoding)
-                            if content_type == "text/plain" and content_disposition != "attachment":
-                                text_encoding = part.get_charsets()[0]
-                                text_body = part.get_payload(decode=True).decode(text_encoding)
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+
                     except Exception as e:
                         desc = "Error parsing message parts"
-                        error_msg = desc + ": " + repr(e)
-                        error.append(error_msg)
-                        stack_trace.append(traceback.format_exc())
-                        log.error(error_msg)
-
+                        errors = helper.handle_error(errors, e, desc)
 
                     # Look for message arrangement
                     try:
@@ -102,12 +70,11 @@ class EML(EmailAccount):
                         unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
-                        log.error(e)
-                        error.append("Error reading message path from headers.")
-
+                        desc = "Error reading message path from headers"
+                        errors = helper.handle_error(errors, e, desc)
 
                     message = Email(
-                            Error=error,
+                            Error=errors["msg"],
                             Message_ID=msg["message-id"].strip(),
                             Original_File=originalFile,
                             Message_Path=messagePath,
@@ -118,23 +85,22 @@ class EML(EmailAccount):
                             Subject=msg["subject"],
                             Content_Type=msg.get_content_type(),
                             Headers=msg,
-                            HTML_Body=html_body,
-                            HTML_Encoding=html_encoding,
-                            Text_Body=text_body,
-                            Text_Encoding=text_encoding,
+                            HTML_Body=bodies["html_body"],
+                            HTML_Encoding=bodies["html_encoding"],
+                            Text_Body=bodies["text_body"],
+                            Text_Encoding=bodies["text_encoding"],
                             Message=msg,
                             Attachments=attachments,
-                            StackTrace=stack_trace
+                            StackTrace=errors["stack_trace"]
                         )
 
             except (email.errors.MessageParseError, Exception) as e:
                 desc = 'Error parsing message'
-                error_msg = desc + ": " + repr(e)
+                errors = helper.handle_error(errors, e, desc)
                 message = Email(
-                    Error=error.append(error_msg),
-                    StackTrace=stack_trace.append(traceback.format_exc())
+                    Error=errors["msg"],
+                    StackTrace=errors["stack_trace"]
                 )
-                log.error(error_msg)
 
 
             # Move EML to new mailbag directory structure

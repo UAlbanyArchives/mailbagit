@@ -1,6 +1,5 @@
 import email
 import mailbox
-import traceback
 
 from structlog import get_logger
 from pathlib import Path
@@ -8,7 +7,7 @@ import os, shutil, glob
 import email.errors
 
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email,Attachment
+from mailbag.models import Email, Attachment
 import mailbag.helper as helper
 
 log = get_logger()
@@ -47,58 +46,27 @@ class Mbox(EmailAccount):
             for mail in data.itervalues():
                 
                 attachments = []
-                error = []
-                stack_trace=[]
+                errors = {}
+                errors["msg"] = []
+                errors["stack_trace"] = []
                 try:
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
 
                     # Try to parse content
                     try:
-                        html_body = None
-                        text_body = None
-                        html_encoding = None
-                        text_encoding = None
+                        bodies = {}
+                        bodies["html_body"] = None
+                        bodies["text_body"] = None
+                        bodies["html_encoding"] = None
+                        bodies["text_encoding"] = None
                         if mailObject.is_multipart():
                             for part in mailObject.walk():
-                                content_type = part.get_content_type()
-                                content_disposition = part.get_content_disposition()
-                                if content_type == "text/html" and content_disposition != "attachment":
-                                    html_encoding = part.get_charsets()[0]
-                                    html_body = part.get_payload(decode=True).decode(html_encoding)
-                                if content_type == "text/plain" and content_disposition != "attachment":
-                                    text_encoding = part.get_charsets()[0]
-                                    text_body = part.get_payload(decode=True).decode(text_encoding)
-                                    
-                                # Extract Attachment using walk
-                                if part.get_content_maintype() == 'multipart': continue
-                                if content_disposition is None: continue
-                                try:
-                                    attachmentName = part.get_filename()
-                                    attachmentFile = part.get_payload(decode=True)
-                                    attachment = Attachment(
-                                                            Name=attachmentName if attachmentName else str(len(attachments)),
-                                                            File=attachmentFile,
-                                                            MimeType=helper.mimeType(attachmentName)
-                                                            )
-                                    attachments.append(attachment)
-                                except Exception as e:
-                                    log.error(e)
-                                    error.append("Error parsing attachments.")
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            content_type = mailObject.get_content_type()
-                            content_disposition = mailObject.get_content_disposition()
-                            if content_type == "text/html" and content_disposition != "attachment":
-                                html_encoding = part.get_charsets()[0]
-                                html_body = part.get_payload(decode=True).decode(html_encoding)
-                            if content_type == "text/plain" and content_disposition != "attachment":
-                                text_encoding = part.get_charsets()[0]
-                                text_body = part.get_payload(decode=True).decode(text_encoding)
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                     except Exception as e:
-                        desc = "Error parsing message body"
-                        error_msg = desc + ": " + repr(e)
-                        error.append(error_msg)
-                        stack_trace.append(traceback.format_exc())
-                        log.error(error_msg)
+                        desc = "Error parsing message parts"
+                        errors = helper.handle_error(errors, e, desc)
 
                     # Look for message arrangement
                     try:
@@ -107,14 +75,10 @@ class Mbox(EmailAccount):
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
-                        error_msg = desc + ": " + repr(e)
-                        error.append(error_msg)
-                        stack_trace.append(traceback.format_exc())
-                        log.error(error_msg)
+                        errors = helper.handle_error(errors, e, desc)
                     
-
                     message = Email(
-                        Error=error,
+                        Error=errors["msg"],
                         Message_ID=mail['Message-ID'].strip(),
                         Original_File=originalFile,
                         Message_Path=messagePath,
@@ -127,20 +91,20 @@ class Mbox(EmailAccount):
                         Subject=mail['Subject'],
                         Content_Type=mailObject.get_content_type(),
                         Headers=mail,
-                        HTML_Body=html_body,
-                        HTML_Encoding=html_encoding,
-                        Text_Body=text_body,
-                        Text_Encoding=text_encoding,
+                        HTML_Body=bodies["html_body"],
+                        HTML_Encoding=bodies["html_encoding"],
+                        Text_Body=bodies["text_body"],
+                        Text_Encoding=bodies["text_encoding"],
                         Message=mailObject,
                         Attachments=attachments,
-                        StackTrace = stack_trace
+                        StackTrace = errors["stack_trace"]
                     )
                 except (email.errors.MessageParseError, Exception) as e:
                     desc = 'Error parsing message'
-                    error_msg = desc + ": " + repr(e)
+                    errors = helper.handle_error(errors, e, desc)
                     message = Email(
-                        Error=error.append(error_msg),
-                        StackTrace=stack_trace.append(traceback.format_exc())
+                        Error=errors["msg"],
+                        StackTrace=errors["stack_trace"]
                     )
                     log.error(error_msg)
 

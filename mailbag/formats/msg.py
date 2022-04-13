@@ -4,7 +4,6 @@ from email import parser
 from structlog import get_logger
 from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
-import traceback
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
@@ -37,8 +36,9 @@ class MSG(EmailAccount):
             originalFile = helper.relativePath(self.file, filePath)
             
             attachments = []
-            error = []
-            stack_trace = []
+            errors = {}
+            errors["msg"] = []
+            errors["stack_trace"] = []
             try:
                 mail = extract_msg.openMsg(filePath)
 
@@ -56,10 +56,7 @@ class MSG(EmailAccount):
                         text_encoding = mail.stringEncoding
                 except Exception as e:
                     desc = "Error parsing message body"
-                    error_msg = desc + ": " + repr(e)
-                    error.append(error_msg)
-                    stack_trace.append(traceback.format_exc())
-                    log.error(error_msg)
+                    errors = helper.handle_error(errors, e, desc)
 
                 # Look for message arrangement
                 try:
@@ -67,35 +64,38 @@ class MSG(EmailAccount):
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                     derivativesPath = helper.normalizePath(unsafePath)
                 except Exception as e:
-                    log.error(e)
-                    error.append("Error reading message path from headers.")
+                    desc = "Error reading message path from headers"
+                    errors = helper.handle_error(errors, e, desc)
 
                 try:   
                     for mailAttachment in mail.attachments:
-                        if mailAttachment.longFilename:
+                        if mailAttachment.getFilename():
+                            attachmentName = mailAttachment.getFilename()
+                        elif mailAttachment.longFilename:
                             attachmentName = mailAttachment.longFilename
                         elif mailAttachment.shortFilename:
-                            attachmentNames = mailAttachment.shortFilename
+                            attachmentName = mailAttachment.shortFilename
                         else:
-                            attachmentNames = str(len(attachments))
+                            attachmentName = str(len(attachments))
+                            nameMsg = "No filename found for attachment " + attachmentName + \
+                                " for message " + str(message.Mailbag_Message_ID)
+                            log.error(nameMsg)
+                            error.append(nameMsg)
                             
                         attachment = Attachment(
                                                 Name=attachmentName,
                                                 File=mailAttachment.data,
-                                                MimeType=helper.mimeType(attachmentName)
+                                                MimeType=helper.guessMimeType(attachmentName)
                                                 )
                         attachments.append(attachment)
 
                 except Exception as e:
                     desc = "Error parsing attachments"
-                    error_msg = desc + ": " + repr(e)
-                    error.append(error_msg)
-                    stack_trace.append(traceback.format_exc())
-                    log.error(error_msg)
+                    errors = helper.handle_error(errors, e, desc)
 
 
                 message = Email(
-                    Error = error,
+                    Error = errors["msg"],
                     Message_ID = mail.messageId.strip(),
                     Original_File=originalFile,
                     Message_Path=messagePath,
@@ -116,19 +116,18 @@ class MSG(EmailAccount):
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg
                     Message=None,
                     Attachments=attachments,
-                    StackTrace=stack_trace
+                    StackTrace=errors["stack_trace"]
                 )
                 # Make sure the MSG file is closed
                 mail.close()
             
             except (email.errors.MessageParseError, Exception) as e:
                 desc = 'Error parsing message'
-                error_msg = desc + ": " + repr(e)
+                errors = helper.handle_error(errors, e, desc)
                 message = Email(
-                    Error=error.append(error_msg),
-                    StackTrace=stack_trace.append(traceback.format_exc())
+                    Error=errors["msg"],
+                    StackTrace=errors["stack_trace"]
                     )
-                log.error(error_msg)
                 # Make sure the MSG file is closed
                 mail.close()
  
