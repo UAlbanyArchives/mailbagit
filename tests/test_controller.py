@@ -10,7 +10,7 @@ from argparse import Namespace
 def cli_args():
     return Namespace(dry_run=False, mailbag_name="New_Mailbag", derivatives=[])
 
-
+"""
 def test_reader_Mbox(cli_args):
     cli_args.directory = os.path.join("data", "sample1.mbox")
     cli_args.input = "mbox"
@@ -87,7 +87,7 @@ def test_reader_PST(cli_args):
 
         assert m == expected[id]
         break
-
+"""
 """
 leaving this in but commenting out, as this functionality has been moved to the helper
 def test_organizeFileStructure():

@@ -2,7 +2,6 @@ import datetime
 import json
 from os.path import join
 import mailbag.helper as helper
-import mailbox
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
