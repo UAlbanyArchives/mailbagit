@@ -22,7 +22,7 @@ def test_Mbox(cli_args):
         message = Email()
         message.read(os.path.join(dump_dir, messageFile))
         expected.append(message)
-
+    
     count = 0
     for id, m in enumerate(data):
         count += 1
@@ -32,8 +32,8 @@ def test_Mbox(cli_args):
             if field[0] == "Headers" or field[0] == "Message":
                 dump = getattr(expected[id], field[0])
                 compare = getattr(m, field[0])
-                #print (compare == dump)
-                #assert compare == dump
+                for key in compare:
+                    assert compare[key] == dump[key]
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
                 
@@ -60,7 +60,9 @@ def test_MSG(cli_args):
             if field[0] == "Headers" or field[0] == "Message":
                 dump = getattr(expected[id], field[0])
                 compare = getattr(m, field[0])
-                #assert compare == dump
+                if compare:
+                    for key in compare:
+                        assert compare[key] == dump[key]
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
 
@@ -87,8 +89,9 @@ def test_EML(cli_args):
             if field[0] == "Headers" or field[0] == "Message":
                 dump = getattr(expected[id], field[0])
                 compare = getattr(m, field[0])
-                #print (compare == dump)
-                #assert compare == dump
+                if compare:
+                    for key in compare:
+                        assert compare[key] == dump[key]
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
 
@@ -116,7 +119,8 @@ def test_PST(cli_args):
             if field[0] == "Headers" or field[0] == "Message":
                 dump = getattr(expected[id], field[0])
                 compare = getattr(m, field[0])
-                #print (compare == dump)
-                #assert compare == dump
+                if compare:
+                    for key in compare:
+                        assert compare[key] == dump[key]
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
