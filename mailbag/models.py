@@ -1,5 +1,6 @@
 from jsonmodels import models, fields, errors, validators
 from email.message import Message
+import os, json
 
 
 class Attachment(models.Base):
@@ -31,3 +32,86 @@ class Email(models.Base):
     Message = fields.EmbeddedField(Message)
     Attachments = fields.ListField(Attachment)
     StackTrace=fields.ListField(str)
+
+    def dump_string(self, value, outpath, encoding = None):
+        with open(outpath, "w", encoding=encoding) as f:
+            f.write(value)
+            f.close()
+
+    def dump(self):
+        filename = os.path.basename(self.Original_File)
+        dump_file = os.path.splitext(filename)[1] + "-" + os.path.splitext(filename)[0]
+        rootpath = os.path.join("data", dump_file, str(self.Mailbag_Message_ID))
+        if not os.path.isdir(rootpath):
+            os.makedirs(rootpath)
+
+        for field in self:
+            name = field[0]
+            value = getattr(self, name)
+
+            if isinstance(value, str):
+                if name.endswith("_Body"):
+                    encoding = getattr(self, name.split("_")[0] + "_Encoding")
+                else:
+                    encoding = None
+                self.dump_string(value, os.path.join(rootpath, name), encoding)
+            elif isinstance(value, list):
+                count = 0
+                for item in value:
+                    count += 1
+                    outdir = os.path.join(rootpath, name)
+                    if not os.path.isdir(outdir):
+                        os.mkdir(outdir)
+                    outpath = os.path.join(outdir, str(count))
+                    if isinstance(item, str):
+                        self.dump_string(item, outpath)
+                    else:
+                        # attachment objects
+                        if not os.path.isdir(outpath):
+                            os.mkdir(outpath)
+                        for subfield in item:
+                            subname = subfield[0]
+                            subvalue = getattr(item, subname)
+                            if isinstance(subvalue, str):
+                                self.dump_string(subvalue, os.path.join(outpath, subname))
+                            elif isinstance(subvalue, bytes):
+                                with open(os.path.join(outpath, subname), "wb") as f:
+                                    f.write(subvalue)
+                                    f.close()
+
+    def read_file(self, path, encoding, filetype="r"):
+        with open(fieldpath, filetype, encoding=encoding) as f:
+            data = f.read()
+            f.close()
+        return data
+
+    def read(self, messagedir):
+        for field in os.listdir(messagedir):
+            fieldpath = os.path.join(messagedir, field)
+            if os.path.isfile(field):
+                if field.endswith("_Body"):
+                    encodingFile = os.path.join(messagedir, field.split("_")[0] + "_Encoding")
+                    encoding = self.read_file(fieldpath, None)
+                else:
+                    encoding = None
+                value = self.read_file(fieldpath, encoding)
+                setattr(self, field, value)
+            else:
+                subvalue = []
+                for subfield in os.listdir(fieldpath):
+                    subfieldpath = os.path.join(fieldpath, subfield)
+                    if os.path.isfile:
+                        subvalue.append(self.read_file(subfieldpath))
+                    else:
+                        #attachments
+                        attachment = Attachment()
+                        for subsubfield in os.listdir(subfieldpath):
+                            subsubfieldpath = os.path.join(subfieldpath, subsubfield)
+                            if subsubfield == "File":
+                                filetype = "rb"
+                            else:
+                                filetype = "r"
+                            setattr(attachment, subsubfield, self.read_file(subsubfieldpath, None, filetype))
+                        subvalue.append(attachment)
+                setattr(self, field, subvalue)
+
