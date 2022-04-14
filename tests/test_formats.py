@@ -41,7 +41,7 @@ def test_Mbox(cli_args):
 
 def test_MSG(cli_args):
     testfile = "sample1.msg"
-    data = EmailAccount.registry['msg'](os.path.join("data", testfile), cli_args).messages()
+    data = EmailAccount.registry['msg'](os.path.join("data"), cli_args).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
 
     expected = []
@@ -60,7 +60,6 @@ def test_MSG(cli_args):
             if field[0] == "Headers" or field[0] == "Message":
                 dump = getattr(expected[id], field[0])
                 compare = getattr(m, field[0])
-                #print (compare == dump)
                 #assert compare == dump
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
@@ -69,7 +68,7 @@ def test_MSG(cli_args):
 def test_EML(cli_args):
 
     testfile = "2016-06-23_144430_6e449c77fe.eml"
-    data = EmailAccount.registry['eml'](os.path.join("data", testfile), cli_args).messages()
+    data = EmailAccount.registry['eml'](os.path.join("data"), cli_args).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
 
     expected = []
@@ -92,7 +91,6 @@ def test_EML(cli_args):
                 #assert compare == dump
             else:
                 assert getattr(m, field[0]) == getattr(expected[id], field[0])
-
 
 def test_PST(cli_args):
     if not 'pst' in EmailAccount.registry:
