@@ -101,8 +101,10 @@ class Email(models.Base):
             fieldpath = os.path.join(messagedir, field)
             if os.path.isfile(fieldpath):
                 if field == "Headers" or field == "Message":
-                    value = pickle.load(open(fieldpath, "rb"))
-                    setattr(self, field, value)
+                    with open(fieldpath, "rb") as f:
+                        value = pickle.load(f)
+                        setattr(self, field, value)
+                        f.close()
                 else:
                     if field.endswith("_Body"):
                         encodingFile = os.path.join(messagedir, field.split("_")[0] + "_Encoding")
