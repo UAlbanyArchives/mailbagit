@@ -32,4 +32,5 @@ jobs:
           pipenv run black . --verbose
       - name: Test with pytest
         run: |
+          python dumpData.py data
           pipenv run pytest -vv
