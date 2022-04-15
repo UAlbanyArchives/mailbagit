@@ -2,6 +2,9 @@ import urllib.parse
 from pathlib import Path
 import os, shutil, glob
 from structlog import get_logger
+from mailbag.models import Attachment
+import mimetypes
+import traceback
 
 log = get_logger()
 
@@ -95,22 +98,125 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
 
         return file_new_path
 
-def saveAttachments(part):
-    return (part.get_filename(),part.get_payload(decode=True))
+def handle_error(errors, exception, desc):
+    """
+    Is called when an exception is raised in the parsers.
+    returns a dict of readable and full trace errors that can be appended to.
+        
+    Parameters:
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+        exception (Exception): The exception raised
+        desc (String): A full email message object desribed in models.py
+    Returns:
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+    """
+    error_msg = desc + ": " + repr(exception)
+    errors["msg"].append(error_msg)
+    errors["stack_trace"].append(traceback.format_exc())
+    log.error(error_msg)
 
+    return errors
+
+def parse_part(part, bodies, attachments, errors):
+    """
+    Used for EML and MBOX parsers
+    Parses a part of an email message for multipart messages or a full message with a single part
+        
+    Parameters:
+        part (email.Message.message part):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+        bodies (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+        attachments (list): a list of attachment object as defined in models.py
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+    Returns:
+        bodies (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+        attachments (list): a list of attachment object as defined in models.py
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+    """
+    content_type = part.get_content_type()
+    content_disposition = part.get_content_disposition()
+
+    # Extract body
+    try:
+        if content_type == "text/html" and content_disposition != "attachment":
+            bodies["html_encoding"] = part.get_charsets()[0]
+            bodies["html_body"] = part.get_payload(decode=True).decode(bodies["html_encoding"])
+        if content_type == "text/plain" and content_disposition != "attachment":
+            bodies["text_encoding"] = part.get_charsets()[0]
+            bodies["text_body"] = part.get_payload(decode=True).decode(bodies["text_encoding"])
+    except Exception as e:
+        desc = "Error parsing message body"
+        errors = handle_error(errors, e, desc)
+
+    # Extract attachments
+    if part.get_content_maintype() == 'multipart':
+        pass
+    elif content_disposition is None:
+        pass
+    else:
+        try:
+            attachmentName = part.get_filename()
+            attachmentFile = part.get_payload(decode=True)
+            attachment = Attachment(
+                                    Name=attachmentName if attachmentName else str(len(attachments)),
+                                    File=attachmentFile,
+                                    MimeType=content_type
+                                    )
+            attachments.append(attachment)
+        except Exception as e:
+            desc = "Error parsing attachments"
+            errors = handle_error(errors, e, desc)
+
+    return bodies, attachments, errors
 
 def saveAttachmentOnDisk(dry_run,attachments_dir,message):
-    
+    """
+    Takes an email message object and writes any attachments in the model
+    to the attachments subdirectory according to the mailbag spec
+        
+    Parameters:
+        dry_run (Boolean): Option to do a test run without writing changes
+        attachments_dir (Path): Path to the attachments subdirectory
+        message (Email): A full email message object desribed in models.py
+    """
+
     if not dry_run:
         message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
         os.mkdir(message_attachments_dir)
-    for i in range(message.AttachmentNum):
-        log.debug('Saving Attachment:'+str(message.AttachmentNames[i]))
+
+    for attachment in message.Attachments:
+        log.debug('Saving Attachment:'+str(attachment.Name))
+        log.debug('Type:'+str(attachment.MimeType))
         if not dry_run:
-            attachment_path = os.path.join(message_attachments_dir,message.AttachmentNames[i])
+            attachment_path = os.path.join(message_attachments_dir,attachment.Name)
             f = open(attachment_path, "wb")
-            f.write(message.AttachmentFiles[i])
+            f.write(attachment.File)
             f.close()
+
+def guessMimeType(filename):
+    """
+    Takes an file name and uses mimetypes to guess the mime type
+        
+    Parameters:
+        filename (String): Attachment filename
+
+    Returns:
+        Mimetype (String)
+    """
+    return mimetypes.guess_type(filename)[0]
 
 def normalizePath(path):
     # this is not sufficent yet

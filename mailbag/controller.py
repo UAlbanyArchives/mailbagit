@@ -45,7 +45,7 @@ class Controller:
             list: line
         """
         line = [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, \
-        message.Original_File, message.Message_Path, message.Derivatives_Path, str(message.AttachmentNum), \
+        message.Original_File, message.Message_Path, message.Derivatives_Path, str(len(message.Attachments)), \
         message.Date, message.From, message.To, message.Cc,message.Bcc, \
         message.Subject, message.Content_Type]
 
@@ -93,7 +93,7 @@ class Controller:
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
             
-            if message.AttachmentNum and message.AttachmentNum>0:
+            if len(message.Attachments) > 0:
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data
