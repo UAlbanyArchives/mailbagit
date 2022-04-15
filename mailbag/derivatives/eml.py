@@ -6,7 +6,9 @@ import mailbox
 from mailbag.email_account import EmailAccount
 from structlog import get_logger
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
+from email import encoders
 from email import generator
 from mailbag.derivative import Derivative
 
@@ -59,7 +61,13 @@ class EmlDerivative(Derivative):
                     log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body.")
 
                 # Attachments
-                #Missing
+                for attachment in message.Attachments:
+                    mimeType = attachment.MimeType.split('/')
+                    part = MIMEBase(mimeType[0], mimeType[1])
+                    part.set_payload(attachment.File)
+                    header = 'attachment; filename="'+attachment.Name+'"'
+                    part.add_header('Content-Disposition', header)
+                    msg.attach(part)
             else:
                 log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
 

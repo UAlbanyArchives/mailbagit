@@ -2,7 +2,9 @@ from structlog import get_logger
 import mailbox
 import os
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
+from email import encoders
 
 log = get_logger()
 
@@ -63,9 +65,17 @@ class MboxDerivative(Derivative):
                 if body == False:
                     log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Added message to MBOX without message body.")
                 
-                mbox.add(msg)
                 # Attachments
-                #Missing
+                for attachment in message.Attachments:
+                    mimeType = attachment.MimeType.split('/')
+                    part = MIMEBase(mimeType[0], mimeType[1])
+                    part.set_payload(attachment.File)
+                    header = 'attachment; filename="'+attachment.Name+'"'
+                    part.add_header('Content-Disposition', header)
+                    msg.attach(part)
+                    
+                mbox.add(msg)
+
             else:
                 log.error("Unable to write message to MBOX as no body or headers present for " + str(message.Mailbag_Message_ID))
 
