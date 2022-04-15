@@ -141,13 +141,19 @@ def htmlFormatting(message, external_css):
     # check to see which body to use
     html_content = False
     encoding = False
+
+    #setting a flag for html encoding
+    html_flag=False
+
     if message.HTML_Body:
         html_content = message.HTML_Body
         encoding = message.HTML_Encoding
+        html_flag = True
     elif message.Text_Body:
         #  converting text body to html body
         html_content = "<html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
         encoding = message.Text_Encoding
+
     else:
         log.debug("Unable to create PDF, no body found for " + str(message.Mailbag_Message_ID))
 
@@ -177,13 +183,13 @@ def htmlFormatting(message, external_css):
             # fallback to just prepending the table
             html_content = table + html_content
 
-        default_css = "<style>img {padding: 10px;} table.headersTable {margin-bottom: 20px;}</style>"
+
         # add encoding
         meta = "<meta charset=\"" + encoding + "\">"
         if "<head" in html_content.lower():
             head_position = html_content.lower().index("<head")
             meta_position = head_position + html_content[head_position:].index(">") + 1
-            html_content = html_content[:meta_position] + meta + default_css + html_content[meta_position:]
+            html_content = html_content[:meta_position] + meta + html_content[meta_position:]
         else:
             # fallback to just prepending the tag
             html_content = meta + html_content
@@ -192,13 +198,24 @@ def htmlFormatting(message, external_css):
         #Formatting HTML with beautiful soup
         soup = bs4.BeautifulSoup(html_content, 'html.parser', from_encoding=encoding)
 
-        #Embedding table styling
-        tag = soup.table
-        tag['border'] = 1
-        tag['cellspacing'] = 10
-        tag['cellpadding'] = 10
-        tag['align'] = 'center'
-        tag['style']="width:500px;"
+        default_css = "img {padding: 10px;} table, th, td { border: 1px solid; width=100%}"
+
+        #Embedding default styling
+        tag = soup.head
+        if tag:
+            # Create new tag for link
+            style = soup.new_tag("style")
+            style.string=default_css
+            soup.head.insert(1, style)
+        else:
+            # create new head tag with style embedded
+            head = soup.new_tag("head")
+            soup.html.body.insert_before(head)
+            # Create new tag for link
+            style = soup.new_tag("style")
+            style.string = default_css
+            soup.head.insert(1, style)
+
 
         #Adding external_css
         if external_css:
@@ -234,6 +251,9 @@ def htmlFormatting(message, external_css):
             if data:
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode(encoding)
 
-        html_content = str(soup)
+        if html_flag:
+            html_content=soup.prettify(encoding)
+        else:
+            html_content=soup.prettify()
 
-    return html_content, encoding
+    return html_content, encoding,html_flag
