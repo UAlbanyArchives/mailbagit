@@ -70,8 +70,8 @@ class MboxDerivative(Derivative):
                     mimeType = attachment.MimeType.split('/')
                     part = MIMEBase(mimeType[0], mimeType[1])
                     part.set_payload(attachment.File)
-                    header = 'attachment; filename="'+attachment.Name+'"'
-                    part.add_header('Content-Disposition', header)
+                    encoders.encode_base64(part)
+                    part.add_header('Content-Disposition', 'attachment', filename=attachment.Name)
                     msg.attach(part)
                     
                 mbox.add(msg)

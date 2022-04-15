@@ -59,7 +59,7 @@ if not skip_registry:
                 headerFields=[]
                 #Getting all the required attributes of message except error and body
                 for attribute in message:
-                    if(attribute[0] not in ("Error","Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message","Headers", "AttachmentFiles")):
+                    if(attribute[0] not in ("Error","Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message","Headers", "Attachments")):
                         headerFields.append(attribute[0])
                 #Getting the values of the attrbutes and appending to HTML string
                 for headerField in headerFields:
