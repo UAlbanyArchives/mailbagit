@@ -42,7 +42,7 @@ if not skip_registry:
 
         def do_task_per_message(self, message):
 
-                html_formatted, encoding, flag = helper.htmlFormatting(message, self.args.pdf_css)
+                html_formatted, encoding= helper.pdfhtmlFormatting(message, self.args.pdf_css,'pdf')
 
                 if html_formatted:
 
@@ -55,18 +55,12 @@ if not skip_registry:
                     if not self.args.dry_run:
                         if not os.path.isdir(out_dir):
                             os.makedirs(out_dir)
-                        if flag:
-                            write_html = open(html_name, 'w', encoding=encoding)
-                            write_html.write(html_formatted.decode(encoding))
-                            write_html.close()
-                            p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name], stdout=subprocess.PIPE,
+
+                        write_html = open(html_name, 'w', encoding=encoding)
+                        write_html.write(html_formatted.decode(encoding))
+                        write_html.close()
+                        p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name], stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE)
-                        else:
-                            write_html = open(html_name, 'w')
-                            write_html.write(html_formatted)
-                            write_html.close()
-                            p = subprocess.Popen([wkhtmltopdf, html_name, pdf_name], stdout=subprocess.PIPE,
-                                                 stderr=subprocess.PIPE)
 
                         stdout, stderr = p.communicate()
                         if p.returncode == 0:

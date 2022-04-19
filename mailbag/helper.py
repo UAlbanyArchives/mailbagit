@@ -136,24 +136,32 @@ def normalizePath(path):
         return path
 
 
-def htmlFormatting(message, external_css):
+def pdfhtmlFormatting(message, external_css,derivatives):
+    """
+            Creates a formatted html file using message text or html body
+            inserts any additional styling given by user
+            Useful for html and pdf derivative
+
+            Parameters:
+                message:message object
+                external_css(string): path of css file to customize derivative
+                derivatives(string):type of derivative
+
+            Returns:
+                Bytes: formatted html for pdf, html derivatives
+            """
+
 
     # check to see which body to use
     html_content = False
     encoding = False
-
-    #setting a flag for html encoding
-    html_flag=False
-
     if message.HTML_Body:
         html_content = message.HTML_Body
         encoding = message.HTML_Encoding
-        html_flag = True
     elif message.Text_Body:
         #  converting text body to html body
         html_content = "<html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
-        encoding = message.Text_Encoding
-
+        encoding = 'utf-8'
     else:
         log.debug("Unable to create PDF, no body found for " + str(message.Mailbag_Message_ID))
 
@@ -163,7 +171,8 @@ def htmlFormatting(message, external_css):
         # Getting all the required attributes of message except error and body
         for attribute in message:
             if (attribute[0] not in (
-            "Error", "Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message", "Headers", "AttachmentFiles")):
+                    "Error", "Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message", "Headers",
+                    "AttachmentFiles")):
                 headerFields.append(attribute[0])
         # Getting the values of the attrbutes and appending to HTML string
         for headerField in headerFields:
@@ -174,52 +183,60 @@ def htmlFormatting(message, external_css):
                 table += "</tr>"
         table += "</table>"
 
-        # add headers table to html
-        if "<body" in html_content.lower():
-            body_position = html_content.lower().index("<body")
-            table_position = body_position + html_content[body_position:].index(">") + 1
-            html_content = html_content[:table_position] + table + html_content[table_position:]
-        else:
-            # fallback to just prepending the table
-            html_content = table + html_content
+        # add headers table to html if pdf derivative is passed
+        if derivatives == 'pdf':
+            if "<body" in html_content.lower():
+                body_position = html_content.lower().index("<body")
+                table_position = body_position + html_content[body_position:].index(">") + 1
+                html_content = html_content[:table_position] + table + html_content[table_position:]
+            else:
+                # fallback to just prepending the table
+                html_content = table + html_content
 
 
-        # add encoding
-        meta = "<meta charset=\"" + encoding + "\">"
-        if "<head" in html_content.lower():
-            head_position = html_content.lower().index("<head")
-            meta_position = head_position + html_content[head_position:].index(">") + 1
-            html_content = html_content[:meta_position] + meta + html_content[meta_position:]
-        else:
-            # fallback to just prepending the tag
-            html_content = meta + html_content
-
-        
-        #Formatting HTML with beautiful soup
+        # Formatting HTML with beautiful soup
         soup = bs4.BeautifulSoup(html_content, 'html.parser', from_encoding=encoding)
 
-        default_css = "img {padding: 10px;} table, th, td { border: 1px solid; width=100%}"
-
-        #Embedding default styling
+        # Embedding Encoding with meta
         tag = soup.head
         if tag:
-            # Create new tag for link
-            style = soup.new_tag("style")
-            style.string=default_css
-            soup.head.insert(1, style)
+            # Create new tag for meta
+            meta = soup.new_tag("meta")
+            meta["charset"] = encoding
+            soup.head.insert(1, meta)
         else:
             # create new head tag with style embedded
             head = soup.new_tag("head")
             soup.html.body.insert_before(head)
-            # Create new tag for link
-            style = soup.new_tag("style")
-            style.string = default_css
-            soup.head.insert(1, style)
+            # Create new tag for meta
+            meta = soup.new_tag("meta")
+            meta["charset"] = encoding
+            soup.head.insert(1, meta)
 
+        default_css = "img {padding: 10px;} table, th, td { border: 1px solid; width=100%}"
 
-        #Adding external_css
-        if external_css:
+        # Embedding default styling
+        tag = soup.style
+        if tag:
+            tag.string += default_css
+        else:
             tag=soup.head
+            if tag:
+                style = soup.new_tag("style")
+                style.string = default_css
+                soup.head.insert(1, style)
+            else:
+                # create new head tag with style embedded
+                head = soup.new_tag("head")
+                soup.html.body.insert_before(head)
+                # Create new tag for link
+                style = soup.new_tag("style")
+                style.string = default_css
+                soup.head.insert(1, style)
+
+        # Adding external_css
+        if external_css:
+            tag = soup.head
             if tag:
                 # Create new tag for link
                 link = soup.new_tag("link")
@@ -230,11 +247,11 @@ def htmlFormatting(message, external_css):
                 # create new head tag with style embedded
                 head = soup.new_tag("head")
                 soup.html.body.insert_before(head)
-                #Create new tag for link
-                link=soup.new_tag("link")
-                link["rel"]="stylesheet"
-                link['href']=external_css
-                soup.head.insert(1,link)
+                # Create new tag for link
+                link = soup.new_tag("link")
+                link["rel"] = "stylesheet"
+                link['href'] = external_css
+                soup.head.insert(1, link)
 
         # Embedding Images
         tags = (tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
@@ -251,9 +268,6 @@ def htmlFormatting(message, external_css):
             if data:
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode(encoding)
 
-        if html_flag:
-            html_content=soup.prettify(encoding)
-        else:
-            html_content=soup.prettify()
+        html_content = soup.prettify(encoding)
 
-    return html_content, encoding,html_flag
+    return html_content, encoding
