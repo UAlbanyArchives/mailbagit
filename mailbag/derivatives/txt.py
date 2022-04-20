@@ -1,5 +1,6 @@
 # Makes txt file derivatives just containing message bodies
 import os
+import mailbag.helper as helper
 from structlog import get_logger
 
 log = get_logger()
@@ -14,24 +15,28 @@ class TxtDerivative(Derivative):
         log.debug("Setup account")
         super()
 
+        self.args = kwargs["args"]
+        mailbag_dir = kwargs["mailbag_dir"]
+        self.txt_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        if not self.args.dry_run:
+            os.makedirs(self.txt_dir)
+
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
-    def do_task_per_message(self, message, args, mailbag_dir):
+    def do_task_per_message(self, message):
 
-        if message.Email_Folder is None:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format)
-        else:
-            out_dir = os.path.join(mailbag_dir, self.derivative_format, message.Email_Folder)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + "." + self.derivative_format)
+        out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
 
         if message.Text_Body is None:
-            log.warn("Error writing txt derivative for " + str(message.Mailbag_Message_ID))
+            log.warn("No plain text body for " + str(message.Mailbag_Message_ID))
         else:
             log.debug("Writing txt derivative to " + filename)
-            if not args.dry_run:
+            if not self.args.dry_run:
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
-                with open(filename, "w") as f:
-                    f.write(message.Text_Body)
-                    f.close()
+                if message.Text_Body:
+                    with open(filename, "w", encoding=message.Text_Encoding) as f:
+                        f.write(message.Text_Body)
+                        f.close()

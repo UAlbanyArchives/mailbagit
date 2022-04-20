@@ -1,15 +1,17 @@
 import email
 import mailbox
+
 from structlog import get_logger
 from pathlib import Path
 import os, shutil, glob
 import email.errors
 
 from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbag.models import Email, Attachment
 import mailbag.helper as helper
 
 log = get_logger()
+
 
 class Mbox(EmailAccount):
     """Mbox - This concrete class parses mbox file format"""
@@ -30,65 +32,85 @@ class Mbox(EmailAccount):
 
     def messages(self):
         
-        files = glob.glob(os.path.join(self.file, "**", "*.mbox"), recursive=True)
-        for filePath in files:
-            subFolder = helper.emailFolder(self.file,filePath)
+        if os.path.isfile(self.file):
+            files = self.file
+            parent_dir = os.path.dirname(self.file)
+        else:
+            files = os.path.join(self.file, "**", "*.mbox")
+            parent_dir = self.file
+        file_list = glob.glob(files, recursive=True)
+        for filePath in file_list:
+            originalFile = helper.relativePath(self.file, filePath)
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
+                
+                attachments = []
+                errors = {}
+                errors["msg"] = []
+                errors["stack_trace"] = []
                 try:
-                    # mailObject = email.message_from_bytes(mail.as_bytes())
                     mailObject = email.message_from_bytes(mail.as_bytes(),policy=email.policy.default)
 
                     # Try to parse content
-                    attachmentNames = []
-                    attachments = []
+                    try:
+                        bodies = {}
+                        bodies["html_body"] = None
+                        bodies["text_body"] = None
+                        bodies["html_encoding"] = None
+                        bodies["text_encoding"] = None
+                        if mailObject.is_multipart():
+                            for part in mailObject.walk():
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                        else:
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                    except Exception as e:
+                        desc = "Error parsing message parts"
+                        errors = helper.handle_error(errors, e, desc)
 
-                    body = mailObject.get_body(preferencelist=('related', 'html', 'plain')).__str__()
+                    # Look for message arrangement
+                    try:
+                        messagePath = helper.messagePath(mailObject)
+                        unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
+                        derivativesPath = helper.normalizePath(unsafePath)
+                    except Exception as e:
+                        desc = "Error reading message path from headers"
+                        errors = helper.handle_error(errors, e, desc)
                     
-                    # Extract Attachments
-                    for attached in mailObject.iter_attachments():
-                        attachmentName,attachment = helper.saveAttachments(attached)
-                        if attachmentName:
-                            attachmentNames.append(attachmentName)
-                            attachments.append(attachment)
-                    if mail.is_multipart():
-                        
-                        for part in mail.walk():
-                            if part.get_content_type() == "text/html":
-                                html_body = part.get_payload()
-                            elif part.get_content_type() == "text/plain":
-                                text_body = part.get_payload()
-                                log.debug("Content-type "+part.get_content_maintype())
-
                     message = Email(
-                        Message_ID=mail['Message-ID'],
-                        Email_Folder=subFolder,
+                        Error=errors["msg"],
+                        Message_ID=mail['Message-ID'].strip(),
+                        Original_File=originalFile,
+                        Message_Path=messagePath,
+                        Derivatives_Path=derivativesPath,
                         Date=mail['Date'],
                         From=mail['From'],
                         To=mail['To'],
                         Cc=mail['Cc'],
                         Bcc=mail['Bcc'],
                         Subject=mail['Subject'],
-                        Content_Type=mail['Content-Type'],
+                        Content_Type=mailObject.get_content_type(),
                         Headers=mail,
-                        Body = body,
-                        Text_Body=text_body,
-                        HTML_Body=html_body,
+                        HTML_Body=bodies["html_body"],
+                        HTML_Encoding=bodies["html_encoding"],
+                        Text_Body=bodies["text_body"],
+                        Text_Encoding=bodies["text_encoding"],
                         Message=mailObject,
-                        AttachmentNum=len(attachmentNames) if attachmentNames else 0,
-                        AttachmentNames=attachmentNames,
-                        AttachmentFiles=attachments,
-                        Error='False'
+                        Attachments=attachments,
+                        StackTrace = errors["stack_trace"]
                     )
                 except (email.errors.MessageParseError, Exception) as e:
-                    log.error(e)
+                    desc = 'Error parsing message'
+                    errors = helper.handle_error(errors, e, desc)
                     message = Email(
-                        Error='True'
+                        Error=errors["msg"],
+                        StackTrace=errors["stack_trace"]
                     )
+                    log.error(error_msg)
+
                 yield message
 
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run,self.file,self.mailbag_name,self.format_name,subFolder,filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,filePath)

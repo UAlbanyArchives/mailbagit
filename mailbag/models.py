@@ -1,11 +1,21 @@
 from jsonmodels import models, fields, errors, validators
 from email.message import Message
 
+
+class Attachment(models.Base):
+    Name = fields.StringField()
+    File = fields.EmbeddedField(bytes)
+    MimeType = fields.StringField()
+
+    
 class Email(models.Base):
     """EmailModel - model class for email formats"""
+    Error = fields.ListField(str)
+    Mailbag_Message_ID = fields.IntField()
     Message_ID = fields.StringField()
-    Email_Folder = fields.StringField()
-    Original_Filename = fields.StringField()
+    Original_File= fields.StringField()
+    Message_Path = fields.StringField()
+    Derivatives_Path = fields.StringField()
     Date = fields.StringField()
     From = fields.StringField()
     To = fields.StringField()
@@ -14,12 +24,10 @@ class Email(models.Base):
     Subject = fields.StringField()
     Content_Type = fields.StringField()
     Headers = fields.EmbeddedField(Message)
-    Body = fields.StringField()
     HTML_Body = fields.StringField()
+    HTML_Encoding = fields.StringField()
     Text_Body = fields.StringField()
+    Text_Encoding  = fields.StringField()
     Message = fields.EmbeddedField(Message)
-    AttachmentNum = fields.IntField()
-    AttachmentNames = fields.ListField(str)
-    AttachmentFiles = fields.ListField(bytes)
-    Error = fields.StringField()
-    Mailbag_Message_ID=fields.IntField()
+    Attachments = fields.ListField(Attachment)
+    StackTrace=fields.ListField(str)
