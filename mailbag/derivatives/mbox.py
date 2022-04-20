@@ -70,7 +70,7 @@ class MboxDerivative(Derivative):
                     mimeType = attachment.MimeType
                     if mimeType is None:
                         mimeType = "text/plain"
-                        log.error("Mime type not found for the attachment. Set as "+mimeType+".")
+                        log.warn("Mime type not found for the attachment. Set as "+mimeType+".")
                     mimeType = mimeType.split('/')
                     part = MIMEBase(mimeType[0], mimeType[1])
                     part.set_payload(attachment.File)
