@@ -2,8 +2,8 @@ import base64
 import urllib.parse
 from pathlib import Path
 import os, shutil, glob
-
-import bs4
+import codecs
+from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
 
 log = get_logger()
@@ -135,22 +135,40 @@ def normalizePath(path):
     else:
         return path
 
-
-def pdfhtmlFormatting(message, external_css,derivatives):
+def addToHead(tag, soup):
     """
-            Creates a formatted html file using message text or html body
-            inserts any additional styling given by user
-            Useful for html and pdf derivative
+    Adds a Beautiful Soup tag to <head>
+    Handles when no <head> exists
 
-            Parameters:
-                message:message object
-                external_css(string): path of css file to customize derivative
-                derivatives(string):type of derivative
+    Parameters:
+        tag(BeautifulSoup) The tag to add
+        soup(BeautifulSoup): HTML body
 
-            Returns:
-                Bytes: formatted html for pdf, html derivatives
-            """
+    Returns:
+        BeautifulSoup: HTML body
+    """
+    if soup.head:
+        soup.head.insert(0, tag)
+    else:
+        head = soup.new_tag("head")
+        soup.html.body.insert_before(head)
+        soup.head.insert(0, tag)
+    return soup
 
+def htmlFormatting(message, external_css, headers=True):
+    """
+    Creates a formatted html file using message text or html body
+    inserts any additional styling given by user
+    Useful for html and pdf derivative
+
+    Parameters:
+        message:message object
+        external_css(string): path of css file to customize derivative
+        headers(boolean):option to add table of headers
+
+    Returns:
+        String: formatted html for pdf, html derivatives
+    """
 
     # check to see which body to use
     html_content = False
@@ -160,100 +178,108 @@ def pdfhtmlFormatting(message, external_css,derivatives):
         encoding = message.HTML_Encoding
     elif message.Text_Body:
         #  converting text body to html body
-        html_content = "<html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
-        encoding = 'utf-8'
+        html_content = "<!DOCTYPE html><html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
+        # using utf-8 for ascii plain text bodies as we're adding non-ascii whitespace
+        if codecs.lookup(message.Text_Encoding).name.lower() == "ascii":
+            log.debug("Using utf-8 to better handle whitespace for plain text ascii body message " + str(message.Mailbag_Message_ID))
+            encoding = 'utf-8'
+        else:
+            encoding = message.Text_Encoding
     else:
-        log.debug("Unable to create PDF, no body found for " + str(message.Mailbag_Message_ID))
+        log.warn("Unable to format HTML, no message body found for " + str(message.Mailbag_Message_ID))
 
     if html_content:
-        table = "<table class='headersTable'>"
-        headerFields = []
-        # Getting all the required attributes of message except error and body
-        for attribute in message:
-            if (attribute[0] not in (
-                    "Error", "Text_Body", "Text_Bytes", "HTML_Body", "HTML_Bytes", "Message", "Headers",
-                    "AttachmentFiles")):
-                headerFields.append(attribute[0])
-        # Getting the values of the attrbutes and appending to HTML string
-        for headerField in headerFields:
-            if not getattr(message, headerField) is None:
-                table += "<tr>"
-                table += "<td>" + str(headerField) + "</td>"
-                table += "<td>" + str(getattr(message, headerField)) + "</td>"
-                table += "</tr>"
-        table += "</table>"
-
-        # add headers table to html if pdf derivative is passed
-        if derivatives == 'pdf':
-            if "<body" in html_content.lower():
-                body_position = html_content.lower().index("<body")
-                table_position = body_position + html_content[body_position:].index(">") + 1
-                html_content = html_content[:table_position] + table + html_content[table_position:]
-            else:
-                # fallback to just prepending the table
-                html_content = table + html_content
-
 
         # Formatting HTML with beautiful soup
-        soup = bs4.BeautifulSoup(html_content, 'html.parser', from_encoding=encoding)
+        soup = BeautifulSoup(html_content.encode(encoding), 'html.parser', from_encoding=encoding)
+
+        # Check Doctype
+        doctype = False
+        for item in soup.contents:
+            if isinstance(item, Doctype):
+                doctype = True
+        if doctype is False:
+            tag = Doctype('html')
+            soup.insert(0, tag)
+
+        # optionally adds headers table to html
+        if headers:
+            # Make headers table
+            table = "<table id='mailbagHeadersTable'>"
+            if message.Subject:
+                h2 = "<h2>" + message.Subject + "</h2>"
+            else:
+                h2 = ""
+            # Headers to display
+            headerFields = ["Mailbag_Message_ID", "Message_ID", "From", "Date", "To", "Cc", "Bcc", "Subject"]
+            # Getting the values of the attrbutes and appending to HTML string
+            for headerField in headerFields:
+                value = getattr(message, headerField)
+                if not value is None and value != []:
+                    table += "<tr>"
+                    table += "<td class='header'>" + str(headerField) + "</td>"
+                    table += "<td>" + str(getattr(message, headerField)).replace("<", "&lt;").replace(">", "&gt;") + "</td>"
+                    table += "</tr>"
+            if len(message.AttachmentNames) > 0:
+                attachmentNumber = len(message.AttachmentNames)
+                table += "<tr>"
+                table += "<td class='header'>Attachments</td><td>"
+                for i, attachmentName in enumerate(message.AttachmentNames):
+                    table += attachmentName
+                    if i+1 < attachmentNumber:
+                        table += "<br/>"
+                table += "</td>"
+                table += "</tr>"
+            tableSection = "<section id='mailbagHeaders'>" + h2 + table + "</table></section>"
+            soupTable = BeautifulSoup(tableSection, 'html.parser')
+
+            # Add headers table to HTML body
+            soup.html.body.insert(0, soupTable)
 
         # Embedding Encoding with meta
-        tag = soup.head
-        if tag:
-            # Create new tag for meta
-            meta = soup.new_tag("meta")
-            meta["charset"] = encoding
-            soup.head.insert(1, meta)
-        else:
-            # create new head tag with style embedded
-            head = soup.new_tag("head")
-            soup.html.body.insert_before(head)
-            # Create new tag for meta
-            meta = soup.new_tag("meta")
-            meta["charset"] = encoding
-            soup.head.insert(1, meta)
-
-        default_css = "img {padding: 10px;} table, th, td { border: 1px solid; width=100%}"
+        meta = soup.new_tag("meta")
+        meta["charset"] = encoding
+        soup = addToHead(meta, soup)
 
         # Embedding default styling
-        tag = soup.style
-        if tag:
-            tag.string += default_css
-        else:
-            tag=soup.head
-            if tag:
-                style = soup.new_tag("style")
-                style.string = default_css
-                soup.head.insert(1, style)
-            else:
-                # create new head tag with style embedded
-                head = soup.new_tag("head")
-                soup.html.body.insert_before(head)
-                # Create new tag for link
-                style = soup.new_tag("style")
-                style.string = default_css
-                soup.head.insert(1, style)
+        default_css = """
+            section#mailbagHeaders table#mailbagHeadersTable {
+                width: 100%;
+                margin-bottom: 35px;
+                text-align: left;
+                border-top: 4px solid #000000;
+                padding-top: 8px;
+                border-collapse: separate;
+                border-spacing: 0 1px;
+            }
+            section#mailbagHeaders table#mailbagHeadersTable > tbody > tr > td {
+                font: 16px Arial sans-serif;
+                color:  #000000;
+                padding: 2px 5px;
+            }
+            section#mailbagHeaders table#mailbagHeadersTable tbody tr:nth-of-type(even) {
+                background-color: #f3f3f3;
+            }
+            section#mailbagHeaders h2 {
+                margin-bottom: 2px;
+                font-size: 24px;
+                font-family: Arial sans-serif;
+        """
+        style = soup.new_tag("style")
+        style.string = default_css
+        soup = addToHead(style, soup)
 
         # Adding external_css
         if external_css:
-            tag = soup.head
-            if tag:
-                # Create new tag for link
-                link = soup.new_tag("link")
-                link["rel"] = "stylesheet"
-                link['href'] = external_css
-                soup.head.insert(1, link)
-            else:
-                # create new head tag with style embedded
-                head = soup.new_tag("head")
-                soup.html.body.insert_before(head)
-                # Create new tag for link
-                link = soup.new_tag("link")
-                link["rel"] = "stylesheet"
-                link['href'] = external_css
-                soup.head.insert(1, link)
+            link = soup.new_tag("link")
+            link["rel"] = "stylesheet"
+            link["type"] = "text/css" 
+            link['href'] = "file:///" + external_css
+            soup = addToHead(link, soup)
 
         # Embedding Images
+        # HT to extract_msg for this approach
+        # https://github.com/TeamMsgExtractor/msg-extractor/blob/6bed8213de1a7a41739fcf5c9363322508711fce/extract_msg/message_base.py#L403-L414
         tags = (tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
         data = None
         for tag in tags:
@@ -268,6 +294,6 @@ def pdfhtmlFormatting(message, external_css,derivatives):
             if data:
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode(encoding)
 
-        html_content = soup.prettify(encoding)
+        html_content = soup.prettify(encoding).decode(encoding)
 
     return html_content, encoding

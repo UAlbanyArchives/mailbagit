@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 bagit = "==1.8.1"
+beautifulsoup4 = "==4.11.1"
 black = "==22.1.0"
 cffi = "==1.15.0"
 chardet = "==4.0.0"

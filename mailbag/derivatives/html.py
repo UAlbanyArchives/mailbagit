@@ -27,22 +27,18 @@ class HtmlDerivative(Derivative):
     def do_task_per_message(self, message):
 
         out_dir = os.path.join(self.html_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".html")
 
-        log.debug("Writing html derivative to " + filename)
-        if not self.args.dry_run:
-            if not os.path.isdir(out_dir):
-                os.makedirs(out_dir)
-            if message.HTML_Body:
-                log.debug(str(message.Mailbag_Message_ID) + " --> " + message.HTML_Encoding)
+        if message.HTML_Body is None and message.Text_Body is None:
+            log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No HTML derivative will be created.")
+        else:
+            log.debug("Writing html derivative to " + filename)
+            if not self.args.dry_run:
+                if not os.path.isdir(out_dir):
+                    os.makedirs(out_dir)
                 #Calling helper function to get formatted html
-                html_formatted, encoding = helper.pdfhtmlFormatting(message, self.args.pdf_css, 'html')
-                with open(filename + ".html", "w", encoding=encoding) as f:
-                    f.write(html_formatted.decode(encoding))
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=True)
+                with open(filename, "w", encoding=encoding) as f:
+                    f.write(html_formatted)
                     f.close()
-            elif message.Text_Body:
-                with open(filename + ".txt", "w", encoding=message.Text_Encoding) as f:
-                    f.write(message.Text_Body)
-                    f.close()
-            else:
-                log.warn("Error writing html derivative, no body present for " + str(message.Mailbag_Message_ID))
+                
