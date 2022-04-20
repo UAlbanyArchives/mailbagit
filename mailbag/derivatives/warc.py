@@ -4,7 +4,7 @@ import mailbag.helper as helper
 from warcio.capture_http import capture_http
 from warcio import WARCWriter
 import requests  # requests *must* be imported after capture_http
-import _thread
+from threading import Thread
 import http.server
 import socketserver
 
@@ -29,7 +29,8 @@ class WarcDerivative(Derivative):
             os.makedirs(self.warc_dir)
 
             self.httpd = []
-            _thread.start_new_thread(helper.startServer,(self.args.dry_run,self.httpd,5000))
+            self.server_thread = Thread(target=helper.startServer,args=(self.args.dry_run,self.httpd,5000))
+            self.server_thread.start()
 
     def __del__(self):
         log.debug("Calling server destructor")
@@ -38,7 +39,7 @@ class WarcDerivative(Derivative):
         # Terminate the process
         try:
             if not self.args.dry_run:
-                _thread.exit_thread()
+                self.server_thread.join()
         except SystemExit:
             pass
         except:

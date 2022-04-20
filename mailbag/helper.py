@@ -107,4 +107,5 @@ def startServer(dry_run, httpdShared, port=5000):
 def stopServer(dry_run, httpd):
     log.debug("Stopping Server")
     if not dry_run:
+        httpd.shutdown()
         httpd.server_close()
