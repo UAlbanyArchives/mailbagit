@@ -83,7 +83,11 @@ class Controller:
 
             # Generate derivatives
             for d in derivatives:
-                d.do_task_per_message(message, self.args)
+                d.do_task_per_message(message)
+
+        log.debug("Cleaning up derivatives classes.")
+        for d in derivatives:
+            d.cleanup()
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)

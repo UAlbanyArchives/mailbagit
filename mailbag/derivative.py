@@ -46,6 +46,11 @@ class Derivative(ABC):
         """Perform any tasks that should happen once per message"""
         pass
 
+    @abstractmethod
+    def cleanup(self):
+        """Cleanup any threads or data remaining from creating derivatives."""
+        pass
+
 def import_derivatives(additional_dirs=None):
     if not additional_dirs:
         additional_dirs = []

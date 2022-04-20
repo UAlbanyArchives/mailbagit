@@ -24,17 +24,18 @@ class WarcDerivative(Derivative):
         self.args = kwargs['args']
         mailbag_dir = kwargs['mailbag_dir']
         self.warc_dir = os.path.join(str(mailbag_dir),'warc')
+        self.httpd = []
 
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
 
-            self.httpd = []
             self.server_thread = Thread(target=helper.startServer,args=(self.args.dry_run,self.httpd,5000))
             self.server_thread.start()
 
-    def __del__(self):
+    def cleanup(self):
         log.debug("Calling server destructor")
-        helper.stopServer(self.args.dry_run,self.httpd[0])
+        if not self.args.dry_run:
+            helper.stopServer(self.args.dry_run,self.httpd[0])
         
         # Terminate the process
         try:
@@ -49,7 +50,7 @@ class WarcDerivative(Derivative):
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
-    def do_task_per_message(self, message, args):
+    def do_task_per_message(self, message):
         if message.HTML_Body is None:
             log.warn("Error writing warc derivative for " + str(message.Mailbag_Message_ID))
         else:
