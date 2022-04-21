@@ -71,7 +71,10 @@ class Mbox(EmailAccount):
                     # Look for message arrangement
                     try:
                         messagePath = helper.messagePath(mailObject)
-                        unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
+                        if len(messagePath) > 0:
+                            unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
+                        else:
+                            unsafePath = os.path.splitext(originalFile)[0]
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
