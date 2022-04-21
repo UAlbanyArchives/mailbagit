@@ -15,85 +15,91 @@ def cli_args():
 def test_Mbox(cli_args):
     testfile = "sample1.mbox"
     data = EmailAccount.registry['mbox'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    for messageFile in os.listdir(dump_dir):
-        message = Email()
-        message.read(os.path.join(dump_dir, messageFile))
-        expected.append(message)
-    
-    count = 0
-    for id, m in enumerate(data):
-        count += 1
-        m.Mailbag_Message_ID = count
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-        for field in m:
+        for field in message:
             if field[0] == "Headers" or field[0] == "Message":
-                dump = getattr(expected[id], field[0])
-                compare = getattr(m, field[0])
-                for key in compare:
-                    assert compare[key] == dump[key]
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
+                    for key in compare:
+                        assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
             else:
-                assert getattr(m, field[0]) == getattr(expected[id], field[0])
+                assert getattr(message, field[0]) == getattr(expected, field[0])
                 
 
 
 def test_MSG(cli_args):
     testfile = "Digitization Archiving Solutions.msg"
     data = EmailAccount.registry['msg'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    for messageFile in os.listdir(dump_dir):
-        message = Email()
-        message.read(os.path.join(dump_dir, messageFile))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-        expected.append(message)
-
-    count = 0
-    for id, m in enumerate(data):
-        count += 1
-        m.Mailbag_Message_ID = count
-
-        for field in m:
+        for field in message:
             if field[0] == "Headers" or field[0] == "Message":
-                dump = getattr(expected[id], field[0])
-                compare = getattr(m, field[0])
-                if compare:
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
                     for key in compare:
                         assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
             else:
-                assert getattr(m, field[0]) == getattr(expected[id], field[0])
+                assert getattr(message, field[0]) == getattr(expected, field[0])
 
 
 def test_EML(cli_args):
 
     testfile = "2016-06-23_144430_6e449c77fe.eml"
     data = EmailAccount.registry['eml'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    for messageFile in os.listdir(dump_dir):
-        message = Email()
-        message.read(os.path.join(dump_dir, messageFile))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-        expected.append(message)
-
-    count = 0
-    for id, m in enumerate(data):
-        count += 1
-        m.Mailbag_Message_ID = count
-
-        for field in m:
+        for field in message:
             if field[0] == "Headers" or field[0] == "Message":
-                dump = getattr(expected[id], field[0])
-                compare = getattr(m, field[0])
-                if compare:
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
                     for key in compare:
                         assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
             else:
-                assert getattr(m, field[0]) == getattr(expected[id], field[0])
+                assert getattr(message, field[0]) == getattr(expected, field[0])
+
 
 def test_PST(cli_args):
     if not 'pst' in EmailAccount.registry:
@@ -101,26 +107,27 @@ def test_PST(cli_args):
 
     testfile = "outlook2019_MSO_16.0.10377.20023_64-bit.pst"
     data = EmailAccount.registry['pst'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    for messageFile in os.listdir(dump_dir):
-        message = Email()
-        message.read(os.path.join(dump_dir, messageFile))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-        expected.append(message)
-
-    count = 0
-    for id, m in enumerate(data):
-        count += 1
-        m.Mailbag_Message_ID = count
-
-        for field in m:
+        for field in message:
             if field[0] == "Headers" or field[0] == "Message":
-                dump = getattr(expected[id], field[0])
-                compare = getattr(m, field[0])
-                if compare:
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
                     for key in compare:
                         assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
             else:
-                assert getattr(m, field[0]) == getattr(expected[id], field[0])
+                assert getattr(message, field[0]) == getattr(expected, field[0])

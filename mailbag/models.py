@@ -40,7 +40,7 @@ class Email(models.Base):
 
     def dump(self):
         filename = os.path.basename(self.Original_File)
-        dump_file = os.path.splitext(filename)[1] + "-" + os.path.splitext(filename)[0]
+        dump_file = os.path.splitext(filename)[1][1:] + "-" + os.path.splitext(filename)[0]
         rootpath = os.path.join("data", dump_file, str(self.Mailbag_Message_ID))
         if not os.path.isdir(rootpath):
             os.makedirs(rootpath)
