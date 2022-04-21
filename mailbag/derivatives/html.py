@@ -37,7 +37,7 @@ class HtmlDerivative(Derivative):
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
                 #Calling helper function to get formatted html
-                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=True)
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
                 with open(filename, "w", encoding=encoding) as f:
                     f.write(html_formatted)
                     f.close()

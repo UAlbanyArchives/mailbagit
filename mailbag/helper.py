@@ -257,7 +257,12 @@ def addToHead(tag, soup):
         soup.head.insert(0, tag)
     else:
         head = soup.new_tag("head")
-        soup.html.body.insert_before(head)
+        if soup.html:
+            soup.html.insert(0, head)
+        else:
+            html = soup.new_tag("html")
+            soup.insert(0, html)
+            soup.html.insert(0, head)
         soup.head.insert(0, tag)
     return soup
 
@@ -284,7 +289,19 @@ def htmlFormatting(message, external_css, headers=True):
         encoding = message.HTML_Encoding
     elif message.Text_Body:
         #  converting text body to html body
-        html_content = "<!DOCTYPE html><html><head><style>body{ white-space: pre;}</style></head><body>" + message.Text_Body + "</body></html>"
+        html_content = """
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <style>
+                        #mailbagPlainText{white-space: pre;}
+                    </style>
+                </head>
+                <body>
+                    <section id='mailbagPlainText'>""" + message.Text_Body + """<section>
+                </body>
+            </html>
+        """
         # using utf-8 for ascii plain text bodies as we're adding non-ascii whitespace
         if codecs.lookup(message.Text_Encoding).name.lower() == "ascii":
             log.debug("Using utf-8 to better handle whitespace for plain text ascii body message " + str(message.Mailbag_Message_ID))
@@ -326,12 +343,12 @@ def htmlFormatting(message, external_css, headers=True):
                     table += "<td class='header'>" + str(headerField) + "</td>"
                     table += "<td>" + str(getattr(message, headerField)).replace("<", "&lt;").replace(">", "&gt;") + "</td>"
                     table += "</tr>"
-            if len(message.AttachmentNames) > 0:
-                attachmentNumber = len(message.AttachmentNames)
+            if len(message.Attachments) > 0:
+                attachmentNumber = len(message.Attachments)
                 table += "<tr>"
                 table += "<td class='header'>Attachments</td><td>"
-                for i, attachmentName in enumerate(message.AttachmentNames):
-                    table += attachmentName
+                for i, attachment in enumerate(message.Attachments):
+                    table += attachment.Name
                     if i+1 < attachmentNumber:
                         table += "<br/>"
                 table += "</td>"
@@ -392,9 +409,9 @@ def htmlFormatting(message, external_css, headers=True):
             # Iterate through the attachments until we get the right one.
             cid = tag['src'][4:]
 
-            for i in range(message.AttachmentNum):
-                if message.AttachmentNames[i] in cid:
-                    data = message.AttachmentFiles[i]
+            for attachment in message.Attachments:
+                if attachment.Name in cid:
+                    data = attachment.File
 
             # If we found anything, inject it.
             if data:
