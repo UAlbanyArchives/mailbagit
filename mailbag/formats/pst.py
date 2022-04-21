@@ -1,6 +1,6 @@
 import os, glob
 import mailbox
-
+from pathlib import Path
 import chardet
 from structlog import get_logger
 from email import parser
@@ -79,6 +79,8 @@ if not skip_registry:
                         # Build message and derivatives paths
                         try:
                             messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            if len(messagePath) > 0:
+                                messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
                         except Exception as e:
                             desc = "Error reading message path"

@@ -51,7 +51,7 @@ def messagePath(headers):
         """
 
         if headers["X-Folder"]:
-            messagePath = headers["X-Folder"].replace("\\", "/")
+            messagePath = Path(headers["X-Folder"]).as_posix()
         else:
             messagePath = ""
         return messagePath
@@ -234,6 +234,11 @@ def normalizePath(path):
                 new_path.append(urllib.parse.quote_plus(name))
             else:
                 new_path.append(name)
-        return os.path.join(*new_path)
+        out_path = Path(os.path.join(*new_path)).as_posix()
     else:
-        return path
+        out_path = path
+
+    if out_path == ".":
+        return ""
+    else:
+        return out_path

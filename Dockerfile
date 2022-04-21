@@ -16,12 +16,12 @@ RUN apt-get install -y python
 RUN apt-get install -y python3-pip
 
 # Install wxPython with dependancies
-RUN apt-get install -y libgtk-3-dev
-RUN apt-get install -y libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0 libnotify-dev
-RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
+#RUN apt-get install -y libgtk-3-dev
+#RUN apt-get install -y libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0 libnotify-dev
+#RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
 
-# Install Python dependancies
-RUN pip install -r requirements.txt
+# Install Optional Python dependancies
+RUN pip install libpff-python-ratom==20200808
 
 # Install wkhtmltopdf
 RUN apt-get install -y curl

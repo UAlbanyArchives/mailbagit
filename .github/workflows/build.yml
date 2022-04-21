@@ -21,16 +21,15 @@ jobs:
           sudo timedatectl set-timezone America/New_York
           sudo apt-get update
           sudo apt-get install libgtk-3-dev
-      - name: Install pipenv
-        uses: dschep/install-pipenv-action@v1
       - name: Install Python dependencies
         run: |
-          pipenv run pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
-          pipenv install
+          pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
+          pip install .
+          pip install libpff-python-ratom==20200808
       - name: Lint with black
         run: |
-          pipenv run black . --verbose
+          black . --verbose
       - name: Test with pytest
         run: |
           python dumpData.py data
-          pipenv run pytest -vv
+          pytest -vv

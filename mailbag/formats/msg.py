@@ -40,7 +40,6 @@ class MSG(EmailAccount):
             errors["msg"] = []
             errors["stack_trace"] = []
             try:
-                print (filePath)
                 mail = extract_msg.openMsg(filePath)
 
                 # Parse message bodies
