@@ -7,3 +7,4 @@
 *.pst binary
 *.eml binary
 *.mbox binary
+data/* binary
