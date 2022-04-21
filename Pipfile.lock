@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d8dc5b9e3238f2007d3462d1d140174c6cab61126258e6229b87c97e58aed9d3"
+            "sha256": "7eea76007ddfe42aac98e60fc7db846db14647c86a4521ad57a4d45a810b50fd"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -54,11 +54,11 @@
         },
         "beautifulsoup4": {
             "hashes": [
-                "sha256:9a315ce70049920ea4572a4055bc4bd700c940521d36fc858205ad4fcde149bf",
-                "sha256:c23ad23c521d818955a4151a67d81580319d4bf548d3d49f4223ae041ff98891"
+                "sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30",
+                "sha256:ad9aa55b65ef2808eb405f46cf74df7fcb7044d5cbc26487f96eb2ef2e436693"
             ],
-            "markers": "python_version >= '3.1'",
-            "version": "==4.10.0"
+            "markers": "python_version >= '3.6'",
+            "version": "==4.11.1"
         },
         "black": {
             "hashes": [
@@ -234,11 +234,11 @@
         },
         "extract-msg": {
             "hashes": [
-                "sha256:48989d69584707d85accf43453ef6b9afc2979144d3003b8efb71b41ce6b05f0",
-                "sha256:c009745592fcbab8a7080cfe1fc6e28d60ce9fd14704aea0ddb66bff5fb53bc6"
+                "sha256:1bc0569cdaa8fc74fb11c804e5f4a5c886ed3032c7d73f3b895803b58293de76",
+                "sha256:1eef1f442908ca7571f1aced4684a47f97d4f64c113c2c476bd106e28564445f"
             ],
             "index": "pypi",
-            "version": "==0.30.9"
+            "version": "==0.30.10"
         },
         "gooey": {
             "hashes": [
@@ -541,11 +541,11 @@
         },
         "soupsieve": {
             "hashes": [
-                "sha256:1a3cca2617c6b38c0343ed661b1fa5de5637f257d4fe22bd9f1338010a1efefb",
-                "sha256:b8d49b1cd4f037c7082a9683dfa1801aa2597fb11c3a1155b7a5b94829b4f1f9"
+                "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759",
+                "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2.3.1"
+            "version": "==2.3.2.post1"
         },
         "structlog": {
             "hashes": [
