@@ -40,7 +40,7 @@ def test_Mbox(cli_args):
 
 
 def test_MSG(cli_args):
-    testfile = "sample1.msg"
+    testfile = "Digitization Archiving Solutions.msg"
     data = EmailAccount.registry['msg'](os.path.join("data"), cli_args).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1] + "-" + os.path.splitext(testfile)[0])
 

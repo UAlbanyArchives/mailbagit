@@ -1,1 +1,9 @@
 * text eol=lf
+
+# Binary files.
+*.png binary
+*.jpg binary
+*.msg binary
+*.pst binary
+*.eml binary
+*.mbox binary

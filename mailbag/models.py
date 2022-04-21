@@ -34,7 +34,7 @@ class Email(models.Base):
     StackTrace=fields.ListField(str)
 
     def dump_string(self, value, outpath, encoding=None):
-        with open(outpath, "w", encoding=encoding, newline='') as f:
+        with open(outpath, "w", encoding=encoding, newline='\n') as f:
             f.write(value)
             f.close()
 
@@ -87,7 +87,7 @@ class Email(models.Base):
 
     def read_file(self, path, encoding, filetype="r"):
         if filetype == "r":
-            with open(path, filetype, encoding=encoding, newline='') as f:
+            with open(path, filetype, encoding=encoding, newline='\n') as f:
                 data = f.read()
                 f.close()
         else:
