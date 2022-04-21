@@ -27,31 +27,18 @@ class HtmlDerivative(Derivative):
     def do_task_per_message(self, message):
 
         out_dir = os.path.join(self.html_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".html")
 
-        if message.HTML_Body:
-            #add encoding <meta> tag
-            meta = "<meta charset=\"" + message.HTML_Encoding + "\">"
-            if message.HTML_Encoding and "<head" in message.HTML_Body.lower():
-                head_position = message.HTML_Body.lower().index("<head")
-                meta_position = head_position + message.HTML_Body[head_position:].index(">") + 1
-                html_encoded = message.HTML_Body[:meta_position] + meta + message.HTML_Body[meta_position:]
-            else:
-                #fallback to just prepending the tag
-                html_encoded = meta + message.HTML_Body
-
-        log.debug("Writing html derivative to " + filename)
-        if not self.args.dry_run:
-            if not os.path.isdir(out_dir):
-                os.makedirs(out_dir)
-            if message.HTML_Body:
-                log.debug(str(message.Mailbag_Message_ID) + " --> " + message.HTML_Encoding)
-                with open(filename + ".html", "w", encoding=message.HTML_Encoding) as f:
-                    f.write(html_encoded)
+        if message.HTML_Body is None and message.Text_Body is None:
+            log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No HTML derivative will be created.")
+        else:
+            log.debug("Writing html derivative to " + filename)
+            if not self.args.dry_run:
+                if not os.path.isdir(out_dir):
+                    os.makedirs(out_dir)
+                #Calling helper function to get formatted html
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
+                with open(filename, "w", encoding=encoding) as f:
+                    f.write(html_formatted)
                     f.close()
-            elif message.Text_Body:
-                with open(filename + ".txt", "w", encoding=message.Text_Encoding) as f:
-                    f.write(message.Text_Body)
-                    f.close()
-            else:
-                log.warn("Error writing html derivative, no body present for " + str(message.Mailbag_Message_ID))
+                

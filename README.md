@@ -143,8 +143,8 @@ e.g. `-d eml pdf warc`
 > Will not include email headers in `mailbag.csv`
 > Argument does not take any input.
 
-* **--pdf-css**
-> Path to a CSS file to override the included CSS when creating PDF derivatives
+* **--css**
+> Path to a CSS file to override the included CSS when creating PDF or HTML derivatives
 > Argument takes single file path as input.
 
 * **-c --compress**
