@@ -37,5 +37,5 @@ setuptools.setup(
         "RTFDE>=0.0.2",
         "chardet>=4.0.0,<5"
         ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
