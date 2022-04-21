@@ -1,4 +1,4 @@
-* text eol=lf
+* text=auto eol=lf
 
 # Binary files.
 *.png binary
@@ -7,4 +7,7 @@
 *.pst binary
 *.eml binary
 *.mbox binary
+*.pickle binary
+HTML_Body.txt binary
+Text_Body.txt binary
 data/* binary
