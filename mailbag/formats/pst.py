@@ -2,6 +2,8 @@ import os, glob
 import mailbox
 
 import chardet
+import struct
+from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
@@ -59,15 +61,33 @@ if not skip_registry:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
 
-
                         try:
                             # Parse message bodies
                             html_body = None
                             text_body = None
                             html_encoding = None
                             text_encoding = None
+                            encoding = None
+
+                            # Codepage integers found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
+                            # Docs say to use MESSAGE_CODEPAGE: https://github.com/libyal/libfmapi/blob/main/documentation/MAPI%20definitions.asciidoc#51-the-message-body
+                            # this is a 32bit encoded integer
+                            LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE = int("0x3fde", base=16)
+                            LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE = int("0x3ffd", base=16)
+                            for record_set in messageObj.record_sets:
+                                    for entry in record_set.entries:
+                                        if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
+                                            if entry.data:
+                                                value = struct.unpack('i', entry.data)[0]
+                                                # Use the extract_msg code page in constants.py
+                                                encoding = CODE_PAGES[value]
+
                             if messageObj.html_body:
-                                html_encoding = chardet.detect(messageObj.html_body)['encoding']
+                                if encoding:
+                                    html_encoding = encoding
+                                    print ("\t" + chardet.detect(messageObj.html_body)['encoding'] + " --> " + encoding)
+                                else:
+                                    html_encoding = chardet.detect(messageObj.html_body)['encoding']
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
                                 text_encoding = chardet.detect(messageObj.plain_text_body)['encoding']
