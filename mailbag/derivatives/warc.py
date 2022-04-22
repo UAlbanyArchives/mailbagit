@@ -3,6 +3,7 @@ from structlog import get_logger
 import mailbag.helper as helper
 from warcio.capture_http import capture_http
 from warcio import WARCWriter
+from warcio.statusandheaders import StatusAndHeaders
 import requests  # requests *must* be imported after capture_http
 from threading import Thread
 import http.server
@@ -63,8 +64,23 @@ class WarcDerivative(Derivative):
         if not dry_run:
             if not os.path.isdir(out_dir):
                 os.makedirs(out_dir)
-            with capture_http(filename):
+    
+            with open(filename, 'wb') as output:
                 html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
                 helper.saveFile('tmp.html', html_formatted)
-                requests.get('http://localhost:' + str(port) + '/tmp.html')
+                
+                writer = WARCWriter(output, gzip=True)
+                resp = requests.get('http://localhost:' + str(port) + '/tmp.html',
+                                    headers={'Accept-Encoding': 'identity'},
+                                    stream=True)
+            
+                # get raw headers from urllib3
+                headers_list = resp.raw.headers.items()
+            
+                http_headers = StatusAndHeaders('200 OK', headers_list, protocol='HTTP/1.0')
+            
+                record = writer.create_warc_record('http://localhost', 'response',
+                                                    payload=resp.raw,
+                                                    http_headers=http_headers)
+                writer.write_record(record)
             helper.deleteFile('tmp.html')
