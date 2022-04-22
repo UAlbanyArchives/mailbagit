@@ -36,7 +36,9 @@ setuptools.setup(
         "pytest>=7.0.1,<8",
         "python-dotenv>0.19.0,<=0.19.1",
         "RTFDE>=0.0.2",
-        "chardet>=4.0.0,<5"
+        "chardet>=4.0.0,<5",
+        # for black
+        "typed-ast>=1.5.3,<2"
         ],
     python_requires=">=3.7",
 )
