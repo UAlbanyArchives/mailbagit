@@ -52,6 +52,7 @@ class Controller:
         return line
 
     def generate_mailbag(self):
+
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
         #Create folder mailbag folder before writing mailbag.csv
@@ -60,6 +61,7 @@ class Controller:
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+
         attachments_dir = os.path.join(str(mailbag_dir),'data','attachments')
         error_dir=os.path.join(parent_dir,str(self.args.mailbag_name)+'_errors')
         log.debug("Creating mailbag at " + str(mailbag_dir))
@@ -103,7 +105,7 @@ class Controller:
                 csv_portion = [self.csv_headers]
                 csv_portion.append(self.message_to_csv(message))
                 csv_portion_count = 0
-            #if count is less than 100000 , appending the messages in one list
+            # if count is less than 100000 , appending the messages in one list
             else:
                 csv_portion.append(self.message_to_csv(message))
             csv_portion_count += 1
@@ -124,13 +126,18 @@ class Controller:
             for d in derivatives:
                 d.do_task_per_message(message)
 
+        # End derivatives thread and server
+        for d in derivatives:
+            if 'warc.WarcDerivative' in str(type(d)):
+                d.terminate()
+        
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 
         # Write CSV data to mailbag.csv
         log.debug("Writing mailbag.csv to " + str(mailbag_dir))
         if not self.args.dry_run:
-            #Creating csv
+            # Creating csv
             # checking if there are multiple portions in list or not
             if len(csv_data) == 1:
                 filename = os.path.join(mailbag_dir, "mailbag.csv")
@@ -154,9 +161,6 @@ class Controller:
             with open(filename, 'w', encoding='UTF8', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
-
-
-
 
 
         if self.args.compress and not self.args.dry_run:

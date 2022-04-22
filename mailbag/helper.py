@@ -9,6 +9,10 @@ from mailbag.models import Attachment
 import mimetypes
 import traceback
 
+import http.server
+import socketserver
+import sys
+
 log = get_logger()
 
 def moveFile(dry_run, oldPath, newPath):
@@ -59,6 +63,7 @@ def messagePath(headers):
             messagePath = ""
         return messagePath
         
+
 def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         """
         Create new mailbag directory structure while maintaining the input data's directory structure.
@@ -100,6 +105,36 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
                 p = p.parent
 
         return file_new_path
+
+
+def saveAttachments(part):
+    return (part.get_filename(), part.get_payload(decode=True))
+
+
+def saveFile(filePath, text):
+    with open(filePath, 'w') as f:
+        f.write(text)
+
+
+def deleteFile(filePath): 
+    if os.path.exists(filePath):
+        os.remove(filePath)
+
+
+def startServer(dry_run, httpdShared, port=5000):
+    log.debug("Starting Server")
+    if not dry_run:
+        Handler = http.server.SimpleHTTPRequestHandler
+        with socketserver.TCPServer(("127.0.0.1", port), Handler) as httpd:
+            httpdShared.append(httpd)
+            httpd.serve_forever()
+
+
+def stopServer(dry_run, httpd):
+    log.debug("Stopping Server")
+    if not dry_run:
+        httpd.shutdown()
+        httpd.server_close()
 
 def handle_error(errors, exception, desc):
     """

@@ -20,11 +20,20 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={
-        "console_scripts": [
-            "mailbagit=mailbag:cli",
-            "mailbagit-gui=mailbag:gui"
-        ]
+        "console_scripts": ["mailbagit=mailbag:cli", "mailbagit-gui=mailbag:gui"]
     },
-    install_requires=["bagit>=1.8.1,<2", "beautifulsoup4>=4.11.1,<5", "gooey>=1.0.8.1,<2", "jsonmodels>=2.2,<=2.5.0", "extract_msg>=0.30.9", "structlog>=18.1.0,<=21.1.0", "python-dotenv>0.19.0,<=0.19.1", "RTFDE>=0.0.2", "chardet>=4.0.0"],
+    install_requires=[
+        "bagit>=1.8.1,<2",
+        "beautifulsoup4>=4.11.1,<5",
+        "gooey>=1.0.8.1,<2",
+        "jsonmodels>=2.2,<=2.5.0",
+        "extract_msg>=0.30.10",
+        "structlog>=18.1.0,<=21.1.0",
+        "python-dotenv>0.19.0,<=0.19.1",
+        "RTFDE>=0.0.2",
+        "chardet>=4.0.0",
+        "warcio>=1.7.4,<2",
+        "requests >=2.27.1,<3",
+    ],
     python_requires=">=3.6",
 )
