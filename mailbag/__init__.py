@@ -131,8 +131,9 @@ def main():
     if isinstance(args.derivatives, str):
         args.derivatives = args.derivatives.split(" ")
         if not all(elem in derivative_types for elem in args.derivatives):
-            log.error('Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"')
-            exit()
+            error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
+            log.error(error_msg)
+            raise Exception(error_msg)
 
     log.debug("Arguments:", args=args)
 
