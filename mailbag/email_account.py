@@ -19,9 +19,11 @@ class EmailAccount(ABC):
     registry = {}
 
     def __init_subclass__(cls, **kwargs):
-        """Enforce format_name attribute on subclasses, register them"""
-        if not hasattr(cls, 'format_name'):
-            raise RuntimeError("EmailAccount subclass must have `format_name` attribute")
+        """Enforce format descriptive attributes on subclasses, register them"""
+        format_attrs = ["format_name", "format_agent", "format_agent_version"]
+        for attr in format_attrs:
+            if not hasattr(cls, attr):
+                raise RuntimeError("EmailAccount subclass must have `" + attr + "` attribute")
 
         super().__init_subclass__(**kwargs)
         __class__.registry[cls.format_name] = cls

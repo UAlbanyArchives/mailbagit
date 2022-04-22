@@ -3,13 +3,15 @@ import bagit
 
 from structlog import get_logger
 import csv
+import mailbag
 from mailbag.email_account import EmailAccount
 from mailbag.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
-
+import uuid
+import datetime
 import traceback
 log = get_logger()
 
@@ -51,6 +53,11 @@ class Controller:
 
         return line
 
+    def human_size(self, size, units=[' bytes',' KB',' MB',' GB',' TB', ' PB', ' EB']):
+        """ Returns a human readable string representation of bytes """
+        #HT https://stackoverflow.com/questions/1094841/get-human-readable-version-of-file-size
+        return str(size) + units[0] if size < 1024 else self.human_size(size>>10, units[1:])
+
     def generate_mailbag(self):
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
@@ -68,10 +75,30 @@ class Controller:
             os.mkdir(mailbag_dir)
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir)
-            os.mkdir(attachments_dir)
-
+            bag.info['Bag-Type'] = 'Mailbag'
+            bag.info['Mailbag-Source'] = self.args.input.lower()
+            bag.info['Original-Included'] = 'True'
+            bag.info['External-Identifier'] = uuid.uuid4()
+            bag.info['Mailbag-Agent'] = mailbag.__name__
+            bag.info['Mailbag-Agent-Version'] = mailbag.__version__
+            #user-supplied mailbag metadata
+            user_metadata = ["Capture-Date", "Capture-Agent", "Capture-Agent-Version"]
+            for user_field in user_metadata:
+                if getattr(self.args, user_field.lower().replace("-", "_")):
+                    bag.info[user_field] = getattr(self.args, user_field.lower().replace("-", "_"))
+            # source format metadata
+            bag.info[self.args.input.upper() + "-Agent"] = mail_account.format_agent
+            bag.info[self.args.input.upper() + "-Agent-Version"] = mail_account.format_agent_version
+            
         # Instantiate derivatives
         derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
+        if not self.args.dry_run:
+            # write derivatives metadata
+            for d in derivatives:
+                if len(d.derivative_agent) > 0:
+                    bag.info[d.derivative_format.upper() + "-Agent"] = d.derivative_agent
+                if len(d.derivative_agent_version) > 0:
+                    bag.info[d.derivative_format.upper() + "-Agent-Version"] = d.derivative_agent_version
 
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
@@ -94,6 +121,8 @@ class Controller:
             message.Mailbag_Message_ID = mailbag_message_id
             
             if len(message.Attachments) > 0:
+                if not os.path.isdir(attachments_dir) and not self.args.dry_run:
+                    os.mkdir(attachments_dir)
                 helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
             
             # Setting up CSV data
@@ -157,8 +186,6 @@ class Controller:
 
 
 
-
-
         if self.args.compress and not self.args.dry_run:
             log.info("Compressing Mailbag")
             compressionFormats = {'tar': 'tar', 'zip': 'zip', 'tar.gz': 'gztar'}        
@@ -170,6 +197,15 @@ class Controller:
                 shutil.rmtree(mailbag_dir)
 
         if not self.args.dry_run:
+            bag_size = 0
+            for root, dirs, files in os.walk(os.path.join(str(mailbag_dir),'data')):
+                for file in files:
+                    bag_size += os.stat(os.path.join(root, file)).st_size
+            bag.info['Bag-Size'] = self.human_size(bag_size)
+
+            now = datetime.datetime.now()
+            bag.info['Bagging-Timestamp'] = now.strftime('%Y-%m-%dT%H:%M:%S')
+            bag.info['Bagging-Date'] = now.strftime('%Y-%m-%d')
             bag.save(manifests=True)
 
 

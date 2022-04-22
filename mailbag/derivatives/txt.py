@@ -10,6 +10,8 @@ from mailbag.derivative import Derivative
 class TxtDerivative(Derivative):
     derivative_name = 'txt'
     derivative_format = 'txt'
+    derivative_agent = ""
+    derivative_agent_version = ""
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")

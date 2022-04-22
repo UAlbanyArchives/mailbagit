@@ -9,6 +9,7 @@ from mailbag.models import Email, Attachment
 import email
 import glob, os
 from email import policy
+import platform
 
 log = get_logger()
 
@@ -16,6 +17,8 @@ log = get_logger()
 class EML(EmailAccount):
     """EML - This concrete class parses eml file format"""
     format_name = 'eml'
+    format_agent = email.__name__
+    format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")

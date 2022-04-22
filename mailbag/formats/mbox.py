@@ -9,6 +9,7 @@ import email.errors
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
+import platform
 
 log = get_logger()
 
@@ -16,6 +17,8 @@ log = get_logger()
 class Mbox(EmailAccount):
     """Mbox - This concrete class parses mbox file format"""
     format_name = 'mbox'
+    format_agent = mailbox.__name__
+    format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")

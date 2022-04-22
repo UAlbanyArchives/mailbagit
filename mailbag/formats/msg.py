@@ -15,6 +15,8 @@ log = get_logger()
 class MSG(EmailAccount):
     """MSG - This concrete class parses msg file format"""
     format_name = 'msg'
+    format_agent = extract_msg.__name__
+    format_agent_version = extract_msg.__version__
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")

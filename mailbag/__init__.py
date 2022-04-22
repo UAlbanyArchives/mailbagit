@@ -38,13 +38,14 @@ bagit_parser = _make_parser()
 bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 mailbagit_args = bagit_parser.add_argument_group("Mailbag arguments")
 mailbagit_options = bagit_parser.add_argument_group("Mailbag options")
+mailbagit_metadata = bagit_parser.add_argument_group("Optional Mailbag Metadata")
 
 input_types = list(EmailAccount.registry.keys())
 derivative_types = list(Derivative.registry.keys())
 
 # add mailbag-specific required args here
-mailbagit_args.add_argument("-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, nargs=None)
-mailbagit_args.add_argument("-d", "--derivatives", choices=derivative_types, required=False, help=f"types of derivatives to create before bagging", nargs='+')
+mailbagit_args.add_argument("-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, type=str.lower, nargs=None)
+mailbagit_args.add_argument("-d", "--derivatives", choices=derivative_types, type=str.lower, required=False, help=f"types of derivatives to create before bagging", nargs='+')
 
 # add mailbag-specific optional args here
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -60,6 +61,10 @@ mailbagit_options.add_argument("-c", "--compress", help="Compress the mailbag as
 mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
 mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
+# Optional user-supplied mailbag metadata
+mailbagit_metadata.add_argument("--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.", nargs=None)
+mailbagit_metadata.add_argument("--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.", nargs=None)
+mailbagit_metadata.add_argument("--capture-agent-version", help="A string field describing the version of the agent used to capture the email included in a mailbag.", nargs=None)
 
 def cli():
     """hook for CLI-only mailbag invocation"""

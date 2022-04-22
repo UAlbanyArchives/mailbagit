@@ -8,6 +8,10 @@ log = get_logger()
 from mailbag.derivative import Derivative
 class ExampleDerivative(Derivative):
     derivative_name = 'example'
+    derivative_format = 'example'
+    derivative_agent = ""
+    derivative_agent_version = ""
+
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")

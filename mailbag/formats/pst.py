@@ -23,6 +23,13 @@ if not skip_registry:
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
         format_name = 'pst'
+        try:
+            from importlib import metadata
+        except ImportError:  # for Python<3.8
+            import importlib_metadata as metadata
+        #format_agent = pypff.__name__
+        format_agent = "libpff-python-ratom"
+        format_agent_version = metadata.version("libpff-python-ratom")
 
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
