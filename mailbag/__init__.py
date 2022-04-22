@@ -47,15 +47,8 @@ derivative_types = list(Derivative.registry.keys())
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, type=str.lower, nargs=None
 )
-mailbagit_args.add_argument(
-    "-d",
-    "--derivatives",
-    choices=derivative_types,
-    type=str.lower,
-    required=False,
-    help=f"types of derivatives to create before bagging",
-    nargs="+",
-)
+
+mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
 # add mailbag-specific optional args here
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -85,7 +78,6 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
-mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
 # Optional user-supplied mailbag metadata
 mailbagit_metadata.add_argument(
@@ -103,12 +95,29 @@ mailbagit_metadata.add_argument(
 
 def cli():
     """hook for CLI-only mailbag invocation"""
+    mailbagit_args.add_argument(
+        "-d",
+        "--derivatives",
+        choices=derivative_types,
+        type=str.lower,
+        required=False,
+        help=f"types of derivatives to create before bagging",
+        nargs="+",
+    )
     main()
 
 
 @Gooey
 def gui():
     """hook for GUI mailbag invocation"""
+    mailbagit_args.add_argument(
+        "-d",
+        "--derivatives",
+        type=str.lower,
+        required=False,
+        help=f"types of derivatives to create before bagging separated by spaces. Such as 'pdf warc'",
+        nargs=None,
+    )
     main()
 
 
@@ -118,6 +127,12 @@ def main():
     if args.input not in EmailAccount.registry.keys():
         log.error("No parser found")
         exit()
+
+    if isinstance(args.derivatives, str):
+        args.derivatives = args.derivatives.split(" ")
+        if not all(elem in derivative_types for elem in args.derivatives):
+            log.error('Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"')
+            exit()
 
     log.debug("Arguments:", args=args)
 
