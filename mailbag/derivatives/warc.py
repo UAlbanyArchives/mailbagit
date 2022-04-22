@@ -64,7 +64,7 @@ class WarcDerivative(Derivative):
             if not os.path.isdir(out_dir):
                 os.makedirs(out_dir)
             with capture_http(filename):
-                content = message.HTML_Body if message.HTML_Body else message.Text_Body
-                helper.saveFile('tmp.html', content)
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
+                helper.saveFile('tmp.html', html_formatted)
                 requests.get('http://localhost:' + str(port) + '/tmp.html')
             helper.deleteFile('tmp.html')

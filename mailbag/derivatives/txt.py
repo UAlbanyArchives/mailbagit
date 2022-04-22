@@ -27,10 +27,10 @@ class TxtDerivative(Derivative):
     def do_task_per_message(self, message):
 
         out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
 
         if message.Text_Body is None:
-            log.warn("No plain text body for " + str(message.Mailbag_Message_ID))
+            log.warn("No plain text body for " + str(message.Mailbag_Message_ID) + ". No TXT derivative will be created.")
         else:
             log.debug("Writing txt derivative to " + filename)
             if not self.args.dry_run:
@@ -40,3 +40,4 @@ class TxtDerivative(Derivative):
                     with open(filename, "w", encoding=message.Text_Encoding) as f:
                         f.write(message.Text_Body)
                         f.close()
+                        
