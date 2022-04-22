@@ -26,9 +26,6 @@ jobs:
           pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
           pip install .
           pip install libpff-python-ratom==20200808
-      - name: Lint with black
-        run: |
-          black . --verbose
       - name: Test with pytest
         run: |
           python dumpData.py data
