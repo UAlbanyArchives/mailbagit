@@ -85,6 +85,11 @@ class Controller:
             for d in derivatives:
                 d.do_task_per_message(message, self.args)
 
+        # End derivatives thread and server
+        for d in derivatives:
+            if 'warc.WarcDerivative' in str(type(d)):
+                d.terminate()
+        
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 

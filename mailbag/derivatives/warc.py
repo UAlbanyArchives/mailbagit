@@ -23,21 +23,20 @@ class WarcDerivative(Derivative):
         
         self.args = kwargs['args']
         mailbag_dir = kwargs['mailbag_dir']
-        self.warc_dir = os.path.join(str(mailbag_dir),'warc')
+        self.warc_dir = os.path.join(str(mailbag_dir), 'warc')
 
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
 
             self.httpd = []
-            self.server_thread = Thread(target=helper.startServer,args=(self.args.dry_run,self.httpd,5000))
+            self.server_thread = Thread(target=helper.startServer, args=(self.args.dry_run, self.httpd, 5000))
             self.server_thread.start()
 
-    def __del__(self):
-        log.debug("Calling server destructor")
-        helper.stopServer(self.args.dry_run,self.httpd[0])
+    def terminate(self):
         
         # Terminate the process
         try:
+            helper.stopServer(self.args.dry_run, self.httpd[0])
             if not self.args.dry_run:
                 self.server_thread.join()
         except SystemExit:
@@ -53,7 +52,7 @@ class WarcDerivative(Derivative):
         if message.HTML_Body is None:
             log.warn("Error writing warc derivative for " + str(message.Mailbag_Message_ID))
         else:
-            log.debug('self.warc_dir'+str(self.warc_dir))
+            log.debug('self.warc_dir' + str(self.warc_dir))
             self.saveWARC(self.args.dry_run, self.warc_dir, message)            
 
     def saveWARC(self, dry_run, warc_dir, message, port=5000):
@@ -65,6 +64,6 @@ class WarcDerivative(Derivative):
         if not dry_run:
             os.mkdir(message_warc_dir)
             with capture_http(filename):
-                helper.saveFile('tmp.html',message.HTML_Body)
+                helper.saveFile('tmp.html', message.HTML_Body)
                 requests.get('http://localhost:' + str(port) + '/tmp.html')
             helper.deleteFile('tmp.html')
