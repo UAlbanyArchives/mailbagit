@@ -38,6 +38,7 @@ bagit_parser = _make_parser()
 bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 mailbagit_args = bagit_parser.add_argument_group("Mailbag arguments")
 mailbagit_options = bagit_parser.add_argument_group("Mailbag options")
+mailbagit_metadata = bagit_parser.add_argument_group("Optional Mailbag Metadata")
 
 input_types = list(EmailAccount.registry.keys())
 derivative_types = list(Derivative.registry.keys())
@@ -85,6 +86,19 @@ mailbagit_options.add_argument(
 )
 mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
 mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
+
+# Optional user-supplied mailbag metadata
+mailbagit_metadata.add_argument(
+    "--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.", nargs=None
+)
+mailbagit_metadata.add_argument(
+    "--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.", nargs=None
+)
+mailbagit_metadata.add_argument(
+    "--capture-agent-version",
+    help="A string field describing the version of the agent used to capture the email included in a mailbag.",
+    nargs=None,
+)
 
 
 def cli():
