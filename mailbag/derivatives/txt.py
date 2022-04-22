@@ -7,9 +7,11 @@ log = get_logger()
 
 # Does nothing currently
 from mailbag.derivative import Derivative
+
+
 class TxtDerivative(Derivative):
-    derivative_name = 'txt'
-    derivative_format = 'txt'
+    derivative_name = "txt"
+    derivative_format = "txt"
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -30,7 +32,11 @@ class TxtDerivative(Derivative):
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
 
         if message.Text_Body is None:
-            log.warn("No plain text body for " + str(message.Mailbag_Message_ID) + ". No TXT derivative will be created.")
+            log.warn(
+                "No plain text body for "
+                + str(message.Mailbag_Message_ID)
+                + ". No TXT derivative will be created."
+            )
         else:
             log.debug("Writing txt derivative to " + filename)
             if not self.args.dry_run:
@@ -40,4 +46,3 @@ class TxtDerivative(Derivative):
                     with open(filename, "w", encoding=message.Text_Encoding) as f:
                         f.write(message.Text_Body)
                         f.close()
-                        

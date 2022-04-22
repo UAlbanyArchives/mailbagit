@@ -22,7 +22,7 @@ if not skip_registry:
 
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
-        format_name = 'pst'
+        format_name = "pst"
 
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
@@ -54,11 +54,12 @@ if not skip_registry:
 
                         try:
                             headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
+                            headers = headerParser.parsestr(
+                                messageObj.transport_headers
+                            )
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
-
 
                         try:
                             # Parse message bodies
@@ -67,54 +68,70 @@ if not skip_registry:
                             html_encoding = None
                             text_encoding = None
                             if messageObj.html_body:
-                                html_encoding = chardet.detect(messageObj.html_body)['encoding']
+                                html_encoding = chardet.detect(messageObj.html_body)[
+                                    "encoding"
+                                ]
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
-                                text_encoding = chardet.detect(messageObj.plain_text_body)['encoding']
-                                text_body = messageObj.plain_text_body.decode(text_encoding)
+                                text_encoding = chardet.detect(
+                                    messageObj.plain_text_body
+                                )["encoding"]
+                                text_body = messageObj.plain_text_body.decode(
+                                    text_encoding
+                                )
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            messagePath = os.path.join(
+                                os.path.splitext(originalFile)[0], *path
+                            )
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
                         except Exception as e:
                             desc = "Error reading message path"
                             errors = helper.handle_error(errors, e, desc)
-                        
+
                         try:
                             total_attachment_size_bytes = 0
                             for attachmentObj in messageObj.attachments:
-                                total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
-                                attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
+                                total_attachment_size_bytes = (
+                                    total_attachment_size_bytes
+                                    + attachmentObj.get_size()
+                                )
+                                attachment_content = attachmentObj.read_buffer(
+                                    attachmentObj.get_size()
+                                )
 
                                 try:
                                     attachmentName = attachmentObj.get_name()
                                 except:
                                     attachmentName = str(len(attachments))
-                                    desc = "No filename found for attachment " + attachmentName + \
-                                    " for message " + str(message.Mailbag_Message_ID)
+                                    desc = (
+                                        "No filename found for attachment "
+                                        + attachmentName
+                                        + " for message "
+                                        + str(message.Mailbag_Message_ID)
+                                    )
                                     errors = helper.handle_error(errors, e, desc)
-                                
+
                                 attachment = Attachment(
-                                                        Name=attachmentName,
-                                                        File=attachment_content,
-                                                        MimeType=helper.guessMimeType(attachmentName)
-                                            )
+                                    Name=attachmentName,
+                                    File=attachment_content,
+                                    MimeType=helper.guessMimeType(attachmentName),
+                                )
                                 attachments.append(attachment)
-                                
+
                         except Exception as e:
                             desc = "Error parsing attachments"
                             errors = helper.handle_error(errors, e, desc)
 
-
                         message = Email(
                             Error=errors["msg"],
-                            Message_ID=headers['Message-ID'].strip(),
+                            Message_ID=headers["Message-ID"].strip(),
                             Original_File=originalFile,
                             Message_Path=messagePath,
                             Derivatives_Path=derivativesPath,
@@ -132,20 +149,19 @@ if not skip_registry:
                             Text_Encoding=text_encoding,
                             Message=None,
                             Attachments=attachments,
-                            StackTrace=errors["stack_trace"]
+                            StackTrace=errors["stack_trace"],
                         )
-                
+
                     except (Exception) as e:
-                        desc = 'Error parsing message'
+                        desc = "Error parsing message"
                         errors = helper.handle_error(errors, e, desc)
                         message = Email(
-                            Error=errors["msg"],
-                            StackTrace=errors["stack_trace"]
+                            Error=errors["msg"], StackTrace=errors["stack_trace"]
                         )
-                
+
                     yield message
 
-            # iterate over any subfolders too       
+            # iterate over any subfolders too
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
@@ -176,11 +192,19 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                         yield from self.folders(folder, pathList, os.path.basename(filePath))
+                        yield from self.folders(
+                            folder, pathList, os.path.basename(filePath)
+                        )
                     else:
                         # gotta return empty directory to controller somehow
                         log.error("???--> " + folder.name)
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,filePath)
+                new_path = helper.moveWithDirectoryStructure(
+                    self.dry_run,
+                    parent_dir,
+                    self.mailbag_name,
+                    self.format_name,
+                    filePath,
+                )

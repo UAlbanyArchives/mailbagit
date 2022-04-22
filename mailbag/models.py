@@ -8,13 +8,14 @@ class Attachment(models.Base):
     File = fields.EmbeddedField(bytes)
     MimeType = fields.StringField()
 
-    
+
 class Email(models.Base):
     """EmailModel - model class for email formats"""
+
     Error = fields.ListField(str)
     Mailbag_Message_ID = fields.IntField()
     Message_ID = fields.StringField()
-    Original_File= fields.StringField()
+    Original_File = fields.StringField()
     Message_Path = fields.StringField()
     Derivatives_Path = fields.StringField()
     Date = fields.StringField()
@@ -28,19 +29,21 @@ class Email(models.Base):
     HTML_Body = fields.StringField()
     HTML_Encoding = fields.StringField()
     Text_Body = fields.StringField()
-    Text_Encoding  = fields.StringField()
+    Text_Encoding = fields.StringField()
     Message = fields.EmbeddedField(Message)
     Attachments = fields.ListField(Attachment)
-    StackTrace=fields.ListField(str)
+    StackTrace = fields.ListField(str)
 
     def dump_string(self, value, outpath, encoding=None):
-        with open(outpath + ".txt", "w", encoding=encoding, newline='\n') as f:
+        with open(outpath + ".txt", "w", encoding=encoding, newline="\n") as f:
             f.write(value)
             f.close()
 
     def dump(self):
         filename = os.path.basename(self.Original_File)
-        dump_file = os.path.splitext(filename)[1][1:] + "-" + os.path.splitext(filename)[0]
+        dump_file = (
+            os.path.splitext(filename)[1][1:] + "-" + os.path.splitext(filename)[0]
+        )
         rootpath = os.path.join("data", dump_file, str(self.Mailbag_Message_ID))
         if not os.path.isdir(rootpath):
             os.makedirs(rootpath)
@@ -68,20 +71,24 @@ class Email(models.Base):
                     if isinstance(item, str):
                         self.dump_string(item, outpath)
                     else:
-                        # attachment objects 
+                        # attachment objects
                         if not os.path.isdir(outpath):
                             os.mkdir(outpath)
                         for subfield in item:
                             subname = subfield[0]
                             subvalue = getattr(item, subname)
                             if isinstance(subvalue, str):
-                                self.dump_string(subvalue, os.path.join(outpath, subname))
+                                self.dump_string(
+                                    subvalue, os.path.join(outpath, subname)
+                                )
                             elif isinstance(subvalue, bytes):
-                                with open(os.path.join(outpath, subname + '.bin'), "wb") as f:
+                                with open(
+                                    os.path.join(outpath, subname + ".bin"), "wb"
+                                ) as f:
                                     f.write(subvalue)
                                     f.close()
             else:
-                #Message and header objects
+                # Message and header objects
                 outdir = os.path.join(rootpath, name)
                 with open(outdir + ".pickle", "wb") as f:
                     pickle.dump(value, f)
@@ -89,7 +96,7 @@ class Email(models.Base):
 
     def read_file(self, path, encoding, filetype="r"):
         if filetype == "r":
-            with open(path, filetype, encoding=encoding, newline='\n') as f:
+            with open(path, filetype, encoding=encoding, newline="\n") as f:
                 data = f.read()
                 f.close()
         else:
@@ -102,7 +109,7 @@ class Email(models.Base):
         for field in os.listdir(messagedir):
             fieldpath = os.path.join(messagedir, field)
             if os.path.isfile(fieldpath):
-                #print (field)
+                # print (field)
                 if field == "Headers.pickle" or field == "Message.pickle":
                     with open(fieldpath, "rb") as f:
                         value = pickle.load(f)
@@ -110,7 +117,9 @@ class Email(models.Base):
                         f.close()
                 else:
                     if field.endswith("_Body.txt"):
-                        encodingFile = os.path.join(messagedir, field.split("_")[0] + "_Encoding.txt")
+                        encodingFile = os.path.join(
+                            messagedir, field.split("_")[0] + "_Encoding.txt"
+                        )
                         encoding = self.read_file(encodingFile, None)
                     else:
                         encoding = None
@@ -126,7 +135,7 @@ class Email(models.Base):
                     if os.path.isfile(subfieldpath):
                         subvalue.append(self.read_file(subfieldpath, None))
                     else:
-                        #attachments
+                        # attachments
                         attachment = Attachment()
                         for subsubfield in os.listdir(subfieldpath):
                             subsubfieldpath = os.path.join(subfieldpath, subsubfield)
@@ -134,7 +143,10 @@ class Email(models.Base):
                                 filetype = "rb"
                             else:
                                 filetype = "r"
-                            setattr(attachment, os.path.splitext(subsubfield)[0], self.read_file(subsubfieldpath, None, filetype))
+                            setattr(
+                                attachment,
+                                os.path.splitext(subsubfield)[0],
+                                self.read_file(subsubfieldpath, None, filetype),
+                            )
                         subvalue.append(attachment)
                 setattr(self, os.path.splitext(field)[0], subvalue)
-

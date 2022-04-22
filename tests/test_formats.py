@@ -12,10 +12,13 @@ import os
 def cli_args():
     return Namespace(dry_run=True, mailbag_name="New_Mailbag")
 
+
 def test_Mbox(cli_args):
     testfile = "sample1.mbox"
-    data = EmailAccount.registry['mbox'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
+    data = EmailAccount.registry["mbox"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join(
+        "data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0]
+    )
 
     for i, message in enumerate(data):
         message.Mailbag_Message_ID = i + 1
@@ -39,13 +42,14 @@ def test_Mbox(cli_args):
                     assert match == True
             else:
                 assert getattr(message, field[0]) == getattr(expected, field[0])
-                
 
 
 def test_MSG(cli_args):
     testfile = "Digitization Archiving Solutions.msg"
-    data = EmailAccount.registry['msg'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
+    data = EmailAccount.registry["msg"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join(
+        "data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0]
+    )
 
     for i, message in enumerate(data):
         message.Mailbag_Message_ID = i + 1
@@ -74,8 +78,10 @@ def test_MSG(cli_args):
 def test_EML(cli_args):
 
     testfile = "2016-06-23_144430_6e449c77fe.eml"
-    data = EmailAccount.registry['eml'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
+    data = EmailAccount.registry["eml"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join(
+        "data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0]
+    )
 
     for i, message in enumerate(data):
         message.Mailbag_Message_ID = i + 1
@@ -102,12 +108,14 @@ def test_EML(cli_args):
 
 
 def test_PST(cli_args):
-    if not 'pst' in EmailAccount.registry:
+    if not "pst" in EmailAccount.registry:
         raise pytest.skip("PST not installed, cannot test")
 
     testfile = "outlook2019_MSO_16.0.10377.20023_64-bit.pst"
-    data = EmailAccount.registry['pst'](os.path.join("data"), cli_args).messages()
-    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
+    data = EmailAccount.registry["pst"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join(
+        "data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0]
+    )
 
     for i, message in enumerate(data):
         message.Mailbag_Message_ID = i + 1

@@ -6,9 +6,11 @@ from mailbag.models import Email
 from mailbag.formats import mbox, msg, pst
 from argparse import Namespace
 
+
 @pytest.fixture
 def cli_args():
     return Namespace(dry_run=False, mailbag_name="New_Mailbag", derivatives=[])
+
 
 """
 def test_reader_Mbox(cli_args):
