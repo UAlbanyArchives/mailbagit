@@ -9,53 +9,66 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email import generator
 from mailbag.derivative import Derivative
-from mailbag.controller import Controller
+
 
 log = get_logger()
-class ExampleDerivative(Derivative):
+class EmlDerivative(Derivative):
     derivative_name = 'eml'
+    derivative_format = 'eml'
 
     def __init__(self,email_account, **kwargs):
-        print("Setup account")
+        log.debug("Setup account")
         super()
+
+        self.args = kwargs["args"]
+        mailbag_dir = kwargs["mailbag_dir"]
+        self.eml_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        if not self.args.dry_run:
+            os.makedirs(self.eml_dir)
 
     def do_task_per_account(self):
         print(self.account.account_data())
 
-    def do_task_per_message(self, message, args):
-        new_path = os.path.join(args.directory, args.mailbag_name, "eml")
-        name = str(message.Mailbag_Message_ID)+".eml"
-        outfile_name = os.path.join(new_path, name)
-        log.debug("Writing EML to " + str(outfile_name))
-        #Generating eml file
-        if not args.dry_run:
-            if not os.path.isdir(new_path):
-                os.mkdir(new_path)
-            if message.Message is not None:
-                with open(outfile_name, 'w') as outfile:
-                    gen = generator.Generator(outfile)
-                    gen.flatten(message.Message)
-            elif message.Headers is not None:
-                with open(outfile_name, 'w') as outfile:
-                    gen = generator.Generator(outfile)
-                    msg = MIMEMultipart('alternative')
-                    for key in message.Headers:
-                        value = message.Headers[key]
-                        msg[key] = value
 
-                    msg.attach(MIMEText(message.Text_Body))
-                    msg.attach(MIMEText(message.HTML_Body, 'html'))
-                    gen.flatten(msg)
+    def do_task_per_message(self, message):
+
+        out_dir = os.path.join(self.eml_dir, message.Derivatives_Path)
+        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+
+        # Build msg
+        if not message.Message and not message.Headers:
+            log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
+        else:
+            if message.Message:
+                msg = message.Message
+            elif message.Headers:
+                msg = MIMEMultipart('alternative')
+                for key in message.Headers:
+                    value = message.Headers[key]
+                    msg[key] = value
+
+                # Does not yet try to use HTML_Bytes or Text_Bytes
+                body = False
+                if message.HTML_Body:
+                    body = True
+                    msg.attach(MIMEText(message.HTML_Body, 'html', message.HTML_Encoding))
+                if message.Text_Body:
+                    body = True
+                    msg.attach(MIMEText(message.Text_Body, 'plain', message.Text_Encoding))
+                if body == False:
+                    log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body.")
+
+                # Attachments
+                #Missing
             else:
                 log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
 
-
-
-
-
-
-
-
-
-
-
+            # Write EML to disk
+            log.debug("Writing EML to " + str(out_dir))
+            if not self.args.dry_run:
+                if not os.path.isdir(out_dir):
+                    os.makedirs(out_dir)
+                with open(filename + ".eml",'w') as outfile:
+                    gen = generator.Generator(outfile)
+                    gen.flatten(msg)
+                    outfile.close()
