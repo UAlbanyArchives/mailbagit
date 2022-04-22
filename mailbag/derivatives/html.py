@@ -32,20 +32,14 @@ class HtmlDerivative(Derivative):
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".html")
 
         if message.HTML_Body is None and message.Text_Body is None:
-            log.warn(
-                "No HTML or plain text body for "
-                + str(message.Mailbag_Message_ID)
-                + ". No HTML derivative will be created."
-            )
+            log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No HTML derivative will be created.")
         else:
             log.debug("Writing html derivative to " + filename)
             if not self.args.dry_run:
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
                 # Calling helper function to get formatted html
-                html_formatted, encoding = helper.htmlFormatting(
-                    message, self.args.css, headers=False
-                )
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
                 with open(filename, "w", encoding=encoding) as f:
                     f.write(html_formatted)
                     f.close()

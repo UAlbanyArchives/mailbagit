@@ -32,11 +32,7 @@ class TxtDerivative(Derivative):
         filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
 
         if message.Text_Body is None:
-            log.warn(
-                "No plain text body for "
-                + str(message.Mailbag_Message_ID)
-                + ". No TXT derivative will be created."
-            )
+            log.warn("No plain text body for " + str(message.Mailbag_Message_ID) + ". No TXT derivative will be created.")
         else:
             log.debug("Writing txt derivative to " + filename)
             if not self.args.dry_run:

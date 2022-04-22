@@ -48,6 +48,8 @@ Pillow = "==9.0.1"
 RTFDE = "==0.0.2"
 win_unicode_console = "==0.5"
 wxPython = "==4.1.1"
+warcio = "==1.7.4"
+requests = "==2.27.1"
 extract-msg = "==0.30.10"
 
 [dev-packages]

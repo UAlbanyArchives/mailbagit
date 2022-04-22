@@ -78,6 +78,7 @@ class Controller:
         return line
 
     def generate_mailbag(self):
+
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
         # Create folder mailbag folder before writing mailbag.csv
@@ -88,6 +89,7 @@ class Controller:
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
         attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
         error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
+
         log.debug("Creating mailbag at " + str(mailbag_dir))
 
         if not self.args.dry_run:
@@ -97,10 +99,7 @@ class Controller:
             os.mkdir(attachments_dir)
 
         # Instantiate derivatives
-        derivatives = [
-            d(mail_account, args=self.args, mailbag_dir=mailbag_dir)
-            for d in self.derivatives_to_create
-        ]
+        derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
 
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
@@ -142,9 +141,7 @@ class Controller:
                     # making error directory if error is present
                     os.mkdir(error_dir)
                 error_csv.append(self.message_to_csv(message))
-                trace_file = os.path.join(
-                    error_dir, str(message.Mailbag_Message_ID) + ".txt"
-                )
+                trace_file = os.path.join(error_dir, str(message.Mailbag_Message_ID) + ".txt")
                 with open(trace_file, "w") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
@@ -152,6 +149,11 @@ class Controller:
             # Generate derivatives
             for d in derivatives:
                 d.do_task_per_message(message)
+
+        # End derivatives thread and server
+        for d in derivatives:
+            if "warc.WarcDerivative" in str(type(d)):
+                d.terminate()
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
@@ -171,9 +173,7 @@ class Controller:
                 portion_count = 0
                 for portion in csv_data:
                     portion_count += 1
-                    filename = os.path.join(
-                        mailbag_dir, "mailbag-" + str(portion_count) + ".csv"
-                    )
+                    filename = os.path.join(mailbag_dir, "mailbag-" + str(portion_count) + ".csv")
                     with open(filename, "w", encoding="utf-8", newline="") as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
@@ -189,9 +189,7 @@ class Controller:
         if self.args.compress and not self.args.dry_run:
             log.info("Compressing Mailbag")
             compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
-            shutil.make_archive(
-                mailbag_dir, compressionFormats[self.args.compress], mailbag_dir
-            )
+            shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
 
             # Checking if the files with all the given extensions are present
             if os.path.isfile(mailbag_dir + "." + self.args.compress):

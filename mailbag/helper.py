@@ -9,6 +9,10 @@ from mailbag.models import Attachment
 import mimetypes
 import traceback
 
+import http.server
+import socketserver
+import sys
+
 log = get_logger()
 
 
@@ -88,14 +92,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
 
     file_new_path = os.path.join(folder_new, relPath, filename)
 
-    log.debug(
-        "Moving: "
-        + str(fullFilePath)
-        + " to: "
-        + str(file_new_path)
-        + " SubFolder: "
-        + str(relPath)
-    )
+    log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -112,6 +109,31 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
             p = p.parent
 
     return file_new_path
+
+
+def saveAttachments(part):
+    return (part.get_filename(), part.get_payload(decode=True))
+
+
+def deleteFile(filePath):
+    if os.path.exists(filePath):
+        os.remove(filePath)
+
+
+def startServer(dry_run, httpdShared, port=5000):
+    log.debug("Starting Server")
+    if not dry_run:
+        Handler = http.server.SimpleHTTPRequestHandler
+        with socketserver.TCPServer(("127.0.0.1", port), Handler) as httpd:
+            httpdShared.append(httpd)
+            httpd.serve_forever()
+
+
+def stopServer(dry_run, httpd):
+    log.debug("Stopping Server")
+    if not dry_run:
+        httpd.shutdown()
+        httpd.server_close()
 
 
 def handle_error(errors, exception, desc):
@@ -170,14 +192,10 @@ def parse_part(part, bodies, attachments, errors):
     try:
         if content_type == "text/html" and content_disposition != "attachment":
             bodies["html_encoding"] = part.get_charsets()[0]
-            bodies["html_body"] = part.get_payload(decode=True).decode(
-                bodies["html_encoding"]
-            )
+            bodies["html_body"] = part.get_payload(decode=True).decode(bodies["html_encoding"])
         if content_type == "text/plain" and content_disposition != "attachment":
             bodies["text_encoding"] = part.get_charsets()[0]
-            bodies["text_body"] = part.get_payload(decode=True).decode(
-                bodies["text_encoding"]
-            )
+            bodies["text_body"] = part.get_payload(decode=True).decode(bodies["text_encoding"])
     except Exception as e:
         desc = "Error parsing message body"
         errors = handle_error(errors, e, desc)
@@ -216,9 +234,7 @@ def saveAttachmentOnDisk(dry_run, attachments_dir, message):
     """
 
     if not dry_run:
-        message_attachments_dir = os.path.join(
-            attachments_dir, str(message.Mailbag_Message_ID)
-        )
+        message_attachments_dir = os.path.join(attachments_dir, str(message.Mailbag_Message_ID))
         os.mkdir(message_attachments_dir)
 
     for attachment in message.Attachments:
@@ -307,6 +323,24 @@ def addToHead(tag, soup):
     if soup.head:
         soup.head.insert(0, tag)
     else:
+        return path
+
+
+def addToHead(tag, soup):
+    """
+    Adds a Beautiful Soup tag to <head>
+    Handles when no <head> exists
+
+    Parameters:
+        tag(BeautifulSoup) The tag to add
+        soup(BeautifulSoup): HTML body
+
+    Returns:
+        BeautifulSoup: HTML body
+    """
+    if soup.head:
+        soup.head.insert(0, tag)
+    else:
         head = soup.new_tag("head")
         if soup.html:
             soup.html.insert(0, head)
@@ -360,25 +394,17 @@ def htmlFormatting(message, external_css, headers=True):
         )
         # using utf-8 for ascii plain text bodies as we're adding non-ascii whitespace
         if codecs.lookup(message.Text_Encoding).name.lower() == "ascii":
-            log.debug(
-                "Using utf-8 to better handle whitespace for plain text ascii body message "
-                + str(message.Mailbag_Message_ID)
-            )
+            log.debug("Using utf-8 to better handle whitespace for plain text ascii body message " + str(message.Mailbag_Message_ID))
             encoding = "utf-8"
         else:
             encoding = message.Text_Encoding
     else:
-        log.warn(
-            "Unable to format HTML, no message body found for "
-            + str(message.Mailbag_Message_ID)
-        )
+        log.warn("Unable to format HTML, no message body found for " + str(message.Mailbag_Message_ID))
 
     if html_content:
 
         # Formatting HTML with beautiful soup
-        soup = BeautifulSoup(
-            html_content.encode(encoding), "html.parser", from_encoding=encoding
-        )
+        soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
 
         # Check Doctype
         doctype = False
@@ -386,6 +412,7 @@ def htmlFormatting(message, external_css, headers=True):
             if isinstance(item, Doctype):
                 doctype = True
         if doctype is False:
+            tag = Doctype("html")
             tag = Doctype("html")
             soup.insert(0, tag)
 
@@ -398,29 +425,14 @@ def htmlFormatting(message, external_css, headers=True):
             else:
                 h2 = ""
             # Headers to display
-            headerFields = [
-                "Mailbag_Message_ID",
-                "Message_ID",
-                "From",
-                "Date",
-                "To",
-                "Cc",
-                "Bcc",
-                "Subject",
-            ]
+            headerFields = ["Mailbag_Message_ID", "Message_ID", "From", "Date", "To", "Cc", "Bcc", "Subject"]
             # Getting the values of the attrbutes and appending to HTML string
             for headerField in headerFields:
                 value = getattr(message, headerField)
                 if not value is None and value != []:
                     table += "<tr>"
                     table += "<td class='header'>" + str(headerField) + "</td>"
-                    table += (
-                        "<td>"
-                        + str(getattr(message, headerField))
-                        .replace("<", "&lt;")
-                        .replace(">", "&gt;")
-                        + "</td>"
-                    )
+                    table += "<td>" + str(getattr(message, headerField)).replace("<", "&lt;").replace(">", "&gt;") + "</td>"
                     table += "</tr>"
             if len(message.Attachments) > 0:
                 attachmentNumber = len(message.Attachments)
@@ -432,24 +444,11 @@ def htmlFormatting(message, external_css, headers=True):
                         table += "<br/>"
                 table += "</td>"
                 table += "</tr>"
-            tableSection = (
-                "<section id='mailbagHeaders'>" + h2 + table + "</table></section>"
-            )
+            tableSection = "<section id='mailbagHeaders'>" + h2 + table + "</table></section>"
             soupTable = BeautifulSoup(tableSection, "html.parser")
 
             # Add headers table to HTML body
-            if not soup.html:
-                html = soup.new_tag("html")
-                soup.insert(0, html)
-                body = soup.new_tag("body")
-                soup.html.insert(0, body)
-                soup.html.body.insert(0, soupTable)
-            elif not soup.html.body:
-                body = soup.new_tag("body")
-                soup.html.insert(0, body)
-                soup.html.body.insert(0, soupTable)
-            else:
-                soup.html.body.insert(0, soupTable)
+            soup.html.body.insert(0, soupTable)
 
         # Embedding Encoding with meta
         meta = soup.new_tag("meta")
@@ -495,11 +494,7 @@ def htmlFormatting(message, external_css, headers=True):
         # Embedding Images
         # HT to extract_msg for this approach
         # https://github.com/TeamMsgExtractor/msg-extractor/blob/6bed8213de1a7a41739fcf5c9363322508711fce/extract_msg/message_base.py#L403-L414
-        tags = (
-            tag
-            for tag in soup.findAll("img")
-            if tag.get("src") and tag.get("src").startswith("cid:")
-        )
+        tags = (tag for tag in soup.findAll("img") if tag.get("src") and tag.get("src").startswith("cid:"))
         data = None
         for tag in tags:
             # Iterate through the attachments until we get the right one.
@@ -511,9 +506,7 @@ def htmlFormatting(message, external_css, headers=True):
 
             # If we found anything, inject it.
             if data:
-                tag["src"] = (b"data:image;base64," + base64.b64encode(data)).decode(
-                    encoding
-                )
+                tag["src"] = (b"data:image;base64," + base64.b64encode(data)).decode(encoding)
 
         html_content = soup.prettify(encoding).decode(encoding)
 

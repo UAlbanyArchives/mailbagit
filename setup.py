@@ -19,9 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    entry_points={
-        "console_scripts": ["mailbagit=mailbag:cli", "mailbagit-gui=mailbag:gui"]
-    },
+    entry_points={"console_scripts": ["mailbagit=mailbag:cli", "mailbagit-gui=mailbag:gui"]},
     install_requires=[
         "bagit>=1.8.1,<2",
         "beautifulsoup4>=4.11.1,<5" "black>=22.1.0,<23",
@@ -33,6 +31,8 @@ setuptools.setup(
         "python-dotenv>0.19.0,<=0.19.1",
         "RTFDE>=0.0.2",
         "chardet>=4.0.0,<5",
+        "warcio>=1.7.4,<2",
+        "requests >=2.27.1,<3",
         # for black
         "typed-ast>=1.5.3,<2",
     ],

@@ -44,40 +44,24 @@ derivative_types = list(Derivative.registry.keys())
 
 # add mailbag-specific required args here
 mailbagit_args.add_argument(
-    "-i",
-    "--input",
-    required=True,
-    help=f"type of mailbox to be bagged",
-    choices=input_types,
-    nargs=None,
+    "-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, type=str.lower, nargs=None
 )
 mailbagit_args.add_argument(
     "-d",
     "--derivatives",
     choices=derivative_types,
+    type=str.lower,
     required=False,
     help=f"types of derivatives to create before bagging",
     nargs="+",
 )
 
 # add mailbag-specific optional args here
+mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
+mailbagit_options.add_argument("--imap_password", help="password for creating a mailbag from an IMAP connection", nargs=None)
+mailbagit_options.add_argument("--exclude_folders", help="email folders to be excluded from the mailbag", nargs="+")
 mailbagit_options.add_argument(
-    "--imap_host",
-    help="the host for creating a mailbag from an IMAP connection",
-    nargs=None,
-)
-mailbagit_options.add_argument(
-    "--imap_password",
-    help="password for creating a mailbag from an IMAP connection",
-    nargs=None,
-)
-mailbagit_options.add_argument(
-    "--exclude_folders", help="email folders to be excluded from the mailbag", nargs="+"
-)
-mailbagit_options.add_argument(
-    "--exclude_messages",
-    help="a line-separated text file of Message-IDs to be excluded from a mailbag",
-    nargs="+",
+    "--exclude_messages", help="a line-separated text file of Message-IDs to be excluded from a mailbag", nargs="+"
 )
 mailbagit_options.add_argument(
     "-e",
@@ -86,10 +70,7 @@ mailbagit_options.add_argument(
     action="store_true",
 )
 mailbagit_options.add_argument(
-    "-l",
-    "--crawl_links",
-    help="will attempt to capture links in messages and include them in WARC output",
-    action="store_true",
+    "-l", "--crawl_links", help="will attempt to capture links in messages and include them in WARC output", action="store_true"
 )
 mailbagit_options.add_argument(
     "-a",
@@ -97,28 +78,13 @@ mailbagit_options.add_argument(
     help="will attempt to capture links attached to messages and include them in WARC output",
     action="store_true",
 )
+mailbagit_options.add_argument("-n", "--no-headers", help="will not include email headers in mailbag.csv", action="store_true")
+mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
 mailbagit_options.add_argument(
-    "-n",
-    "--no-headers",
-    help="will not include email headers in mailbag.csv",
-    action="store_true",
+    "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
-mailbagit_options.add_argument(
-    "--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None
-)
-mailbagit_options.add_argument(
-    "-c",
-    "--compress",
-    help="Compress the mailbag as ZIP, TAR, or TAR.GZ",
-    nargs=None,
-    choices=["tar", "zip", "tar.gz"],
-)
-mailbagit_options.add_argument(
-    "-r", "--dry_run", help="Dry run", default=False, action="store_true"
-)
-mailbagit_options.add_argument(
-    "-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None
-)
+mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
+mailbagit_options.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
 
 
 def cli():
