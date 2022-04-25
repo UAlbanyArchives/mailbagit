@@ -147,6 +147,7 @@ def handle_error(errors, exception, desc, level="error"):
             "stack_trace" contains a list of full stack traces
         exception (Exception): The exception raised
         desc (String): A full email message object desribed in models.py
+        level (String): Whether to log as error or warn. Defaults to error.
     Returns:
         errors (dict):
             "msg" contains a list of human readable error messages
