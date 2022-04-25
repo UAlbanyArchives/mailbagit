@@ -164,6 +164,10 @@ class Controller:
                 csv_portion.append(self.message_to_csv(message))
             csv_portion_count += 1
 
+            # Generate derivatives
+            for d in derivatives:
+                message = d.do_task_per_message(message)
+
             # creating text file and csv if error is present
             if len(message.Error) > 0:
                 if not os.path.isdir(error_dir):
@@ -174,10 +178,6 @@ class Controller:
                 with open(trace_file, "w") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
-
-            # Generate derivatives
-            for d in derivatives:
-                d.do_task_per_message(message)
 
         # End derivatives thread and server
         for d in derivatives:
