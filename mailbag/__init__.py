@@ -8,6 +8,7 @@ from pathlib import Path
 from bagit import _make_parser, Bag
 from gooey import Gooey
 from structlog import get_logger
+from argparse import ArgumentParser
 from mailbag.email_account import EmailAccount, import_formats
 from mailbag.derivative import Derivative, import_derivatives
 from mailbag.controller import Controller
@@ -35,10 +36,52 @@ log.debug("EmailAccount:", Registry=EmailAccount.registry)
 log.debug("Derivative:", Registry=Derivative.registry)
 
 bagit_parser = _make_parser()
-bagit_parser.description = f"Mailbag ({bagit_parser.description})"
-mailbagit_args = bagit_parser.add_argument_group("Mailbag arguments")
-mailbagit_options = bagit_parser.add_argument_group("Mailbag options")
-mailbagit_metadata = bagit_parser.add_argument_group("Optional Mailbag Metadata")
+mailbag_parser = ArgumentParser(description="Mailbag")
+print(dir(bagit_parser))
+# bagit_parser.description = f"Mailbag ({bagit_parser.description})"
+mailbagit_args = mailbag_parser.add_argument_group("Mailbag arguments")
+mailbagit_options = mailbag_parser.add_argument_group("Mailbag options")
+mailbagit_metadata = mailbag_parser.add_argument_group("Optional Mailbag Metadata")
+
+count = 0
+for arg_group in bagit_parser._action_groups:
+    count += 1
+    # print (type(arg_group))
+    # print (dir(arg_group))
+    print(arg_group.__dict__["title"])
+    group = mailbag_parser.add_argument_group(arg_group.__dict__["title"])
+    group.description = arg_group.__dict__["description"]
+    # group.add_argument("-" + str(count), "--input" + str(count), required=True, help=f"type of mailbox to be bagged", nargs=None)
+    for action in arg_group._actions:
+        if action.dest == "help":
+            pass
+        else:
+            if action.container == arg_group:
+                # print (action)
+                # print (dir(action))
+                # print (action.dest)
+                # print (action.required)
+                # print (action.help)
+                # print (action.choices)
+                # print (action.nargs)
+                if len(action.option_strings) > 0:
+                    if action.nargs == 0:
+                        group.add_argument(
+                            action.option_strings[0],
+                            required=action.required,
+                            default=action.default,
+                            help=action.help,
+                            action="store_true",
+                        )
+                    else:
+                        group.add_argument(
+                            action.option_strings[0],
+                            required=action.required,
+                            default=action.default,
+                            help=action.help,
+                            choices=action.choices,
+                            nargs=action.nargs,
+                        )
 
 input_types = list(EmailAccount.registry.keys())
 derivative_types = list(Derivative.registry.keys())
@@ -48,9 +91,8 @@ mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, type=str.lower, nargs=None
 )
 
-mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="Mailbag name", nargs=None)
-
 # add mailbag-specific optional args here
+"""
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
 mailbagit_options.add_argument("--imap_password", help="password for creating a mailbag from an IMAP connection", nargs=None)
 mailbagit_options.add_argument("--exclude_folders", help="email folders to be excluded from the mailbag", nargs="+")
@@ -73,6 +115,7 @@ mailbagit_options.add_argument(
     action="store_true",
 )
 mailbagit_options.add_argument("-n", "--no-headers", help="will not include email headers in mailbag.csv", action="store_true")
+"""
 mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
 mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
@@ -104,6 +147,7 @@ def cli():
         help=f"types of derivatives to create before bagging",
         nargs="+",
     )
+    mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A directory name for the mailbag root directory.", nargs=None)
     main()
 
 
@@ -118,11 +162,12 @@ def gui():
         help=f"types of derivatives to create before bagging separated by spaces. Such as 'pdf warc'",
         nargs=None,
     )
+    mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A directory name for the mailbag root directory.", nargs=None)
     main()
 
 
 def main():
-    args = bagit_parser.parse_args()
+    args = mailbag_parser.parse_args()
     args.input = args.input.lower()
     if args.input not in EmailAccount.registry.keys():
         log.error("No parser found")
