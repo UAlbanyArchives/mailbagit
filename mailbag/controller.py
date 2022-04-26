@@ -179,7 +179,7 @@ class Controller:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
 
-        # End derivatives thread and server
+        # End thread and server for WARC derivatives
         for d in derivatives:
             if "warc.WarcDerivative" in str(type(d)):
                 d.terminate()
