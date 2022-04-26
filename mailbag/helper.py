@@ -2,9 +2,11 @@ import base64
 import urllib.parse
 from pathlib import Path
 import os, shutil, glob
+import datetime
 import codecs
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
+import mailbag.globals as globals
 from mailbag.models import Attachment
 import mimetypes
 import traceback
@@ -24,6 +26,68 @@ def moveFile(dry_run, oldPath, newPath):
     except IOError as e:
         log.error('Unable to move file. %s' % e)
 
+def progressBar (current, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    Parameters:
+        current   - Required  : current current (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (current / float(total)))
+    filledLength = int(length * current // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    
+    if globals.loglevel == "INFO":
+        e = datetime.datetime.now()
+        
+        style = globals.style
+        dt = f'{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}'
+        message_type = f'[{style["b"][0]}{style["g"][0]}{globals.loglevel.lower()}{5*" "}{style["b"][1]}]'
+        deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
+        status = f' |{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
+        print(f'\r{dt} {message_type} {deco_prefix}{status}', end = printEnd)
+        # Print New Line on Complete
+        if current == total: 
+            print()
+    else:
+        log.info(f'{prefix} |{bar}| {percent}% [{current}MB out of {total}MB] {suffix}')
+
+def processedFile(filePath):
+    """
+    Add size of this file to counter
+    
+    Parameters:
+        filePath (String): Location to find the file
+    """
+    
+    increment = os.path.getsize(filePath)/(1024**2)
+    globals.processedSize += increment
+    globals.processedSize = round(globals.processedSize,2)
+
+def getDirectorySize(directory, format):
+    """
+    Calculate total size of relevant files in the directory
+    
+    Parameters:
+        directory (String): Location to find files
+        format (String): format of the mail type
+    
+    Returns:
+            String: emailFolder
+    """
+    
+    filePath = os.path.join(directory, "**", "*."+format)
+    total = (sum(os.path.getsize(f) for f in glob.iglob(filePath, recursive=True) if os.path.isfile(f)))
+    total = round(total/(1024**2),2)
+    log.debug(f'Total files to be processed: {total}MB')
+    return total
+    
 def relativePath(mainPath, file):
         """
         Gets the relative path of an input file within the input directory structure

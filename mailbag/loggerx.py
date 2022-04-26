@@ -1,6 +1,6 @@
 import os
 import logging, structlog
-
+import mailbag.globals as globals
 
 def configure():
     
@@ -17,4 +17,5 @@ def configure():
                 wrapper_class=structlog.make_filtering_bound_logger(level)
             )
     log = structlog.get_logger()
+    globals.loglevel = LOGLEVEL
     log.info("MAILBAG_LOG_LEVEL:", LOGS=LOGLEVEL)
