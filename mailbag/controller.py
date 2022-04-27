@@ -98,11 +98,10 @@ class Controller:
         error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
 
         log.debug("Creating mailbag at " + str(mailbag_dir))
-
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
             # Creating a bagit-python style bag
-            bag = bagit.make_bag(mailbag_dir)
+            bag = bagit.make_bag(mailbag_dir, self.args.bag_info, processes=self.args.processes, checksums=self.args.checksums)
             bag.info["Bag-Type"] = "Mailbag"
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
@@ -215,16 +214,6 @@ class Controller:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
 
-        if self.args.compress and not self.args.dry_run:
-            log.info("Compressing Mailbag")
-            compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
-            shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
-
-            # Checking if the files with all the given extensions are present
-            if os.path.isfile(mailbag_dir + "." + self.args.compress):
-                # Deleting the mailbag if compressed files are present
-                shutil.rmtree(mailbag_dir)
-
         if not self.args.dry_run:
             bag_size = 0
             for root, dirs, files in os.walk(os.path.join(str(mailbag_dir), "data")):
@@ -236,5 +225,15 @@ class Controller:
             bag.info["Bagging-Timestamp"] = now.strftime("%Y-%m-%dT%H:%M:%S")
             bag.info["Bagging-Date"] = now.strftime("%Y-%m-%d")
             bag.save(manifests=True)
+
+        if self.args.compress and not self.args.dry_run:
+            log.info("Compressing Mailbag")
+            compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
+            shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
+
+            # Checking if the files with all the given extensions are present
+            if os.path.isfile(mailbag_dir + "." + self.args.compress):
+                # Deleting the mailbag if compressed files are present
+                shutil.rmtree(mailbag_dir)
 
         return mail_account.messages()

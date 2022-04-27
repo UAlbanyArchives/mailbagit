@@ -53,7 +53,6 @@ class HtmlDerivative(Derivative):
 
                 if not self.args.dry_run:
                     try:
-                        blah
                         if not os.path.isdir(out_dir):
                             os.makedirs(out_dir)
                         with open(filename, "w", encoding=encoding) as f:
