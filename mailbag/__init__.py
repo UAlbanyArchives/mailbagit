@@ -207,6 +207,10 @@ def main():
             error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
             bagit_parser.error((error_msg))
 
+    if args.input in args.derivatives:
+        error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
+        bagit_parser.error((error_msg))
+
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"
         bagit_parser.error((error_msg))
