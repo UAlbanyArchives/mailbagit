@@ -112,7 +112,7 @@ mailbagit_args.add_argument(
     nargs=1,
     widget="DirChooser",
     help=(
-        "Path to email to be packaged into a mailbag." "This can be a single file or a directory containing " "a number of email exports."
+        "A path to email to be packaged into a mailbag." "This can be a single file or a directory containing " "a number of email exports."
     ),
 )
 
@@ -120,7 +120,7 @@ mailbagit_args.add_argument(
 # add mailbag-specific required args here
 mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A directory name for the mailbag root directory.", nargs=None)
 mailbagit_args.add_argument(
-    "-i", "--input", required=True, help=f"type of mailbox to be bagged", choices=input_types, type=str.lower, nargs=None
+    "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
 )
 mailbagit_args.add_argument(
     "-d",
@@ -128,7 +128,7 @@ mailbagit_args.add_argument(
     choices=derivative_types,
     type=str.lower,
     required=False,
-    help=f"types of derivatives to create before bagging",
+    help=f"types of derivative formats to create during packaging",
     nargs="+",
     widget="Listbox",
 )
@@ -138,7 +138,9 @@ mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PD
 mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
-mailbagit_options.add_argument("-r", "--dry_run", help="Dry run", default=False, action="store_true")
+mailbagit_options.add_argument(
+    "-r", "--dry_run", help="A dry run performs a trial run with no changes made", default=False, action="store_true"
+)
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
