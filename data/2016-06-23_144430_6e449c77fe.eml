@@ -1,0 +1,68 @@
+From 1537939153526368958@xxx Thu Jun 23 14:44:30 +0000 2016
+X-GM-THRID: 1537939153526368958
+X-Gmail-Labels: Important,Inbox
+Delivered-To: ualbanymodernpoliticalarchives@gmail.com
+Received: by 10.159.32.15 with SMTP id 15csp570869uam;
+        Thu, 23 Jun 2016 07:44:31 -0700 (PDT)
+X-Received: by 10.55.187.4 with SMTP id l4mr45741214qkf.123.1466693071358;
+        Thu, 23 Jun 2016 07:44:31 -0700 (PDT)
+Return-Path: <info@jerrynadler.com>
+Received: from mailout637.ngpweb.com (mailout637.ngpweb.com. [192.82.209.1])
+        by mx.google.com with ESMTPS id c130si399713qkb.126.2016.06.23.07.44.31
+        for <ualbanymodernpoliticalarchives@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 23 Jun 2016 07:44:31 -0700 (PDT)
+Received-SPF: neutral (google.com: 192.82.209.1 is neither permitted nor denied by best guess record for domain of info@jerrynadler.com) client-ip=192.82.209.1;
+Authentication-Results: mx.google.com;
+       dkim=temperror (no key for signature) header.i=@jerrynadler.com;
+       spf=neutral (google.com: 192.82.209.1 is neither permitted nor denied by best guess record for domain of info@jerrynadler.com) smtp.mailfrom=info@jerrynadler.com
+Return-Path: <info@jerrynadler.com>
+DKIM-Signature: v=1; a=rsa-sha1; d=jerrynadler.com; s=ngpweb3; c=simple/simple;
+	q=dns/txt; i=@jerrynadler.com; t=1466693070;
+	h=Sender:From:Subject:List-Unsubscribe:Date:To:Reply-To:Message-ID:MIME-Version:
+	Content-Type;
+	bh=YgS1t6u8DKpJX1dl4SYgOoYShmM=;
+	b=AvZdN0AX+qrbFqTcxmzYDjHt0ma2YvqxU8iUO58erPLKqXGtQOvmHPla8PTnS3Ul
+	99JtXgdVuZfsTAjk4gJXjqNTHR7ngyJzVSK4XjVRFscLfJkPsP2rV1KsTeBQSa2q
+	N/FR5ArzPSOj4QzLlej/bK2CvGHiIQlBcJ0bPQhdEf8=;
+X-MSFBL: RiOuyKu2xXwXPQpLzPPVxTc7gBKDpi6Q2UYEbRcuGiY=|eyJyIjoidWFsYmFueW1
+	vZGVybnBvbGl0aWNhbGFyY2hpdmVzQGdtYWlsLmNvbSIsImIiOiJtYWlsb3V0NjM
+	3IiwiZyI6InRyYW5zYWN0aW9uYWxncm91cCIsInUiOiJpbmZvIn0=
+Received: from [10.11.74.231] ([10.11.74.231:61459] helo=NSV11OBJOB1201)
+	by asv11mtam001.ngpweb.com (envelope-from <info@jerrynadler.com>)
+	(ecelerity 4.2.1.51032 r(Core:4.2.1.4)) with ESMTP
+	id 51/F5-11141-EC5FB675; Thu, 23 Jun 2016 10:44:30 -0400
+X-Binding: transactional
+Reply-To: info@jerrynadler.com
+From: "Nadler for Congress" <info@jerrynadler.com>
+To: ualbanymodernpoliticalarchives@gmail.com
+Message-ID: <a6e213b376f34b4f839059e4cc19f2f8@jerrynadler.com>
+Date: Thu, 23 Jun 2016 10:44:26 -0400
+Subject: Thank you for your submission
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----A5B6B6AF6565407280DE337DA45320FE"
+
+------A5B6B6AF6565407280DE337DA45320FE
+Content-type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Dear Friend,
+
+Thank you for joining our campaign=2E   =20
+
+Contact Information:   =20
+  =20
+ =20
+ =20
+=C2=A0=C2=A012222
+------A5B6B6AF6565407280DE337DA45320FE
+Content-type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<p>
+=09Thank you for joining our campaign=2E</p>
+
+------A5B6B6AF6565407280DE337DA45320FE--
+
+

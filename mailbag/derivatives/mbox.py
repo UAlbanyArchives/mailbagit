@@ -9,9 +9,11 @@ from email import encoders
 log = get_logger()
 
 from mailbag.derivative import Derivative
+
+
 class MboxDerivative(Derivative):
-    derivative_name = 'mbox'
-    derivative_format = 'mbox'
+    derivative_name = "mbox"
+    derivative_format = "mbox"
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -26,17 +28,16 @@ class MboxDerivative(Derivative):
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
-
     def do_task_per_message(self, message):
 
         if len(message.Derivatives_Path) < 1:
             out_dir = self.mbox_dir
             filename = os.path.join(out_dir, self.args.mailbag_name + ".mbox")
-        elif len(message.Derivatives_Path.strip(os.sep).split(os.sep)) == 1:
+        elif len(message.Derivatives_Path.strip("/").split("/")) == 1:
             out_dir = self.mbox_dir
             filename = os.path.join(out_dir, message.Derivatives_Path.strip(os.sep) + ".mbox")
         else:
-            out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip(os.sep)))
+            out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip("/")))
             filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")
 
         log.debug("Writing message to " + str(filename))
@@ -49,7 +50,7 @@ class MboxDerivative(Derivative):
             if message.Message:
                 mbox.add(message.Message)
             elif message.Headers:
-                msg = MIMEMultipart('mixed')
+                msg = MIMEMultipart("mixed")
                 folder_header = False
                 for key in message.Headers:
                     value = message.Headers[key]
@@ -61,29 +62,29 @@ class MboxDerivative(Derivative):
 
                 # Does not yet try to use HTML_Bytes or Text_Bytes
                 if message.HTML_Body or message.Text_Body:
-                    alt = MIMEMultipart('alternative')
+                    alt = MIMEMultipart("alternative")
                     if message.Text_Body:
-                        alt.attach(MIMEText(message.Text_Body, 'plain', message.Text_Encoding))
+                        alt.attach(MIMEText(message.Text_Body, "plain", message.Text_Encoding))
                     if message.HTML_Body:
-                        alt = MIMEMultipart('alternative')
-                        alt.attach(MIMEText(message.HTML_Body, 'html', message.HTML_Encoding))
+                        alt = MIMEMultipart("alternative")
+                        alt.attach(MIMEText(message.HTML_Body, "html", message.HTML_Encoding))
                     msg.attach(alt)
                 else:
                     log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Added message to MBOX without message body.")
-                
+
                 # Attachments
                 for attachment in message.Attachments:
                     mimeType = attachment.MimeType
                     if mimeType is None:
                         mimeType = "text/plain"
-                        log.warn("Mime type not found for the attachment. Set as "+mimeType+".")
-                    mimeType = mimeType.split('/')
+                        log.warn("Mime type not found for the attachment. Set as " + mimeType + ".")
+                    mimeType = mimeType.split("/")
                     part = MIMEBase(mimeType[0], mimeType[1])
                     part.set_payload(attachment.File)
                     encoders.encode_base64(part)
-                    part.add_header('Content-Disposition', 'attachment', filename=attachment.Name)
+                    part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
                     msg.attach(part)
-                    
+
                 mbox.add(msg)
 
             else:

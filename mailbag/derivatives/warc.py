@@ -1,4 +1,5 @@
 import os
+import warcio
 from structlog import get_logger
 import mailbag.helper as helper
 from warcio.capture_http import capture_http
@@ -36,9 +37,7 @@ class WarcDerivative(Derivative):
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
 
-            self.server_thread = Thread(
-                target=helper.startServer, args=(self.args.dry_run, self.httpd, 5000)
-            )
+            self.server_thread = Thread(target=helper.startServer, args=(self.args.dry_run, self.httpd, 5000))
             self.server_thread.start()
 
     def terminate(self):
@@ -61,11 +60,7 @@ class WarcDerivative(Derivative):
     def do_task_per_message(self, message):
 
         if message.HTML_Body is None and message.Text_Body is None:
-            log.warn(
-                "No HTML or plain text body for "
-                + str(message.Mailbag_Message_ID)
-                + ". No HTML derivative will be created."
-            )
+            log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No HTML derivative will be created.")
         else:
             log.debug("self.warc_dir" + str(self.warc_dir))
             self.saveWARC(self.args.dry_run, self.warc_dir, message)
@@ -79,10 +74,10 @@ class WarcDerivative(Derivative):
                 os.makedirs(out_dir)
 
             with open(filename, "wb") as output:
-                html_formatted, encoding = helper.htmlFormatting(
-                    message, self.args.css, headers=False
-                )
-                helper.saveFile("tmp.html", html_formatted)
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
+                with open("tmp.html", "w", encoding=encoding) as f:
+                    f.write(html_formatted)
+                    f.close()
 
                 writer = WARCWriter(output, gzip=True)
                 resp = requests.get(
@@ -94,9 +89,7 @@ class WarcDerivative(Derivative):
                 # get raw headers from urllib3
                 headers_list = resp.raw.headers.items()
 
-                http_headers = StatusAndHeaders(
-                    "200 OK", headers_list, protocol="HTTP/1.0"
-                )
+                http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
 
                 record = writer.create_warc_record(
                     "http://localhost:" + str(port) + "/tmp.html",

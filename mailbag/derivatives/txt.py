@@ -7,9 +7,11 @@ log = get_logger()
 
 # Does nothing currently
 from mailbag.derivative import Derivative
+
+
 class TxtDerivative(Derivative):
-    derivative_name = 'txt'
-    derivative_format = 'txt'
+    derivative_name = "txt"
+    derivative_format = "txt"
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -40,4 +42,3 @@ class TxtDerivative(Derivative):
                     with open(filename, "w", encoding=message.Text_Encoding) as f:
                         f.write(message.Text_Body)
                         f.close()
-                        
