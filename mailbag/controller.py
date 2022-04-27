@@ -9,6 +9,9 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
+import mailbag.globals as globals
+from time import sleep
+
 
 import traceback
 log = get_logger()
@@ -87,7 +90,12 @@ class Controller:
         csv_portion = [self.csv_headers]
         error_csv = [self.csv_headers]
 
-
+        # Initialize progress bar
+        globals.totalSize = helper.getDirectorySize(self.args.directory,self.args.input)
+        helper.progressBar(0, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100, printEnd="")
+        previousFilePath = ''
+        newPath = ''
+        
         for message in mail_account.messages():
             # do stuff you ought to do per message here
 
@@ -125,7 +133,19 @@ class Controller:
             #Generate derivatives
             for d in derivatives:
                 d.do_task_per_message(message)
-
+            
+            # Increase processedSize by the size of the current message
+            # And show progress bar
+            newPath = helper.getNewFilePath(self.args,message.Original_File)
+            
+            if previousFilePath != newPath:
+                previousFilePath = newPath
+                helper.processedFile(newPath)
+                if(globals.processedSize<globals.totalSize):
+                    helper.progressBar(globals.processedSize, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100)
+        
+        helper.progressBar(globals.totalSize, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100)
+        
         # End derivatives thread and server
         for d in derivatives:
             if 'warc.WarcDerivative' in str(type(d)):

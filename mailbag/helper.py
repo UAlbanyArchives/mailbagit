@@ -17,6 +17,7 @@ import sys
 
 log = get_logger()
 
+
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
@@ -26,11 +27,13 @@ def moveFile(dry_run, oldPath, newPath):
     except IOError as e:
         log.error('Unable to move file. %s' % e)
 
-def progressBar (current, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+
+def progressBar (current, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
+    
     Parameters:
-        current   - Required  : current current (Int)
+        current     - Required  : current current (Int)
         total       - Required  : total iterations (Int)
         prefix      - Optional  : prefix string (Str)
         suffix      - Optional  : suffix string (Str)
@@ -43,20 +46,19 @@ def progressBar (current, total, prefix = '', suffix = '', decimals = 1, length 
     filledLength = int(length * current // total)
     bar = fill * filledLength + '-' * (length - filledLength)
     
-    if globals.loglevel == "INFO":
-        e = datetime.datetime.now()
-        
-        style = globals.style
-        dt = f'{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}'
-        message_type = f'[{style["b"][0]}{style["g"][0]}{globals.loglevel.lower()}{5*" "}{style["b"][1]}]'
-        deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
-        status = f' |{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-        print(f'\r{dt} {message_type} {deco_prefix}{status}', end = printEnd)
-        # Print New Line on Complete
-        if current == total: 
-            print()
-    else:
-        log.info(f'{prefix} |{bar}| {percent}% [{current}MB out of {total}MB] {suffix}')
+    
+    e = datetime.datetime.now()
+    
+    style = globals.style
+    dt = f'{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}'
+    message_type = f'[{style["b"][0]}{style["g"][0]}{prefix}{style["b"][1]}]'
+    deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
+    status = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
+    print(f'\r{dt} {message_type} {status}', end=printEnd)
+    # Print New Line on Complete
+    if current == total: 
+        print()
+
 
 def processedFile(filePath):
     """
@@ -66,9 +68,10 @@ def processedFile(filePath):
         filePath (String): Location to find the file
     """
     
-    increment = os.path.getsize(filePath)/(1024**2)
+    increment = os.path.getsize(filePath) / (1024 ** 2)
     globals.processedSize += increment
-    globals.processedSize = round(globals.processedSize,2)
+    globals.processedSize = round(globals.processedSize, 2)
+
 
 def getDirectorySize(directory, format):
     """
@@ -82,11 +85,12 @@ def getDirectorySize(directory, format):
             String: emailFolder
     """
     
-    filePath = os.path.join(directory, "**", "*."+format)
+    filePath = os.path.join(directory, "**", "*." + format)
     total = (sum(os.path.getsize(f) for f in glob.iglob(filePath, recursive=True) if os.path.isfile(f)))
-    total = round(total/(1024**2),2)
+    total = round(total / (1024 ** 2), 2)
     log.debug(f'Total files to be processed: {total}MB')
     return total
+
     
 def relativePath(mainPath, file):
         """
@@ -109,6 +113,7 @@ def relativePath(mainPath, file):
         else:
             return relPath
 
+
 def messagePath(headers):
         """
         Tries to read any email folder arragement from headers
@@ -126,8 +131,45 @@ def messagePath(headers):
         else:
             messagePath = ""
         return messagePath
-        
 
+def getNewFilePath(args,file):
+    """
+    Creates new file paths for input mail files
+    
+    Parameters:
+        mainPath (String) :
+        mailbag_name (String) :
+        input (String) :
+        file (String) :
+    """
+    
+    originalPath = os.path.join(args.directory,file)
+    newPath = os.path.join(args.directory,args.mailbag_name,'data',args.input,file)
+    
+    if Path(originalPath).is_file():
+        return originalPath
+    return newPath
+    
+def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
+    """
+    Creates file paths for input mail files and new paths
+    
+    Parameters:
+        mainPath (String) :
+        mailbag_name (String) :
+        input (String) :
+        file (String) :
+    """
+    fullPath = Path(mainPath).resolve()
+    fullFilePath = Path(file).resolve()
+    relPath = fullFilePath.relative_to(fullPath).parents[0]
+    filename = fullFilePath.name
+    folder_new = os.path.join(fullPath, mailbag_name, 'data', input)
+    file_new_path = os.path.join(folder_new, relPath, filename)
+    
+    return fullPath, fullFilePath, file_new_path, relPath
+
+    
 def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         """
         Create new mailbag directory structure while maintaining the input data's directory structure.
@@ -145,15 +187,9 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
             file_new_path (Path): The path where the file was moved
         """
 
-        fullPath = Path(mainPath).resolve()
-        fullFilePath = Path(file).resolve()
-        relPath = fullFilePath.relative_to(fullPath).parents[0]
-        filename = fullFilePath.name
-        folder_new = os.path.join(fullPath, mailbag_name,'data', input)
+        fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
+        log.debug('Moving: ' + str(fullFilePath )+ ' to: ' + str(file_new_path) + ' SubFolder: ' + str(relPath))
         
-        file_new_path = os.path.join(folder_new, relPath, filename)
-
-        log.debug('Moving: ' + str(fullFilePath) + ' to: ' + str(file_new_path) + ' SubFolder: ' + str(relPath))
         if(not dry_run):
             moveFile(dry_run, fullFilePath, file_new_path)
             # clean up old directory structure
@@ -200,6 +236,7 @@ def stopServer(dry_run, httpd):
         httpd.shutdown()
         httpd.server_close()
 
+
 def handle_error(errors, exception, desc):
     """
     Is called when an exception is raised in the parsers.
@@ -222,6 +259,7 @@ def handle_error(errors, exception, desc):
     log.error(error_msg)
 
     return errors
+
 
 def parse_part(part, bodies, attachments, errors):
     """
@@ -284,7 +322,8 @@ def parse_part(part, bodies, attachments, errors):
 
     return bodies, attachments, errors
 
-def saveAttachmentOnDisk(dry_run,attachments_dir,message):
+
+def saveAttachmentOnDisk(dry_run, attachments_dir, message):
     """
     Takes an email message object and writes any attachments in the model
     to the attachments subdirectory according to the mailbag spec
@@ -296,17 +335,18 @@ def saveAttachmentOnDisk(dry_run,attachments_dir,message):
     """
 
     if not dry_run:
-        message_attachments_dir = os.path.join(attachments_dir,str(message.Mailbag_Message_ID))
+        message_attachments_dir = os.path.join(attachments_dir, str(message.Mailbag_Message_ID))
         os.mkdir(message_attachments_dir)
 
     for attachment in message.Attachments:
-        log.debug('Saving Attachment:'+str(attachment.Name))
-        log.debug('Type:'+str(attachment.MimeType))
+        log.debug('Saving Attachment:' + str(attachment.Name))
+        log.debug('Type:' + str(attachment.MimeType))
         if not dry_run:
-            attachment_path = os.path.join(message_attachments_dir,attachment.Name)
+            attachment_path = os.path.join(message_attachments_dir, attachment.Name)
             f = open(attachment_path, "wb")
             f.write(attachment.File)
             f.close()
+
 
 def guessMimeType(filename):
     """
@@ -319,6 +359,7 @@ def guessMimeType(filename):
         Mimetype (String)
     """
     return mimetypes.guess_type(filename)[0]
+
 
 def normalizePath(path):
     # this is not sufficent yet
@@ -339,6 +380,7 @@ def normalizePath(path):
         return os.path.join(*new_path)
     else:
         return path
+
 
 def addToHead(tag, soup):
     """
@@ -364,6 +406,7 @@ def addToHead(tag, soup):
             soup.html.insert(0, head)
         soup.head.insert(0, tag)
     return soup
+
 
 def htmlFormatting(message, external_css, headers=True):
     """
@@ -448,7 +491,7 @@ def htmlFormatting(message, external_css, headers=True):
                 table += "<td class='header'>Attachments</td><td>"
                 for i, attachment in enumerate(message.Attachments):
                     table += attachment.Name
-                    if i+1 < attachmentNumber:
+                    if i + 1 < attachmentNumber:
                         table += "<br/>"
                 table += "</td>"
                 table += "</tr>"
