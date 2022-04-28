@@ -150,6 +150,7 @@ class Controller:
             if len(message.Attachments) > 0:
                 if not os.path.isdir(attachments_dir) and not self.args.dry_run:
                     os.mkdir(attachments_dir)
+
                 helper.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
 
             # Setting up CSV data
@@ -178,6 +179,10 @@ class Controller:
                 with open(trace_file, "w") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
+
+            # Generate derivatives
+            for d in derivatives:
+                d.do_task_per_message(message)
 
         # End thread and server for WARC derivatives
         for d in derivatives:
