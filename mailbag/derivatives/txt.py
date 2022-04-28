@@ -30,17 +30,37 @@ class TxtDerivative(Derivative):
 
     def do_task_per_message(self, message):
 
-        out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
+        errors = {}
+        errors["msg"] = []
+        errors["stack_trace"] = []
 
-        if message.Text_Body is None:
-            log.warn("No plain text body for " + str(message.Mailbag_Message_ID) + ". No TXT derivative will be created.")
-        else:
-            log.debug("Writing txt derivative to " + filename)
-            if not self.args.dry_run:
-                if not os.path.isdir(out_dir):
-                    os.makedirs(out_dir)
-                if message.Text_Body:
-                    with open(filename, "w", encoding=message.Text_Encoding) as f:
-                        f.write(message.Text_Body)
-                        f.close()
+        try:
+
+            out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
+            filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
+
+            if message.Text_Body is None:
+                desc = "No plain text body for " + str(message.Mailbag_Message_ID) + ", no TXT derivative created"
+                errors = helper.handle_error(errors, None, desc, "warn")
+            else:
+                log.debug("Writing txt derivative to " + filename)
+                if not self.args.dry_run:
+                    try:
+                        if not os.path.isdir(out_dir):
+                            os.makedirs(out_dir)
+                        if message.Text_Body:
+                            with open(filename, "w", encoding=message.Text_Encoding) as f:
+                                f.write(message.Text_Body)
+                                f.close()
+                    except Exception as e:
+                        desc = "Error writing plain text body to file"
+                        errors = helper.handle_error(errors, e, desc)
+
+        except Exception as e:
+            desc = "Error creating plain text derivative"
+            errors = helper.handle_error(errors, e, desc)
+
+        message.Error.extend(errors["msg"])
+        message.StackTrace.extend(errors["stack_trace"])
+
+        return message
