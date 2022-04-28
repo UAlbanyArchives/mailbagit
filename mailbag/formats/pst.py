@@ -219,9 +219,9 @@ if not skip_registry:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
                     yield from self.folders(subfolder, path, originalFile)
-            # else:
-            #     # gotta return empty directory to controller somehow
-            #     log.error("??--> " + folder.name)
+            else:
+                # gotta return empty directory to controller somehow
+                log.warn("Empty folder " + folder.name + " not handled.")
 
         def messages(self):
             if os.path.isfile(self.file):
@@ -248,7 +248,7 @@ if not skip_registry:
                         yield from self.folders(folder, pathList, os.path.basename(filePath))
                     else:
                         # gotta return empty directory to controller somehow
-                        log.error("???--> " + folder.name)
+                        log.warn("Empty folder " + folder.name + " not handled.")
                 pst.close()
 
                 # Move PST to new mailbag directory structure
