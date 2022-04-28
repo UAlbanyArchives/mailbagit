@@ -129,8 +129,11 @@ if not skip_registry:
                                                 == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG
                                             ):
                                                 if entry.data:
+                                                    att_enc = chardet.detect(
+                                                        entry.data
+                                                    )["encoding"]
                                                     attachmentName = entry.data.decode(
-                                                        "cp1252"
+                                                        att_enc
                                                     ).replace(chr(0), "")
                                             if (
                                                 entry.entry_type
@@ -140,8 +143,11 @@ if not skip_registry:
                                                     entry.data
                                                     and len(attachmentName) > 0
                                                 ):
+                                                    att_enc = chardet.detect(
+                                                        entry.data
+                                                    )["encoding"]
                                                     attachmentName = entry.data.decode(
-                                                        "cp1252"
+                                                        att_enc
                                                     ).replace(chr(0), "")
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
