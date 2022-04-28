@@ -60,7 +60,9 @@ if not skip_registry:
 
                         try:
                             headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
+                            headers = headerParser.parsestr(
+                                messageObj.transport_headers
+                            )
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
@@ -72,18 +74,26 @@ if not skip_registry:
                             html_encoding = None
                             text_encoding = None
                             if messageObj.html_body:
-                                html_encoding = chardet.detect(messageObj.html_body)["encoding"]
+                                html_encoding = chardet.detect(messageObj.html_body)[
+                                    "encoding"
+                                ]
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
-                                text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
-                                text_body = messageObj.plain_text_body.decode(text_encoding)
+                                text_encoding = chardet.detect(
+                                    messageObj.plain_text_body
+                                )["encoding"]
+                                text_body = messageObj.plain_text_body.decode(
+                                    text_encoding
+                                )
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            messagePath = os.path.join(
+                                os.path.splitext(originalFile)[0], *path
+                            )
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
@@ -94,24 +104,46 @@ if not skip_registry:
                         try:
                             total_attachment_size_bytes = 0
                             for attachmentObj in messageObj.attachments:
-                                total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
-                                attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
+                                total_attachment_size_bytes = (
+                                    total_attachment_size_bytes
+                                    + attachmentObj.get_size()
+                                )
+                                attachment_content = attachmentObj.read_buffer(
+                                    attachmentObj.get_size()
+                                )
 
                                 try:
                                     # attachmentName = attachmentObj.get_name()
                                     # Entries found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
-                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG = int("0x3707", base=16)
-                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT = int("0x3704", base=16)
+                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG = int(
+                                        "0x3707", base=16
+                                    )
+                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT = int(
+                                        "0x3704", base=16
+                                    )
                                     attachmentName = ""
                                     for record_set in attachmentObj.record_sets:
                                         for entry in record_set.entries:
-                                            if entry.entry_type == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG:
+                                            if (
+                                                entry.entry_type
+                                                == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG
+                                            ):
                                                 if entry.data:
-                                                    attachmentName = entry.data.decode("utf-8").replace(chr(0), "")
-                                            if entry.entry_type == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT:
-                                                if entry.data and len(attachmentName) > 0:
-                                                    attachmentName = entry.data.decode("utf-8").replace(chr(0), "")
-                                except:
+                                                    attachmentName = entry.data.decode(
+                                                        "cp1252"
+                                                    ).replace(chr(0), "")
+                                            if (
+                                                entry.entry_type
+                                                == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT
+                                            ):
+                                                if (
+                                                    entry.data
+                                                    and len(attachmentName) > 0
+                                                ):
+                                                    attachmentName = entry.data.decode(
+                                                        "cp1252"
+                                                    ).replace(chr(0), "")
+                                except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
                                         "No filename found for attachment "
@@ -158,7 +190,9 @@ if not skip_registry:
                     except (Exception) as e:
                         desc = "Error parsing message"
                         errors = helper.handle_error(errors, e, desc)
-                        message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                        message = Email(
+                            Error=errors["msg"], StackTrace=errors["stack_trace"]
+                        )
 
                     yield message
 
@@ -193,7 +227,9 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, pathList, os.path.basename(filePath))
+                        yield from self.folders(
+                            folder, pathList, os.path.basename(filePath)
+                        )
                     else:
                         # gotta return empty directory to controller somehow
                         log.error("???--> " + folder.name)
