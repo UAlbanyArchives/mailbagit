@@ -23,6 +23,7 @@ if not skip_registry:
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
         format_name = "pst"
+
         try:
             from importlib import metadata
         except ImportError:  # for Python<3.8
@@ -61,7 +62,9 @@ if not skip_registry:
 
                         try:
                             headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
+                            headers = headerParser.parsestr(
+                                messageObj.transport_headers
+                            )
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
@@ -78,6 +81,7 @@ if not skip_registry:
                             if messageObj.plain_text_body:
                                 text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
                                 text_body = messageObj.plain_text_body.decode(text_encoding)
+
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
@@ -85,6 +89,7 @@ if not skip_registry:
                         # Build message and derivatives paths
                         try:
                             messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
@@ -95,8 +100,13 @@ if not skip_registry:
                         try:
                             total_attachment_size_bytes = 0
                             for attachmentObj in messageObj.attachments:
-                                total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
-                                attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
+                                total_attachment_size_bytes = (
+                                    total_attachment_size_bytes
+                                    + attachmentObj.get_size()
+                                )
+                                attachment_content = attachmentObj.read_buffer(
+                                    attachmentObj.get_size()
+                                )
 
                                 try:
                                     attachmentName = attachmentObj.get_name()
@@ -148,7 +158,7 @@ if not skip_registry:
                         desc = "Error parsing message"
                         errors = helper.handle_error(errors, e, desc)
                         message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
-
+                    
                     yield message
 
             # iterate over any subfolders too

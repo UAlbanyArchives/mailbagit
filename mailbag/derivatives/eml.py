@@ -43,7 +43,10 @@ class EmlDerivative(Derivative):
 
         # Build msg
         if not message.Message and not message.Headers:
-            log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
+            log.error(
+                "Unable to create EML as no body or headers present for "
+                + str(message.Mailbag_Message_ID)
+            )
         else:
             if message.Message:
                 msg = message.Message
@@ -68,7 +71,11 @@ class EmlDerivative(Derivative):
                         alt.attach(MIMEText(message.HTML_Body, "html", message.HTML_Encoding))
                     msg.attach(alt)
                 else:
-                    log.warn("No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body.")
+                    log.warn(
+                        "No body present for "
+                        + str(message.Mailbag_Message_ID)
+                        + ". Created EML without message body."
+                    )
 
                 # Attachments
                 for attachment in message.Attachments:
@@ -83,7 +90,10 @@ class EmlDerivative(Derivative):
                     part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
                     msg.attach(part)
             else:
-                log.error("Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID))
+                log.error(
+                    "Unable to create EML as no body or headers present for "
+                    + str(message.Mailbag_Message_ID)
+                )
 
             # Write EML to disk
             log.debug("Writing EML to " + str(out_dir))

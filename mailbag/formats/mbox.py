@@ -65,9 +65,13 @@ class Mbox(EmailAccount):
                         bodies["text_encoding"] = None
                         if mailObject.is_multipart():
                             for part in mailObject.walk():
-                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                                bodies, attachments, errors = helper.parse_part(
+                                    part, bodies, attachments, errors
+                                )
                         else:
-                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                            bodies, attachments, errors = helper.parse_part(
+                                part, bodies, attachments, errors
+                            )
                     except Exception as e:
                         desc = "Error parsing message parts"
                         errors = helper.handle_error(errors, e, desc)

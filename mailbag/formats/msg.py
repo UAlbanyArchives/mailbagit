@@ -64,7 +64,9 @@ class MSG(EmailAccount):
                 # Look for message arrangement
                 try:
                     messagePath = helper.messagePath(mail.header)
-                    unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
+                    unsafePath = os.path.join(
+                        os.path.dirname(originalFile), messagePath
+                    )
                     derivativesPath = helper.normalizePath(unsafePath)
                 except Exception as e:
                     desc = "Error reading message path from headers"
@@ -129,5 +131,7 @@ class MSG(EmailAccount):
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
+            new_path = helper.moveWithDirectoryStructure(
+                self.dry_run, self.file, self.mailbag_name, self.format_name, filePath
+            )
             yield message
