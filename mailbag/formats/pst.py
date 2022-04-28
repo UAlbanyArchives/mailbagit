@@ -24,6 +24,14 @@ if not skip_registry:
         # pst - This concrete class parses PST file format
         format_name = "pst"
 
+        try:
+            from importlib import metadata
+        except ImportError:  # for Python<3.8
+            import importlib_metadata as metadata
+        # format_agent = pypff.__name__
+        format_agent = "libpff-python-ratom"
+        format_agent_version = metadata.version("libpff-python-ratom")
+
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
@@ -68,26 +76,20 @@ if not skip_registry:
                             html_encoding = None
                             text_encoding = None
                             if messageObj.html_body:
-                                html_encoding = chardet.detect(messageObj.html_body)[
-                                    "encoding"
-                                ]
+                                html_encoding = chardet.detect(messageObj.html_body)["encoding"]
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
-                                text_encoding = chardet.detect(
-                                    messageObj.plain_text_body
-                                )["encoding"]
-                                text_body = messageObj.plain_text_body.decode(
-                                    text_encoding
-                                )
+                                text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
+                                text_body = messageObj.plain_text_body.decode(text_encoding)
+
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(
-                                os.path.splitext(originalFile)[0], *path
-                            )
+                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
@@ -155,10 +157,8 @@ if not skip_registry:
                     except (Exception) as e:
                         desc = "Error parsing message"
                         errors = helper.handle_error(errors, e, desc)
-                        message = Email(
-                            Error=errors["msg"], StackTrace=errors["stack_trace"]
-                        )
-
+                        message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                    
                     yield message
 
             # iterate over any subfolders too
@@ -192,9 +192,7 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(
-                            folder, pathList, os.path.basename(filePath)
-                        )
+                        yield from self.folders(folder, pathList, os.path.basename(filePath))
                     else:
                         # gotta return empty directory to controller somehow
                         log.error("???--> " + folder.name)

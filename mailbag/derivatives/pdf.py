@@ -26,6 +26,13 @@ if not skip_registry:
     class PDFDerivative(Derivative):
         derivative_name = "pdf"
         derivative_format = "pdf"
+        derivative_agent = "wkhtmltopdf"
+        check_version = subprocess.Popen([wkhtmltopdf, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = check_version.communicate()
+        if len(err) > 0:
+            log.error("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
+            raise Exception("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
+        derivative_agent_version = out.decode("utf-8").strip()
 
         def __init__(self, email_account, **kwargs):
             log.debug("Setup account")

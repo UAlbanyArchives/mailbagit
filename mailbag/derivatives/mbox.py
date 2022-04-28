@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
+import platform
 
 log = get_logger()
 
@@ -14,6 +15,8 @@ from mailbag.derivative import Derivative
 class MboxDerivative(Derivative):
     derivative_name = "mbox"
     derivative_format = "mbox"
+    derivative_agent = mailbox.__name__
+    derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -35,7 +38,7 @@ class MboxDerivative(Derivative):
             filename = os.path.join(out_dir, self.args.mailbag_name + ".mbox")
         elif len(message.Derivatives_Path.strip("/").split("/")) == 1:
             out_dir = self.mbox_dir
-            filename = os.path.join(out_dir, message.Derivatives_Path.strip(os.sep) + ".mbox")
+            filename = os.path.join(out_dir, message.Derivatives_Path.strip("/") + ".mbox")
         else:
             out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip("/")))
             filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")

@@ -8,6 +8,9 @@ from mailbag.models import Email
 
 class ExampleAccount(EmailAccount):
     format_name = "example"
+    format_details = ""
+    format_agent = ""
+    format_agent_version = ""
 
     def __init__(self, target_account, args, **kwargs):
         print("Parsity parse")

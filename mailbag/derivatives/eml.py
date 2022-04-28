@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from email import encoders
 from email import generator
 from mailbag.derivative import Derivative
+import platform
 
 
 log = get_logger()
@@ -19,6 +20,8 @@ log = get_logger()
 class EmlDerivative(Derivative):
     derivative_name = "eml"
     derivative_format = "eml"
+    derivative_agent = email.__name__
+    derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -62,14 +65,10 @@ class EmlDerivative(Derivative):
                 if message.HTML_Body or message.Text_Body:
                     alt = MIMEMultipart("alternative")
                     if message.Text_Body:
-                        alt.attach(
-                            MIMEText(message.Text_Body, "plain", message.Text_Encoding)
-                        )
+                        alt.attach(MIMEText(message.Text_Body, "plain", message.Text_Encoding))
                     if message.HTML_Body:
                         alt = MIMEMultipart("alternative")
-                        alt.attach(
-                            MIMEText(message.HTML_Body, "html", message.HTML_Encoding)
-                        )
+                        alt.attach(MIMEText(message.HTML_Body, "html", message.HTML_Encoding))
                     msg.attach(alt)
                 else:
                     log.warn(
@@ -83,18 +82,12 @@ class EmlDerivative(Derivative):
                     mimeType = attachment.MimeType
                     if mimeType is None:
                         mimeType = "text/plain"
-                        log.warn(
-                            "Mime type not found for the attachment. Set as "
-                            + mimeType
-                            + "."
-                        )
+                        log.warn("Mime type not found for the attachment. Set as " + mimeType + ".")
                     mimeType = mimeType.split("/")
                     part = MIMEBase(mimeType[0], mimeType[1])
                     part.set_payload(attachment.File)
                     encoders.encode_base64(part)
-                    part.add_header(
-                        "Content-Disposition", "attachment", filename=attachment.Name
-                    )
+                    part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
                     msg.attach(part)
             else:
                 log.error(

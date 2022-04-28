@@ -21,11 +21,11 @@ class Derivative(ABC):
     registry = {}
 
     def __init_subclass__(cls, **kwargs):
-        """Enforce format_name attribute on subclasses, register them"""
-        if not hasattr(cls, "derivative_name"):
-            raise RuntimeError(
-                "Derivative subclass must have `derivative_name` attribute"
-            )
+        """Enforce derivative descriptive attributes on subclasses, register them"""
+        derivative_attrs = ["derivative_name", "derivative_format", "derivative_agent", "derivative_agent_version"]
+        for attr in derivative_attrs:
+            if not hasattr(cls, attr):
+                raise RuntimeError("Derivative subclass must have `" + attr + "` attribute")
 
         super().__init_subclass__(**kwargs)
         __class__.registry[cls.derivative_name] = cls
@@ -63,11 +63,7 @@ def import_derivatives(additional_dirs=None):
             module = basename(filename)[:-3]
             full_path = join(derivatives_dir, filename)
             # skip if not a normal, non underscored file ending in .py
-            if (
-                module.startswith("_")
-                or not isfile(full_path)
-                or filename[-3:] != ".py"
-            ):
+            if module.startswith("_") or not isfile(full_path) or filename[-3:] != ".py":
                 continue
 
             SourceFileLoader(module, full_path).load_module()

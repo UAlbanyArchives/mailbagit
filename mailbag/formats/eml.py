@@ -9,6 +9,7 @@ from mailbag.models import Email, Attachment
 import email
 import glob, os
 from email import policy
+import platform
 
 log = get_logger()
 
@@ -17,6 +18,8 @@ class EML(EmailAccount):
     """EML - This concrete class parses eml file format"""
 
     format_name = "eml"
+    format_agent = email.__name__
+    format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
@@ -106,7 +109,6 @@ class EML(EmailAccount):
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
             # Move EML to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(
-                self.dry_run, self.file, self.mailbag_name, self.format_name, filePath
-            )
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
+            
             yield message

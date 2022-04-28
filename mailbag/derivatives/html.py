@@ -12,6 +12,8 @@ from mailbag.derivative import Derivative
 class HtmlDerivative(Derivative):
     derivative_name = "html"
     derivative_format = "html"
+    derivative_agent = ""
+    derivative_agent_version = ""
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
