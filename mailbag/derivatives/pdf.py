@@ -9,10 +9,10 @@ import mailbag.helper as helper
 # pst is not supported otherwise
 skip_registry = False
 try:
-    if distutils.spawn.find_executable('wkhtmltopdf.exe'):
-        wkhtmltopdf = 'wkhtmltopdf.exe'
-    elif distutils.spawn.find_executable('wkhtmltopdf'):
-        wkhtmltopdf = 'wkhtmltopdf'
+    if distutils.spawn.find_executable("wkhtmltopdf.exe"):
+        wkhtmltopdf = "wkhtmltopdf.exe"
+    elif distutils.spawn.find_executable("wkhtmltopdf"):
+        wkhtmltopdf = "wkhtmltopdf"
     else:
         skip_registry = True
         wkhtmltopdf = None
@@ -24,9 +24,16 @@ log = get_logger()
 if not skip_registry:
 
     class PDFDerivative(Derivative):
-        derivative_name = 'pdf'
-        derivative_format = 'pdf'
-        
+        derivative_name = "pdf"
+        derivative_format = "pdf"
+        derivative_agent = "wkhtmltopdf"
+        check_version = subprocess.Popen([wkhtmltopdf, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = check_version.communicate()
+        if len(err) > 0:
+            log.error("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
+            raise Exception("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
+        derivative_agent_version = out.decode("utf-8").strip()
+
         def __init__(self, email_account, **kwargs):
             log.debug("Setup account")
             super()
@@ -57,12 +64,12 @@ if not skip_registry:
                     if not os.path.isdir(out_dir):
                         os.makedirs(out_dir)
 
-                    with open(html_name, 'w', encoding=encoding) as write_html:
+                    with open(html_name, "w", encoding=encoding) as write_html:
                         write_html.write(html_formatted)
                         write_html.close()
-                    p = subprocess.Popen([wkhtmltopdf, "--disable-javascript", html_name, pdf_name], stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE)
-
+                    p = subprocess.Popen(
+                        [wkhtmltopdf, "--disable-javascript", html_name, pdf_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    )
                     stdout, stderr = p.communicate()
                     if p.returncode == 0:
                         log.debug("Successfully created " + str(message.Mailbag_Message_ID) + ".pdf")
@@ -75,5 +82,3 @@ if not skip_registry:
                         # raise TypeError(stderr)
                     # delete the HTML file
                     os.remove(html_name)
-
-

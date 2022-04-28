@@ -1,6 +1,6 @@
 import os, glob
 import mailbox
-
+from pathlib import Path
 import chardet
 import struct
 from extract_msg.constants import CODE_PAGES
@@ -25,6 +25,12 @@ if not skip_registry:
     class PST(EmailAccount):
         # pst - This concrete class parses PST file format
         format_name = "pst"
+        try:
+            from importlib import metadata
+        except ImportError:  # for Python<3.8
+            import importlib_metadata as metadata
+        format_agent = pypff.__name__
+        format_agent_version = metadata.version("libpff-python")
 
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
@@ -102,24 +108,11 @@ if not skip_registry:
                                             ] = CODE_PAGES[value]
 
                             if messageObj.html_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    html_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    html_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    html_encoding = chardet.detect(
-                                        messageObj.html_body
-                                    )["encoding"]
+                                html_encoding = chardet.detect(messageObj.html_body)[
+                                    "encoding"
+                                ]
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    text_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    text_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    text_encoding = chardet.detect(
-                                        messageObj.plain_text_body
-                                    )["encoding"]
                                 text_encoding = chardet.detect(
                                     messageObj.plain_text_body
                                 )["encoding"]
@@ -135,6 +128,8 @@ if not skip_registry:
                             messagePath = os.path.join(
                                 os.path.splitext(originalFile)[0], *path
                             )
+                            if len(messagePath) > 0:
+                                messagePath = Path(messagePath).as_posix()
                             derivativesPath = helper.normalizePath(messagePath)
                         except Exception as e:
                             desc = "Error reading message path"
@@ -150,8 +145,44 @@ if not skip_registry:
                                 attachment_content = attachmentObj.read_buffer(
                                     attachmentObj.get_size()
                                 )
+
                                 try:
-                                    attachmentName = attachmentObj.get_name()
+                                    # attachmentName = attachmentObj.get_name()
+                                    # Entries found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
+                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG = int(
+                                        "0x3707", base=16
+                                    )
+                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT = int(
+                                        "0x3704", base=16
+                                    )
+                                    attachmentName = ""
+                                    for record_set in attachmentObj.record_sets:
+                                        for entry in record_set.entries:
+                                            if (
+                                                entry.entry_type
+                                                == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG
+                                            ):
+                                                if entry.data:
+                                                    att_enc = chardet.detect(
+                                                        entry.data
+                                                    )["encoding"]
+                                                    attachmentName = entry.data.decode(
+                                                        att_enc
+                                                    ).replace(chr(0), "")
+                                            if (
+                                                entry.entry_type
+                                                == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT
+                                            ):
+                                                if (
+                                                    entry.data
+                                                    and len(attachmentName) > 0
+                                                ):
+                                                    att_enc = chardet.detect(
+                                                        entry.data
+                                                    )["encoding"]
+                                                    attachmentName = entry.data.decode(
+                                                        att_enc
+                                                    ).replace(chr(0), "")
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
@@ -168,6 +199,7 @@ if not skip_registry:
                                     MimeType=helper.guessMimeType(attachmentName),
                                 )
                                 attachments.append(attachment)
+
                         except Exception as e:
                             desc = "Error parsing attachments"
                             errors = helper.handle_error(errors, e, desc)

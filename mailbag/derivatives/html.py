@@ -7,9 +7,13 @@ log = get_logger()
 
 # Does nothing currently
 from mailbag.derivative import Derivative
+
+
 class HtmlDerivative(Derivative):
-    derivative_name = 'html'
-    derivative_format = 'html'
+    derivative_name = "html"
+    derivative_format = "html"
+    derivative_agent = ""
+    derivative_agent_version = ""
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -36,9 +40,8 @@ class HtmlDerivative(Derivative):
             if not self.args.dry_run:
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
-                #Calling helper function to get formatted html
-                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=True)
+                # Calling helper function to get formatted html
+                html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
                 with open(filename, "w", encoding=encoding) as f:
                     f.write(html_formatted)
                     f.close()
-                
