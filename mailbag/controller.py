@@ -180,10 +180,6 @@ class Controller:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
 
-            # Generate derivatives
-            for d in derivatives:
-                d.do_task_per_message(message)
-
         # End thread and server for WARC derivatives
         for d in derivatives:
             if "warc.WarcDerivative" in str(type(d)):
