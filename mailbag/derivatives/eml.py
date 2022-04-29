@@ -108,7 +108,7 @@ class EmlDerivative(Derivative):
                     desc = "Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID)
                     errors = helper.handle_error(errors, None, desc, "error")
 
-                # Write EML to disk
+# Write EML to disk
                 log.debug("Writing EML to " + str(out_dir))
                 try:
                     if not self.args.dry_run:
