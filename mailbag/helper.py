@@ -433,7 +433,16 @@ def htmlFormatting(message, external_css, headers=True):
             else:
                 h2 = ""
             # Headers to display
-            headerFields = ["Mailbag_Message_ID", "Message_ID", "From", "Date", "To", "Cc", "Bcc", "Subject"]
+            headerFields = [
+                "Mailbag_Message_ID",
+                "Message_ID",
+                "From",
+                "Date",
+                "To",
+                "Cc",
+                "Bcc",
+                "Subject",
+            ]
             # Getting the values of the attrbutes and appending to HTML string
             for headerField in headerFields:
                 value = getattr(message, headerField)
@@ -465,6 +474,10 @@ def htmlFormatting(message, external_css, headers=True):
 
         # Embedding default styling
         default_css = """
+            @media print {
+                /* for Chrome margins */
+                @page { margin: 10; }
+            }
             section#mailbagHeaders table#mailbagHeadersTable {
                 width: 100%;
                 margin-bottom: 35px;

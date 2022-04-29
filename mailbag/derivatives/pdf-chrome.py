@@ -5,17 +5,16 @@ from mailbag.derivative import Derivative
 from structlog import get_logger
 import mailbag.helper as helper
 
-# only create format if pypff is successfully importable -
-# pst is not supported otherwise
+
 skip_registry = False
 try:
-    if distutils.spawn.find_executable("wkhtmltopdf.exe"):
-        wkhtmltopdf = "wkhtmltopdf.exe"
-    elif distutils.spawn.find_executable("wkhtmltopdf"):
-        wkhtmltopdf = "wkhtmltopdf"
+    if distutils.spawn.find_executable("chrome.exe"):
+        chrome = "chrome.exe"
+    elif distutils.spawn.find_executable("chrome"):
+        chrome = "chrome"
     else:
         skip_registry = True
-        wkhtmltopdf = None
+        chrome = None
 except:
     skip_registry = True
 
@@ -23,16 +22,11 @@ log = get_logger()
 
 if not skip_registry:
 
-    class PDFDerivative(Derivative):
-        derivative_name = "pdf"
+    class PDFChromeDerivative(Derivative):
+        derivative_name = "pdf-chrome"
         derivative_format = "pdf"
-        derivative_agent = "wkhtmltopdf"
-        check_version = subprocess.Popen([wkhtmltopdf, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = check_version.communicate()
-        if len(err) > 0:
-            log.error("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
-            raise Exception("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
-        derivative_agent_version = out.decode("utf-8").strip()
+        derivative_agent = "chrome"
+        derivative_agent_version = "unknown"
 
         def __init__(self, email_account, **kwargs):
             log.debug("Setup account")
@@ -61,8 +55,7 @@ if not skip_registry:
                 pdf_name = filename + ".pdf"
 
                 if message.HTML_Body is None and message.Text_Body is None:
-                    desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no PDF derivative created"
-                    errors = helper.handle_error(errors, None, desc, "warn")
+                    log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No PDF derivative will be created.")
                 else:
                     log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
                     # Calling helper function to get formatted html
@@ -81,22 +74,26 @@ if not skip_registry:
                                 write_html.write(html_formatted)
                                 write_html.close()
                             command = [
-                                wkhtmltopdf,
-                                "--disable-javascript",
+                                chrome,
+                                "--headless",
+                                "--run-all-compositor-stages-before-draw",
+                                "--disable-gpu",
+                                "--print-to-pdf-no-header",
+                                "--print-to-pdf=" + os.path.abspath(pdf_name),
                                 os.path.abspath(html_name),
-                                os.path.abspath(pdf_name),
                             ]
                             log.debug("Running " + " ".join(command))
                             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
                             stdout, stderr = p.communicate()
                             if p.returncode == 0:
                                 log.debug("Successfully created " + str(message.Mailbag_Message_ID) + ".pdf")
                             else:
                                 if stdout:
-                                    log.debug("Output converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + stdout.decode("utf-8"))
+                                    log.warn("Output converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stdout))
                                 if stderr:
-                                    desc = "Error converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + stderr.decode("utf-8")
-                                    errors = helper.handle_error(errors, None, desc, "warn")
+                                    desc = "Error converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stderr)
+                                    errors = helper.handle_error(errors, None, desc, "error")
                             # delete the HTML file
                             if os.path.isfile(pdf_name):
                                 os.remove(html_name)
@@ -106,7 +103,7 @@ if not skip_registry:
                             errors = helper.handle_error(errors, e, desc)
 
             except Exception as e:
-                desc = "Error creating PDF derivative"
+                desc = "Error creating PDF derivative with chrome"
                 errors = helper.handle_error(errors, e, desc)
 
             message.Error.extend(errors["msg"])
