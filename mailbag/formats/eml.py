@@ -59,13 +59,9 @@ class EML(EmailAccount):
                         bodies["text_encoding"] = None
                         if msg.is_multipart():
                             for part in msg.walk():
-                                bodies, attachments, errors = helper.parse_part(
-                                    part, bodies, attachments, errors
-                                )
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(
-                                part, bodies, attachments, errors
-                            )
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
 
                     except Exception as e:
                         desc = "Error parsing message parts"
@@ -74,9 +70,7 @@ class EML(EmailAccount):
                     # Look for message arrangement
                     try:
                         messagePath = helper.messagePath(msg)
-                        unsafePath = os.path.join(
-                            os.path.dirname(originalFile), messagePath
-                        )
+                        unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"

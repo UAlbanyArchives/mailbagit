@@ -62,9 +62,7 @@ if not skip_registry:
 
                         try:
                             headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(
-                                messageObj.transport_headers
-                            )
+                            headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
@@ -130,13 +128,8 @@ if not skip_registry:
                         try:
                             total_attachment_size_bytes = 0
                             for attachmentObj in messageObj.attachments:
-                                total_attachment_size_bytes = (
-                                    total_attachment_size_bytes
-                                    + attachmentObj.get_size()
-                                )
-                                attachment_content = attachmentObj.read_buffer(
-                                    attachmentObj.get_size()
-                                )
+                                total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
+                                attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
 
                                 try:
                                     # attachmentName = attachmentObj.get_name()

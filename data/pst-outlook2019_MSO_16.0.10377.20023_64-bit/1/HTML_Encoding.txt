@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 windows-1252
-=======
-Windows-1252
->>>>>>> refs/remotes/origin/develop
