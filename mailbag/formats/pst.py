@@ -2,6 +2,8 @@ import os, glob
 import mailbox
 from pathlib import Path
 import chardet
+import struct
+from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
@@ -71,12 +73,44 @@ if not skip_registry:
                             text_body = None
                             html_encoding = None
                             text_encoding = None
+
+                            # Codepage integers found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
+                            # Docs say to use MESSAGE_CODEPAGE: https://github.com/libyal/libfmapi/blob/main/documentation/MAPI%20definitions.asciidoc#51-the-message-body
+                            # this is a 32bit encoded integer
+                            encodings = {}
+                            LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE = int("0x3fde", base=16)
+                            LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE = int("0x3ffd", base=16)
+                            for record_set in messageObj.record_sets:
+                                for entry in record_set.entries:
+                                    if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE:
+                                        if entry.data:
+                                            value = struct.unpack("i", entry.data)[0]
+                                            # Use the extract_msg code page in constants.py
+                                            encodings["PidTagInternetCodepage"] = CODE_PAGES[value]
+                                    if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
+                                        if entry.data:
+                                            value = struct.unpack("i", entry.data)[0]
+                                            # Use the extract_msg code page in constants.py
+                                            encodings["PidTagMessageCodepage"] = CODE_PAGES[value]
+
                             if messageObj.html_body:
-                                html_encoding = chardet.detect(messageObj.html_body)["encoding"]
+                                if encodings["PidTagInternetCodepage"]:
+                                    html_encoding = encodings["PidTagInternetCodepage"]
+                                elif encodings["PidTagMessageCodepage"]:
+                                    html_encoding = encodings["PidTagMessageCodepage"]
+                                else:
+                                    html_encoding = chardet.detect(messageObj.html_body)["encoding"]
                                 html_body = messageObj.html_body.decode(html_encoding)
                             if messageObj.plain_text_body:
+                                if encodings["PidTagInternetCodepage"]:
+                                    text_encoding = encodings["PidTagInternetCodepage"]
+                                elif encodings["PidTagMessageCodepage"]:
+                                    text_encoding = encodings["PidTagMessageCodepage"]
+                                else:
+                                    text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
                                 text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
                                 text_body = messageObj.plain_text_body.decode(text_encoding)
+
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = helper.handle_error(errors, e, desc)
@@ -102,16 +136,35 @@ if not skip_registry:
                                     # Entries found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
                                     LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG = int("0x3707", base=16)
                                     LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT = int("0x3704", base=16)
-                                    attachmentName = ""
+                                    LIBPFF_ENTRY_TYPE_ATTACHMENT_MIME_TAG = int("0x370e", base=16)
+                                    attachmentLong = ""
+                                    attachmentShort = ""
+                                    mime = None
                                     for record_set in attachmentObj.record_sets:
                                         for entry in record_set.entries:
                                             if entry.entry_type == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_LONG:
                                                 if entry.data:
-                                                    attachmentName = entry.data.decode("utf-8").replace(chr(0), "")
+                                                    attachmentLong = entry.get_data_as_string()
                                             if entry.entry_type == LIBPFF_ENTRY_TYPE_ATTACHMENT_FILENAME_SHORT:
-                                                if entry.data and len(attachmentName) > 0:
-                                                    attachmentName = entry.data.decode("utf-8").replace(chr(0), "")
-                                except:
+                                                if entry.data:
+                                                    attachmentShort = entry.get_data_as_string()
+                                            if entry.entry_type == LIBPFF_ENTRY_TYPE_ATTACHMENT_MIME_TAG:
+                                                if entry.data:
+                                                    mime = entry.get_data_as_string()
+                                    # Use the Long filename preferably
+                                    if len(attachmentLong) > 0:
+                                        attachmentName = attachmentLong
+                                    elif len(attachmentShort) > 0:
+                                        attachmentName = attachmentShort
+                                    else:
+                                        print(message.Mailbag_Message_ID)
+                                        raise ValueError("No attachment name found.")
+
+                                    # Guess the mime if we can't find it
+                                    if mime is None:
+                                        mime = helper.guessMimeType(attachmentName)
+
+                                except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
                                         "No filename found for attachment "
@@ -124,7 +177,7 @@ if not skip_registry:
                                 attachment = Attachment(
                                     Name=attachmentName,
                                     File=attachment_content,
-                                    MimeType=helper.guessMimeType(attachmentName),
+                                    MimeType=mime,
                                 )
                                 attachments.append(attachment)
 
@@ -167,9 +220,9 @@ if not skip_registry:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
                     yield from self.folders(subfolder, path, originalFile)
-            # else:
-            #     # gotta return empty directory to controller somehow
-            #     log.error("??--> " + folder.name)
+            else:
+                # gotta return empty directory to controller somehow
+                log.warn("Empty folder " + folder.name + " not handled.")
 
         def messages(self):
             if os.path.isfile(self.file):
@@ -196,7 +249,7 @@ if not skip_registry:
                         yield from self.folders(folder, pathList, os.path.basename(filePath))
                     else:
                         # gotta return empty directory to controller somehow
-                        log.error("???--> " + folder.name)
+                        log.warn("Empty folder " + folder.name + " not handled.")
                 pst.close()
 
                 # Move PST to new mailbag directory structure

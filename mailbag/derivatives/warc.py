@@ -80,6 +80,7 @@ class WarcDerivative(Derivative):
                 if not self.args.dry_run:
                     if not os.path.isdir(out_dir):
                         os.makedirs(out_dir)
+
                     with open(filename, "wb") as output:
 
                         try:
@@ -99,6 +100,7 @@ class WarcDerivative(Derivative):
                                 stream=True,
                             )
                             resp.raise_for_status()
+
                         except requests.exceptions.HTTPError as e:
                             desc = "Error requesting HTML for WARC derivative"
                             errors = helper.handle_error(errors, e, desc)
