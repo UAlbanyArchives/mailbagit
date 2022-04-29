@@ -24,5 +24,7 @@ class ExampleDerivative(Derivative):
     def do_task_per_message(self, message):
         if message.Message_ID:
             log.debug(message.Message_ID.strip())
-        else:
+        elif message.Subject:
             log.debug(message.Subject)
+
+        return message
