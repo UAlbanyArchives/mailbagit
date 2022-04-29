@@ -9,6 +9,7 @@ from mailbag.models import Email, Attachment
 import email
 import glob, os
 from email import policy
+import platform
 
 log = get_logger()
 
@@ -17,6 +18,8 @@ class EML(EmailAccount):
     """EML - This concrete class parses eml file format"""
 
     format_name = "eml"
+    format_agent = email.__name__
+    format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
@@ -56,13 +59,9 @@ class EML(EmailAccount):
                         bodies["text_encoding"] = None
                         if msg.is_multipart():
                             for part in msg.walk():
-                                bodies, attachments, errors = helper.parse_part(
-                                    part, bodies, attachments, errors
-                                )
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(
-                                part, bodies, attachments, errors
-                            )
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
 
                     except Exception as e:
                         desc = "Error parsing message parts"
@@ -71,9 +70,7 @@ class EML(EmailAccount):
                     # Look for message arrangement
                     try:
                         messagePath = helper.messagePath(msg)
-                        unsafePath = os.path.join(
-                            os.path.dirname(originalFile), messagePath
-                        )
+                        unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                         derivativesPath = helper.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
@@ -106,7 +103,5 @@ class EML(EmailAccount):
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
             # Move EML to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(
-                self.dry_run, self.file, self.mailbag_name, self.format_name, filePath
-            )
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
             yield message

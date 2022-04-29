@@ -9,6 +9,7 @@ import email.errors
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
+import platform
 
 log = get_logger()
 
@@ -17,6 +18,8 @@ class Mbox(EmailAccount):
     """Mbox - This concrete class parses mbox file format"""
 
     format_name = "mbox"
+    format_agent = mailbox.__name__
+    format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
@@ -51,9 +54,7 @@ class Mbox(EmailAccount):
                 errors["msg"] = []
                 errors["stack_trace"] = []
                 try:
-                    mailObject = email.message_from_bytes(
-                        mail.as_bytes(), policy=email.policy.default
-                    )
+                    mailObject = email.message_from_bytes(mail.as_bytes(), policy=email.policy.default)
 
                     # Try to parse content
                     try:
@@ -64,13 +65,9 @@ class Mbox(EmailAccount):
                         bodies["text_encoding"] = None
                         if mailObject.is_multipart():
                             for part in mailObject.walk():
-                                bodies, attachments, errors = helper.parse_part(
-                                    part, bodies, attachments, errors
-                                )
+                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(
-                                part, bodies, attachments, errors
-                            )
+                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                     except Exception as e:
                         desc = "Error parsing message parts"
                         errors = helper.handle_error(errors, e, desc)
@@ -79,9 +76,7 @@ class Mbox(EmailAccount):
                     try:
                         messagePath = helper.messagePath(mailObject)
                         if len(messagePath) > 0:
-                            unsafePath = os.path.join(
-                                os.path.splitext(originalFile)[0], messagePath
-                            )
+                            unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
                         else:
                             unsafePath = os.path.splitext(originalFile)[0]
                         derivativesPath = helper.normalizePath(unsafePath)
@@ -114,9 +109,7 @@ class Mbox(EmailAccount):
                 except (email.errors.MessageParseError, Exception) as e:
                     desc = "Error parsing message"
                     errors = helper.handle_error(errors, e, desc)
-                    message = Email(
-                        Error=errors["msg"], StackTrace=errors["stack_trace"]
-                    )
+                    message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
                     log.error(error_msg)
 
                 yield message
@@ -124,6 +117,4 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(
-                self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath
-            )
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)

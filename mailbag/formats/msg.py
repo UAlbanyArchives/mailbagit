@@ -16,6 +16,8 @@ class MSG(EmailAccount):
     """MSG - This concrete class parses msg file format"""
 
     format_name = "msg"
+    format_agent = extract_msg.__name__
+    format_agent_version = extract_msg.__version__
 
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
@@ -62,9 +64,7 @@ class MSG(EmailAccount):
                 # Look for message arrangement
                 try:
                     messagePath = helper.messagePath(mail.header)
-                    unsafePath = os.path.join(
-                        os.path.dirname(originalFile), messagePath
-                    )
+                    unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                     derivativesPath = helper.normalizePath(unsafePath)
                 except Exception as e:
                     desc = "Error reading message path from headers"
@@ -80,12 +80,7 @@ class MSG(EmailAccount):
                             attachmentName = mailAttachment.shortFilename
                         else:
                             attachmentName = str(len(attachments))
-                            desc = (
-                                "No filename found for attachment "
-                                + attachmentName
-                                + " for message "
-                                + str(message.Mailbag_Message_ID)
-                            )
+                            desc = "No filename found for attachment " + attachmentName + " for message " + str(message.Mailbag_Message_ID)
                             errors = helper.handle_error(errors, e, desc)
 
                         attachment = Attachment(
@@ -134,7 +129,5 @@ class MSG(EmailAccount):
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(
-                self.dry_run, self.file, self.mailbag_name, self.format_name, filePath
-            )
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
             yield message
