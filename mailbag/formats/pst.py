@@ -2,7 +2,6 @@ import os, glob
 import mailbox
 from pathlib import Path
 import chardet
-import struct
 from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
 from email import parser
@@ -84,12 +83,12 @@ if not skip_registry:
                                 for entry in record_set.entries:
                                     if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE:
                                         if entry.data:
-                                            value = struct.unpack("i", entry.data)[0]
+                                            value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
                                             encodings["PidTagInternetCodepage"] = CODE_PAGES[value]
                                     if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
                                         if entry.data:
-                                            value = struct.unpack("i", entry.data)[0]
+                                            value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
                                             encodings["PidTagMessageCodepage"] = CODE_PAGES[value]
 
