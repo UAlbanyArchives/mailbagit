@@ -8,10 +8,10 @@ import mailbag.helper as helper
 
 skip_registry = False
 try:
-    if distutils.spawn.find_executable('chrome.exe'):
-        chrome = 'chrome.exe'
-    elif distutils.spawn.find_executable('chrome'):
-        chrome = 'chrome'
+    if distutils.spawn.find_executable("chrome.exe"):
+        chrome = "chrome.exe"
+    elif distutils.spawn.find_executable("chrome"):
+        chrome = "chrome"
     else:
         skip_registry = True
         chrome = None
@@ -23,8 +23,8 @@ log = get_logger()
 if not skip_registry:
 
     class PDFChromeDerivative(Derivative):
-        derivative_name = 'pdf2'
-        derivative_format = 'pdf2'
+        derivative_name = "pdf-chrome"
+        derivative_format = "pdf"
 
         def __init__(self, email_account, **kwargs):
             log.debug("Setup account")
@@ -47,35 +47,65 @@ if not skip_registry:
             pdf_name = filename + ".pdf"
 
             if message.HTML_Body is None and message.Text_Body is None:
-                log.warn("No HTML or plain text body for " + str(
-                    message.Mailbag_Message_ID) + ". No PDF derivative will be created.")
+                log.warn(
+                    "No HTML or plain text body for "
+                    + str(message.Mailbag_Message_ID)
+                    + ". No PDF derivative will be created."
+                )
             else:
-                log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
+                log.debug(
+                    "Writing HTML to "
+                    + str(html_name)
+                    + " and converting to "
+                    + str(pdf_name)
+                )
                 html_formatted, encoding = helper.htmlFormatting(message, self.args.css)
 
                 if not self.args.dry_run:
                     if not os.path.isdir(out_dir):
                         os.makedirs(out_dir)
 
-                    with open(html_name, 'w', encoding=encoding) as write_html:
+                    with open(html_name, "w", encoding=encoding) as write_html:
                         write_html.write(html_formatted)
                         write_html.close()
-                    p = subprocess.Popen([chrome, '--headless',
-                                          '--run-all-compositor-stages-before-draw',
-                                          '--remote-debugging-port=9926'
-                                          '--disable-gpu', '--print-to-pdf=', pdf_name, html_name],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE)
+                    command = [
+                        chrome,
+                        "--headless",
+                        "--run-all-compositor-stages-before-draw",
+                        "--disable-gpu",
+                        "--print-to-pdf-no-header",
+                        "--print-to-pdf=" + os.path.abspath(pdf_name),
+                        os.path.abspath(html_name),
+                    ]
+                    log.debug("Running " + " ".join(command))
+                    p = subprocess.Popen(
+                        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    )
 
                     stdout, stderr = p.communicate()
                     if p.returncode == 0:
-                        log.debug("Successfully created " + str(message.Mailbag_Message_ID) + ".pdf")
+                        log.debug(
+                            "Successfully created "
+                            + str(message.Mailbag_Message_ID)
+                            + ".pdf"
+                        )
                     else:
                         if stdout:
-                            log.warn("Output converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stdout))
+                            log.warn(
+                                "Output converting to "
+                                + str(message.Mailbag_Message_ID)
+                                + ".pdf: "
+                                + str(stdout)
+                            )
                         if stderr:
-                            log.error("Error converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stderr))
+                            log.error(
+                                "Error converting to "
+                                + str(message.Mailbag_Message_ID)
+                                + ".pdf: "
+                                + str(stderr)
+                            )
                         # comment out for now since catches even very minor issues
                         # raise TypeError(stderr)
                     # delete the HTML file
-                    os.remove(html_name)
+                    if os.path.isfile(pdf_name):
+                        os.remove(html_name)

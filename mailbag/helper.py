@@ -92,7 +92,14 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
 
     file_new_path = os.path.join(folder_new, relPath, filename)
 
-    log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+    log.debug(
+        "Moving: "
+        + str(fullFilePath)
+        + " to: "
+        + str(file_new_path)
+        + " SubFolder: "
+        + str(relPath)
+    )
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -192,10 +199,14 @@ def parse_part(part, bodies, attachments, errors):
     try:
         if content_type == "text/html" and content_disposition != "attachment":
             bodies["html_encoding"] = part.get_charsets()[0]
-            bodies["html_body"] = part.get_payload(decode=True).decode(bodies["html_encoding"])
+            bodies["html_body"] = part.get_payload(decode=True).decode(
+                bodies["html_encoding"]
+            )
         if content_type == "text/plain" and content_disposition != "attachment":
             bodies["text_encoding"] = part.get_charsets()[0]
-            bodies["text_body"] = part.get_payload(decode=True).decode(bodies["text_encoding"])
+            bodies["text_body"] = part.get_payload(decode=True).decode(
+                bodies["text_encoding"]
+            )
     except Exception as e:
         desc = "Error parsing message body"
         errors = handle_error(errors, e, desc)
@@ -234,7 +245,9 @@ def saveAttachmentOnDisk(dry_run, attachments_dir, message):
     """
 
     if not dry_run:
-        message_attachments_dir = os.path.join(attachments_dir, str(message.Mailbag_Message_ID))
+        message_attachments_dir = os.path.join(
+            attachments_dir, str(message.Mailbag_Message_ID)
+        )
         os.mkdir(message_attachments_dir)
 
     for attachment in message.Attachments:
@@ -394,17 +407,25 @@ def htmlFormatting(message, external_css, headers=True):
         )
         # using utf-8 for ascii plain text bodies as we're adding non-ascii whitespace
         if codecs.lookup(message.Text_Encoding).name.lower() == "ascii":
-            log.debug("Using utf-8 to better handle whitespace for plain text ascii body message " + str(message.Mailbag_Message_ID))
+            log.debug(
+                "Using utf-8 to better handle whitespace for plain text ascii body message "
+                + str(message.Mailbag_Message_ID)
+            )
             encoding = "utf-8"
         else:
             encoding = message.Text_Encoding
     else:
-        log.warn("Unable to format HTML, no message body found for " + str(message.Mailbag_Message_ID))
+        log.warn(
+            "Unable to format HTML, no message body found for "
+            + str(message.Mailbag_Message_ID)
+        )
 
     if html_content:
 
         # Formatting HTML with beautiful soup
-        soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
+        soup = BeautifulSoup(
+            html_content.encode(encoding), "html.parser", from_encoding=encoding
+        )
 
         # Check Doctype
         doctype = False
@@ -425,14 +446,29 @@ def htmlFormatting(message, external_css, headers=True):
             else:
                 h2 = ""
             # Headers to display
-            headerFields = ["Mailbag_Message_ID", "Message_ID", "From", "Date", "To", "Cc", "Bcc", "Subject"]
+            headerFields = [
+                "Mailbag_Message_ID",
+                "Message_ID",
+                "From",
+                "Date",
+                "To",
+                "Cc",
+                "Bcc",
+                "Subject",
+            ]
             # Getting the values of the attrbutes and appending to HTML string
             for headerField in headerFields:
                 value = getattr(message, headerField)
                 if not value is None and value != []:
                     table += "<tr>"
                     table += "<td class='header'>" + str(headerField) + "</td>"
-                    table += "<td>" + str(getattr(message, headerField)).replace("<", "&lt;").replace(">", "&gt;") + "</td>"
+                    table += (
+                        "<td>"
+                        + str(getattr(message, headerField))
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                        + "</td>"
+                    )
                     table += "</tr>"
             if len(message.Attachments) > 0:
                 attachmentNumber = len(message.Attachments)
@@ -444,7 +480,9 @@ def htmlFormatting(message, external_css, headers=True):
                         table += "<br/>"
                 table += "</td>"
                 table += "</tr>"
-            tableSection = "<section id='mailbagHeaders'>" + h2 + table + "</table></section>"
+            tableSection = (
+                "<section id='mailbagHeaders'>" + h2 + table + "</table></section>"
+            )
             soupTable = BeautifulSoup(tableSection, "html.parser")
 
             # Add headers table to HTML body
@@ -457,6 +495,10 @@ def htmlFormatting(message, external_css, headers=True):
 
         # Embedding default styling
         default_css = """
+            @media print {
+                /* for Chrome margins */
+                @page { margin: 10; }
+            }
             section#mailbagHeaders table#mailbagHeadersTable {
                 width: 100%;
                 margin-bottom: 35px;
@@ -494,7 +536,11 @@ def htmlFormatting(message, external_css, headers=True):
         # Embedding Images
         # HT to extract_msg for this approach
         # https://github.com/TeamMsgExtractor/msg-extractor/blob/6bed8213de1a7a41739fcf5c9363322508711fce/extract_msg/message_base.py#L403-L414
-        tags = (tag for tag in soup.findAll("img") if tag.get("src") and tag.get("src").startswith("cid:"))
+        tags = (
+            tag
+            for tag in soup.findAll("img")
+            if tag.get("src") and tag.get("src").startswith("cid:")
+        )
         data = None
         for tag in tags:
             # Iterate through the attachments until we get the right one.
@@ -506,7 +552,9 @@ def htmlFormatting(message, external_css, headers=True):
 
             # If we found anything, inject it.
             if data:
-                tag["src"] = (b"data:image;base64," + base64.b64encode(data)).decode(encoding)
+                tag["src"] = (b"data:image;base64," + base64.b64encode(data)).decode(
+                    encoding
+                )
 
         html_content = soup.prettify(encoding).decode(encoding)
 
