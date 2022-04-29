@@ -110,7 +110,7 @@ derivative_types = list(key for key in Derivative.registry.keys() if key != "exa
 mailbagit_args.add_argument(
     "directory",
     nargs=1,
-    widget="DirChooser",
+    # widget="DirChooser",
     help=(
         "A path to email to be packaged into a mailbag." "This can be a single file or a directory containing " "a number of email exports."
     ),
