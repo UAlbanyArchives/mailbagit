@@ -27,6 +27,9 @@ RUN curl -L -o /tmp/wkhtmltox_0.12.6-1.focal_amd64.deb \
 RUN apt-get install -y /tmp/wkhtmltox_0.12.6-1.focal_amd64.deb
 
 # Install chrome headless
+RUN curl -L -o /tmp/google-chrome-stable_current_amd64.deb \
+    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install -y /tmp/google-chrome-stable_current_amd64.deb
 
 RUN mkdir /mailbag
 WORKDIR /mailbag
@@ -35,6 +38,8 @@ WORKDIR /
 
 RUN if [ "${APP_ENV}" = "dev" ] ; \
     then echo export MAILBAG_LOG_LEVEL='debug' >> ~/.bashrc && \
+    # manually add to $PYTHONPATH because https://github.com/python/importlib_metadata/issues/364
+    echo export PYTHONPATH='/mailbag' >> ~/.bashrc && \
     echo cd /mailbag >> ~/.bashrc && \
     cd /mailbag && \
     pip install -e . ; \
