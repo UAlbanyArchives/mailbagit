@@ -31,7 +31,13 @@ pip install -e .
 
 Build and run image
 ```
-docker build -t mailbag:dev .
+docker build -t mailbag .
+docker run -it mailbag bash
+```
+
+Build and run development image
+```
+docker build -t mailbag:dev --build-arg APP_ENV=dev .
 docker run -it mailbag:dev bash
 ```
 

@@ -22,7 +22,8 @@ setuptools.setup(
     entry_points={"console_scripts": ["mailbagit=mailbag:cli", "mailbagit-gui=mailbag:gui"]},
     install_requires=[
         "bagit>=1.8.1,<2",
-        "beautifulsoup4>=4.11.1,<5" "black>=22.1.0,<23",
+        "beautifulsoup4>=4.11.1,<5",
+        "black>=22.1.0,<23",
         "gooey>=1.0.8.1,<2",
         "jsonmodels>=2.2,<=2.5.0",
         "extract_msg>=0.30.10,<1",
