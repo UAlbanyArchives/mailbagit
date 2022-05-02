@@ -28,7 +28,7 @@ def moveFile(dry_run, oldPath, newPath):
         log.error('Unable to move file. %s' % e)
 
 
-def progressBar (current, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+def progress(current, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     
@@ -44,17 +44,18 @@ def progressBar (current, total, prefix='', suffix='', decimals=1, length=100, f
     """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (current / float(total)))
     filledLength = int(length * current // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    
+    # bar = fill * filledLength + '-' * (length - filledLength)
     
     e = datetime.datetime.now()
-    
     style = globals.style
     dt = f'{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}'
-    message_type = f'[{style["b"][0]}{style["g"][0]}{prefix}{style["b"][1]}]'
+    message_type = f'[{style["b"][0]}{style["y"][0]}{prefix}{style["b"][1]}]'
     deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
-    status = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
+    # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
+    status = f'{percent}% [{current} messages out of {total}] {suffix}'
+
     print(f'\r{dt} {message_type} {status}', end=printEnd)
+    
     # Print New Line on Complete
     if current == total: 
         print()
@@ -132,24 +133,6 @@ def messagePath(headers):
             messagePath = ""
         return messagePath
 
-def getNewFilePath(args,file):
-    """
-    Creates new file paths for input mail files
-    
-    Parameters:
-        mainPath (String) :
-        mailbag_name (String) :
-        input (String) :
-        file (String) :
-    """
-    
-    originalPath = os.path.join(args.directory,file)
-    newPath = os.path.join(args.directory,args.mailbag_name,'data',args.input,file)
-    
-    if Path(originalPath).is_file():
-        return originalPath
-    return newPath
-    
 def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
     """
     Creates file paths for input mail files and new paths
@@ -256,6 +239,8 @@ def handle_error(errors, exception, desc):
     error_msg = desc + ": " + repr(exception)
     errors["msg"].append(error_msg)
     errors["stack_trace"].append(traceback.format_exc())
+    
+    print()
     log.error(error_msg)
 
     return errors

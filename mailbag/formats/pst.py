@@ -31,6 +31,7 @@ if not skip_registry:
             self.file = target_account
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
+            self.iteration_only = True
             log.info("Reading :", File=self.file)
 
         def account_data(self):
@@ -44,7 +45,10 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
-
+                    
+                    if self.iteration_only:
+                        yield None
+                        continue 
                     attachments = []
                     errors = {}
                     errors["msg"] = []
@@ -181,4 +185,5 @@ if not skip_registry:
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,filePath)
+                if not self.iteration_only:
+                    new_path = helper.moveWithDirectoryStructure(self.dry_run,parent_dir,self.mailbag_name,self.format_name,filePath)

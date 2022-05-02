@@ -90,11 +90,11 @@ class Controller:
         csv_portion = [self.csv_headers]
         error_csv = [self.csv_headers]
 
-        # Initialize progress bar
-        globals.totalSize = helper.getDirectorySize(self.args.directory,self.args.input)
-        helper.progressBar(0, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100, printEnd="")
-        previousFilePath = ''
-        newPath = ''
+        
+        
+        # Count total no. of message ahead
+        total = len(list(mail_account.messages()))
+        mail_account.iteration_only = False
         
         for message in mail_account.messages():
             # do stuff you ought to do per message here
@@ -129,22 +129,15 @@ class Controller:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
 
-
             #Generate derivatives
             for d in derivatives:
                 d.do_task_per_message(message)
             
-            # Increase processedSize by the size of the current message
-            # And show progress bar
-            newPath = helper.getNewFilePath(self.args,message.Original_File)
-            
-            if previousFilePath != newPath:
-                previousFilePath = newPath
-                helper.processedFile(newPath)
-                if(globals.processedSize<globals.totalSize):
-                    helper.progressBar(globals.processedSize, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100)
-        
-        helper.progressBar(globals.totalSize, globals.totalSize, prefix = 'Progress:', suffix = 'Complete', length = 100)
+            # Show progress
+            printEnd = '\r'
+            if globals.loglevel != 'INFO':
+                printEnd = '\n'
+            helper.progress(mailbag_message_id, total, prefix = 'Progress ', suffix = 'Complete', length = 100, printEnd=printEnd)
         
         # End derivatives thread and server
         for d in derivatives:
@@ -195,6 +188,5 @@ class Controller:
 
         if not self.args.dry_run:
             bag.save(manifests=True)
-
 
         return mail_account.messages()
