@@ -7,6 +7,7 @@ import email.errors
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
 import mailbag.helper as helper
+import mailbag.globals as globals
 from extract_msg import attachment
 
 log = get_logger()
@@ -27,6 +28,7 @@ class MSG(EmailAccount):
         self.file = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.iteration_only = False
         log.info("Reading :", File=self.file)
 
     def account_data(self):
@@ -35,6 +37,10 @@ class MSG(EmailAccount):
     def messages(self):
         files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
         for filePath in files:
+
+            if self.iteration_only:
+                yield None
+                continue
 
             originalFile = helper.relativePath(self.file, filePath)
 

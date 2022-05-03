@@ -13,7 +13,9 @@ from mailbag.email_account import EmailAccount, import_formats
 from mailbag.derivative import Derivative, import_derivatives
 from mailbag.controller import Controller
 import mailbag.loggerx
+import mailbag.globals
 
+globals.init()
 loggerx.configure()
 log = get_logger()
 

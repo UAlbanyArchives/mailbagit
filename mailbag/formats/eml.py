@@ -29,6 +29,7 @@ class EML(EmailAccount):
         self.file = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.iteration_only = False
         log.info("Reading : ", File=self.file)
 
     def account_data(self):
@@ -39,6 +40,10 @@ class EML(EmailAccount):
         files = glob.glob(os.path.join(self.file, "**", "*.eml"), recursive=True)
 
         for filePath in files:
+
+            if self.iteration_only:
+                yield None
+                continue
 
             originalFile = helper.relativePath(self.file, filePath)
 
@@ -103,5 +108,5 @@ class EML(EmailAccount):
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
             # Move EML to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
             yield message
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)

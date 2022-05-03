@@ -41,9 +41,7 @@ class Email(models.Base):
 
     def dump(self):
         filename = os.path.basename(self.Original_File)
-        dump_file = (
-            os.path.splitext(filename)[1][1:] + "-" + os.path.splitext(filename)[0]
-        )
+        dump_file = os.path.splitext(filename)[1][1:] + "-" + os.path.splitext(filename)[0]
         rootpath = os.path.join("data", dump_file, str(self.Mailbag_Message_ID))
         if not os.path.isdir(rootpath):
             os.makedirs(rootpath)
@@ -78,13 +76,9 @@ class Email(models.Base):
                             subname = subfield[0]
                             subvalue = getattr(item, subname)
                             if isinstance(subvalue, str):
-                                self.dump_string(
-                                    subvalue, os.path.join(outpath, subname)
-                                )
+                                self.dump_string(subvalue, os.path.join(outpath, subname))
                             elif isinstance(subvalue, bytes):
-                                with open(
-                                    os.path.join(outpath, subname + ".bin"), "wb"
-                                ) as f:
+                                with open(os.path.join(outpath, subname + ".bin"), "wb") as f:
                                     f.write(subvalue)
                                     f.close()
             else:
@@ -117,9 +111,7 @@ class Email(models.Base):
                         f.close()
                 else:
                     if field.endswith("_Body.txt"):
-                        encodingFile = os.path.join(
-                            messagedir, field.split("_")[0] + "_Encoding.txt"
-                        )
+                        encodingFile = os.path.join(messagedir, field.split("_")[0] + "_Encoding.txt")
                         encoding = self.read_file(encodingFile, None)
                     else:
                         encoding = None
