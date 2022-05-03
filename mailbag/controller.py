@@ -14,6 +14,7 @@ from time import sleep, time
 
 
 import traceback
+
 log = get_logger()
 
 
@@ -25,9 +26,22 @@ class Controller:
         self.format = self.format_map[args.input]
         self.derivatives_to_create = [self.derivative_map[d] for d in args.derivatives]
 
-        self.csv_headers = ['Error', 'Mailbag-Message-ID', 'Message-ID', 'Original-File', \
-        'Message-Path', 'Derivatives-Path', 'Attachments', 'Date', 'From', 'To', 'Cc', 'Bcc', \
-        'Subject', 'Content_Type']
+        self.csv_headers = [
+            "Error",
+            "Mailbag-Message-ID",
+            "Message-ID",
+            "Original-File",
+            "Message-Path",
+            "Derivatives-Path",
+            "Attachments",
+            "Date",
+            "From",
+            "To",
+            "Cc",
+            "Bcc",
+            "Subject",
+            "Content_Type",
+        ]
 
     @property
     def format_map(self):
@@ -43,14 +57,26 @@ class Controller:
 
         Parameters:
             message (Email): Email model object
-            
+
         Returns:
             list: line
         """
-        line = [" ".join(message.Error), message.Mailbag_Message_ID, message.Message_ID, \
-        message.Original_File, message.Message_Path, message.Derivatives_Path, str(len(message.Attachments)), \
-        message.Date, message.From, message.To, message.Cc,message.Bcc, \
-        message.Subject, message.Content_Type]
+        line = [
+            " ".join(message.Error),
+            message.Mailbag_Message_ID,
+            message.Message_ID,
+            message.Original_File,
+            message.Message_Path,
+            message.Derivatives_Path,
+            str(len(message.Attachments)),
+            message.Date,
+            message.From,
+            message.To,
+            message.Cc,
+            message.Bcc,
+            message.Subject,
+            message.Content_Type,
+        ]
 
         return line
 
@@ -58,15 +84,15 @@ class Controller:
 
         mail_account: EmailAccount = self.format(self.args.directory, self.args)
 
-        #Create folder mailbag folder before writing mailbag.csv
+        # Create folder mailbag folder before writing mailbag.csv
         if os.path.isfile(self.args.directory):
             parent_dir = os.path.dirname(self.args.directory)
         else:
             parent_dir = self.args.directory
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
 
-        attachments_dir = os.path.join(str(mailbag_dir),'data','attachments')
-        error_dir=os.path.join(parent_dir,str(self.args.mailbag_name)+'_errors')
+        attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
+        error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
         log.debug("Creating mailbag at " + str(mailbag_dir))
 
         if not self.args.dry_run:
@@ -80,10 +106,10 @@ class Controller:
 
         # do stuff you ought to do with per-account info here
         # mail_account.account_data()
-        #for d in derivatives:
+        # for d in derivatives:
         #    d.do_task_per_account()
 
-        #Setting up mailbag.csv
+        # Setting up mailbag.csv
         csv_data = []
         mailbag_message_id = 0
         csv_portion_count = 0
@@ -94,17 +120,17 @@ class Controller:
         total_messages = len(list(mail_account.messages()))
         mail_account.iteration_only = False
         start_time = time()
-        
+
         for message in mail_account.messages():
             # do stuff you ought to do per message here
 
             # Generate mailbag_message_id
             mailbag_message_id += 1
             message.Mailbag_Message_ID = mailbag_message_id
-            
+
             if len(message.Attachments) > 0:
-                helper.saveAttachmentOnDisk(self.args.dry_run,attachments_dir,message)
-            
+                helper.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
+
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
             if csv_portion_count > 100000:
@@ -117,34 +143,34 @@ class Controller:
                 csv_portion.append(self.message_to_csv(message))
             csv_portion_count += 1
 
-            #creating text file and csv if error is present
+            # creating text file and csv if error is present
             if len(message.Error) > 0:
                 if not os.path.isdir(error_dir):
-                    #making error directory if error is present
+                    # making error directory if error is present
                     os.mkdir(error_dir)
                 error_csv.append(self.message_to_csv(message))
-                trace_file = os.path.join(error_dir,str(message.Mailbag_Message_ID) + '.txt')
-                with open(trace_file, 'w') as f:
+                trace_file = os.path.join(error_dir, str(message.Mailbag_Message_ID) + ".txt")
+                with open(trace_file, "w") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
 
-            #Generate derivatives
+            # Generate derivatives
             for d in derivatives:
                 d.do_task_per_message(message)
 
             # Show progress
             # If progress%(total_messages/100)==0 then show progress
             # This reduces progress update overhead to only 100 updates at max
-            is_last = mailbag_message_id==total_messages 
-            if total_messages/100<1 or is_last or mailbag_message_id % int(total_messages/100)==0:
-                print_End = '\n' if globals.log_level != 'INFO' or is_last else '\r'
-                helper.progress(mailbag_message_id, total_messages, start_time, prefix = 'Progress ', suffix = 'Complete', print_End=print_End)
-        
+            is_last = mailbag_message_id == total_messages
+            if total_messages / 100 < 1 or is_last or mailbag_message_id % int(total_messages / 100) == 0:
+                print_End = "\n" if globals.log_level == "DEBUG" or is_last else "\r"
+                helper.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
+
         # End derivatives thread and server
         for d in derivatives:
-            if 'warc.WarcDerivative' in str(type(d)):
+            if "warc.WarcDerivative" in str(type(d)):
                 d.terminate()
-        
+
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 
@@ -155,7 +181,7 @@ class Controller:
             # checking if there are multiple portions in list or not
             if len(csv_data) == 1:
                 filename = os.path.join(mailbag_dir, "mailbag.csv")
-                with open(filename, 'w', encoding='utf-8', newline='') as f:
+                with open(filename, "w", encoding="utf-8", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerows(csv_data[0])
                     f.close()
@@ -164,7 +190,7 @@ class Controller:
                 for portion in csv_data:
                     portion_count += 1
                     filename = os.path.join(mailbag_dir, "mailbag-" + str(portion_count) + ".csv")
-                    with open(filename, 'w', encoding='utf-8', newline='') as f:
+                    with open(filename, "w", encoding="utf-8", newline="") as f:
                         writer = csv.writer(f)
                         writer.writerows(portion)
                         f.close()
@@ -172,19 +198,18 @@ class Controller:
         log.debug("Writing error.csv to " + str(error_dir))
         if len(error_csv) > 1:
             filename = os.path.join(error_dir, "error.csv")
-            with open(filename, 'w', encoding='UTF8', newline='') as f:
+            with open(filename, "w", encoding="UTF8", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
 
-
         if self.args.compress and not self.args.dry_run:
             log.info("Compressing Mailbag")
-            compressionFormats = {'tar': 'tar', 'zip': 'zip', 'tar.gz': 'gztar'}        
+            compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
             shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
 
-            #Checking if the files with all the given extensions are present
+            # Checking if the files with all the given extensions are present
             if os.path.isfile(mailbag_dir + "." + self.args.compress):
-                #Deleting the mailbag if compressed files are present
+                # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
 
         if not self.args.dry_run:
