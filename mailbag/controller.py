@@ -97,6 +97,12 @@ class Controller:
         attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
         error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
 
+        #Getting a list of all the files
+        file_list=[]
+        for root, dirs, files in os.walk(parent_dir):
+            for file in files:
+                file_list.append(file)
+
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
             os.mkdir(mailbag_dir)
@@ -214,6 +220,19 @@ class Controller:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
 
+        #moving companion files
+        if self.args.companion_files:
+            new_path = os.path.join(mailbag_dir, "data", self.args.input)
+            new_files=[]
+            for root, dirs, files in os.walk(parent_dir):
+                for file in files:
+                    new_files.append(file)
+            for file in new_files:
+                if file in file_list and self.args.input not in file:
+                    old_path = os.path.join(parent_dir, file)
+                    shutil.move(old_path, new_path)
+
+
         if not self.args.dry_run:
             bag_size = 0
             for root, dirs, files in os.walk(os.path.join(str(mailbag_dir), "data")):
@@ -225,6 +244,7 @@ class Controller:
             bag.info["Bagging-Timestamp"] = now.strftime("%Y-%m-%dT%H:%M:%S")
             bag.info["Bagging-Date"] = now.strftime("%Y-%m-%d")
             bag.save(manifests=True)
+
 
         if self.args.compress and not self.args.dry_run:
             log.info("Compressing Mailbag")

@@ -139,7 +139,10 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made", default=False, action="store_true"
+    "-r", "--dry_run", help="A dry run performs a trial run with no changes made", default=False, action="store_true",
+)
+mailbagit_options.add_argument(
+    "-cf", "--companion_files", help="Companion files", default=False, action="store_true",
 )
 # Yet-to-be-implemented:
 """
