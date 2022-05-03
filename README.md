@@ -33,7 +33,11 @@ To install the mailbagit GUI, in addition to `pip install mailbag`, you need to 
 
 `pip install mailbag[gui]`
 
-If it is installed correctly, the GUI will run using the `mailbagit-gui` command. There is a [known issue](https://github.com/UAlbanyArchives/mailbag/issues/155) where the GUI does not fully run on Windows. It will boot and lets you enter options but then fails to run when you click "start." Instead, try creating a file called `mailbagit-gui.py` with the contents:
+If it is installed correctly, the GUI will run using the `mailbagit-gui` command.
+
+##### GUI on Windows
+
+There is a [known issue](https://github.com/UAlbanyArchives/mailbag/issues/155) where the GUI does not fully run on Windows. It will boot and lets you enter options but then fails to run when you click "start." Instead, try creating a file called `mailbagit-gui.py` with the contents:
 
 ```
 from mailbag import gui
