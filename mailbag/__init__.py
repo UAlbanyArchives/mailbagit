@@ -6,7 +6,7 @@ __version__ = "0.0.1"
 import os
 from pathlib import Path
 from bagit import _make_parser, Bag, BagHeaderAction, DEFAULT_CHECKSUMS
-from gooey import Gooey, GooeyParser
+import importlib
 from structlog import get_logger
 from argparse import ArgumentParser
 from mailbag.email_account import EmailAccount, import_formats
@@ -16,6 +16,12 @@ import mailbag.loggerx
 
 loggerx.configure()
 log = get_logger()
+
+if importlib.util.find_spec("gooey"):
+    gooeyCheck = True
+    from gooey import Gooey, GooeyParser
+else:
+    gooeyCheck = False
 
 plugin_basedir = os.environ.get("MAILBAG_PLUGIN_DIR", None)
 
@@ -36,10 +42,11 @@ log.debug("EmailAccount:", Registry=EmailAccount.registry)
 log.debug("Derivative:", Registry=Derivative.registry)
 
 bagit_parser = _make_parser()
-mailbag_parser = GooeyParser(description="Mailbag")
+if gooeyCheck:
+    mailbag_parser = GooeyParser(description="Mailbag")
+else:
+    mailbag_parser = ArgumentParser(description="Mailbag")
 mailbag_parser.set_defaults(bag_info={})
-# print(dir(bagit_parser))
-# bagit_parser.description = f"Mailbag ({bagit_parser.description})"
 mailbagit_args = mailbag_parser.add_argument_group("Mailbag arguments")
 mailbagit_options = mailbag_parser.add_argument_group("Mailbag options")
 mailbagit_metadata = mailbag_parser.add_argument_group("Optional Mailbag Metadata")
@@ -58,16 +65,27 @@ for arg_group in bagit_parser._action_groups:
             # print ("\t" + action.dest)
             if action.nargs == 0:
                 # checksum options
-                group.add_argument(
-                    action.option_strings[0],
-                    required=action.required,
-                    default=action.default,
-                    help=action.help,
-                    dest=action.dest,
-                    const=action.const,
-                    action="append_const",
-                    widget="BlockCheckbox",
-                )
+                if gooeyCheck:
+                    group.add_argument(
+                        action.option_strings[0],
+                        required=action.required,
+                        default=action.default,
+                        help=action.help,
+                        dest=action.dest,
+                        const=action.const,
+                        action="append_const",
+                        widget="BlockCheckbox",
+                    )
+                else:
+                    group.add_argument(
+                        action.option_strings[0],
+                        required=action.required,
+                        default=action.default,
+                        help=action.help,
+                        dest=action.dest,
+                        const=action.const,
+                        action="append_const",
+                    )
             else:
                 if arg_group.__dict__["title"].lower() == "optional bag metadata":
                     group.add_argument(
@@ -122,16 +140,27 @@ mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A direc
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
 )
-mailbagit_args.add_argument(
-    "-d",
-    "--derivatives",
-    choices=derivative_types,
-    type=str.lower,
-    required=False,
-    help=f"types of derivative formats to create during packaging",
-    nargs="+",
-    widget="Listbox",
-)
+if gooeyCheck:
+    mailbagit_args.add_argument(
+        "-d",
+        "--derivatives",
+        choices=derivative_types,
+        type=str.lower,
+        required=False,
+        help=f"types of derivative formats to create during packaging",
+        nargs="+",
+        widget="Listbox",
+    )
+else:
+    mailbagit_args.add_argument(
+        "-d",
+        "--derivatives",
+        choices=derivative_types,
+        type=str.lower,
+        required=False,
+        help=f"types of derivative formats to create during packaging",
+        nargs="+",
+    )
 
 # add mailbag-specific optional args here
 mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
@@ -186,10 +215,12 @@ def cli():
     main()
 
 
-@Gooey
-def gui():
-    """hook for GUI mailbag invocation"""
-    main()
+if gooeyCheck:
+
+    @Gooey
+    def gui():
+        """hook for GUI mailbag invocation"""
+        main()
 
 
 def main():

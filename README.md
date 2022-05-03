@@ -40,8 +40,8 @@ Build and run development image
 docker build -t mailbag:dev --build-arg APP_ENV=dev .
 docker run -it mailbag:dev bash
 
-docker build -t mailbag:dev -f Dockerfile.production .
-docker build -t mailbag .
+docker build -t mailbag:dev .
+docker build -t mailbag -f Dockerfile.production .
 ```
 
 Build with access to host filesystem. Mailbagit will have access to the directory listed in the `source=` argument.
