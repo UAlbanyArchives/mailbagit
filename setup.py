@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mailbag",  # Replace with your own username
+    name="mailbag",
     version="0.0.1",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
@@ -24,7 +24,6 @@ setuptools.setup(
         "bagit>=1.8.1,<2",
         "beautifulsoup4>=4.11.1,<5",
         "black>=22.1.0,<23",
-        "gooey>=1.0.8.1,<2",
         "jsonmodels>=2.2,<=2.5.0",
         "extract_msg>=0.30.10,<1",
         "structlog>=21.1.0,<22",
@@ -37,5 +36,9 @@ setuptools.setup(
         # for black
         "typed-ast>=1.5.3,<2",
     ],
+    extras_require={
+        "gui": ["gooey>=1.0.8.1,<2"],
+        "pst": ["libpff-python==20211114"],
+    },
     python_requires=">=3.7",
 )
