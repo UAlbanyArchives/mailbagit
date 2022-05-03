@@ -34,7 +34,7 @@ def progress(current, total, start_time, prefix='', suffix='', decimals=1, lengt
     Call in a loop to create terminal progress bar
     
     Parameters:
-        current (int): current current 
+        current (int): current progress 
         total (int): total iterations
         start_time (float): start time
         prefix (String): prefix string
@@ -60,10 +60,6 @@ def progress(current, total, start_time, prefix='', suffix='', decimals=1, lengt
     status = f'{percent}% [{current} messages out of {total}] {suffix}, Time Remaining: {remaining_time}s'
 
     print(f'\r{dt} {message_type} {status}', end=print_End)
-    
-    # Print New Line on Complete
-    if current == total: 
-        print()
 
 
 def processedFile(filePath):

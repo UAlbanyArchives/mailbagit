@@ -133,10 +133,11 @@ class Controller:
                 d.do_task_per_message(message)
 
             # Show progress
-            # Only if progress%(total_messages/100)==0 then show progress
-            # This reduces progress update overhead to only 100 updates at max 
-            if total_messages/100<1 or mailbag_message_id % int(total_messages/100)==0:
-                print_End = '\n' if globals.log_level != 'INFO' else '\r'
+            # If progress%(total_messages/100)==0 then show progress
+            # This reduces progress update overhead to only 100 updates at max
+            is_last = mailbag_message_id==total_messages 
+            if total_messages/100<1 or is_last or mailbag_message_id % int(total_messages/100)==0:
+                print_End = '\n' if globals.log_level != 'INFO' or is_last else '\r'
                 helper.progress(mailbag_message_id, total_messages, start_time, prefix = 'Progress ', suffix = 'Complete', print_End=print_End)
         
         # End derivatives thread and server
