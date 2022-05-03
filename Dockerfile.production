@@ -11,7 +11,6 @@ RUN apt-get -y update && \
     apt-get install -y python3-pip && \
     apt-get install -y curl && \
     \
-    pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython && \
     pip install libpff-python==20211114 && \
     \
     curl -L -o /tmp/wkhtmltox_0.12.6-1.focal_amd64.deb \

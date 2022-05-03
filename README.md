@@ -4,26 +4,80 @@ A tool for creating and managing Mailbags, a package for preserving email in mul
 
 ## Installation
 
+There a a couple different ways to install and run mailbagit.
+
+1. Native python install with pip
+2. Using Windows executables
+3. Using a Docker image
+
+### Native Python Install
+
 `pip install mailbag`
 
-### Working with PST files
+#### Working with PST files
 
-Making mailbags from .pst files on Windows requires Visual Studio C++ Build Tools. This is also required for a development environment setup on Windows. 
+Packaging mailbags from .pst files requires additional dependancies. In addition to `pip install mailbag`, you need to run:
+
+`pip install mailbag[pst]`
+
+Installing this on Windows requires Visual Studio C++ Build Tools. Without this you will get an error.
 
 1. Install [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
 2. Using the Visual Studio installer, in the Workloads tab make sure to check "Desktop development with C++" and the VS 2019 C++ x64/x86 build tools in the Installation details optional settings on the right side.
 
 ![Screenshot of checking the correct options using the Visual Studio Installer.](windows_install.png)
 
-### Development setup
+#### Using the Mailbagit Graphical User Interface (GUI)
 
-mailbag is set up to use pipfile
+To install the mailbagit GUI, in addition to `pip install mailbag`, you need to run:
+
+`pip install mailbag[gui]`
+
+If it is installed correctly, the GUI will run using the `mailbagit-gui` command. There is a [known issue](https://github.com/UAlbanyArchives/mailbag/issues/155) where the GUI does not fully run on Windows. It will boot and lets you enter options but then fails to run when you click "start." Instead, try creating a file called `mailbagit-gui.py` with the contents:
+
+```
+from mailbag import gui
+gui()
+```
+
+You should then be able to run the GUI with `python3 mailbagit-gui.py`.
+
+##### GUI on Ubuntu
+
+The GUI dependency wxPython does not install well on some environments, including Ubuntu. If `pip install mailbag[gui]` fails, you may want to try a [specific version for your distro](https://extras.wxpython.org/wxPython4/extras/linux/gtk3/).
+
+For example, on Ubuntu 20.04, this seems to work well.
+
+`pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython`
+
+After wxPython is installed, try running `pip install mailbag[gui]` again.
+
+### Windows Executables
+
+Executables are available for Windows that contain all dependencies except the PDF dependencies. Download the latest `mailbagit.exe` and `mailbagit-gui.exe` files from the [Github releases](https://github.com/UAlbanyArchives/mailbag/releases).
+
+These executables are unsigned, so Windows will likely give you as "Windows protected your PC" warning from Microsoft Defender SmartScreen. You will need sufficient permissions to allow unsigned executables on you machine.
+
+
+## PDF derivatives
+
+Unless you're using a Docker image, mailbagit is unable to make PDF derivatives out-of-the-box. For this option to be available, you need to have either [wkhtmltopdf](https://wkhtmltopdf.org/) or [Google Chome](https://www.google.com/chrome/) installed and added to your `PATH`.
+
+Adding `wkhtmltopdf` or `wkhtmltopdf.exe` to your `PATH` will make the `pdf` derivative option available. You can test this with `wkhtmltopdf -V` or `wkhtmltopdf.exe -V`.
+
+Adding `chrome`, `chrome.exe` or `google-chrome` to your `PATH` will make the `pdf-chrome` derivative option available. You can test this with:
+```
+chrome https://archives.albany.edu/mailbag
+chrome.exe chrome https://archives.albany.edu/mailbag
+google-chrome chrome https://archives.albany.edu/mailbag
+```
+
+
+### Development setup
 
 ```
 git clone git@github.com:UAlbanyArchives/mailbag.git
 cd mailbag
-pipenv shell
-pipenv install
 pip install -e .
 ```
 

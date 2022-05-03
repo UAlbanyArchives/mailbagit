@@ -39,6 +39,7 @@ setuptools.setup(
     extras_require={
         "gui": ["gooey>=1.0.8.1,<2"],
         "pst": ["libpff-python==20211114"],
+        "dev": ["pyinstaller==5.0.1,<6"],
     },
     python_requires=">=3.7",
 )
