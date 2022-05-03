@@ -3,6 +3,7 @@ import urllib.parse
 from pathlib import Path
 import os, shutil, glob
 import datetime
+from time import time
 import codecs
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
@@ -28,33 +29,37 @@ def moveFile(dry_run, oldPath, newPath):
         log.error('Unable to move file. %s' % e)
 
 
-def progress(current, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+def progress(current, total, start_time, prefix='', suffix='', decimals=1, length=100, fill='█', print_End="\r"):
     """
     Call in a loop to create terminal progress bar
     
     Parameters:
-        current     - Required  : current current (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        current (int): current current 
+        total (int): total iterations
+        start_time (float): start time
+        prefix (String): prefix string
+        suffix (String): suffix string
+        decimals (int): positive number of decimals in percent complete
+        length (int): character length of bar (Int)
+        fill (String): bar fill character (Str)
+        printEnd (String): end character (e.g. "\r", "\r\n")
     """
+    
+    time_spent = time() - start_time
+    remaining_time = round(time_spent*(total/current-1),2)
+    e = datetime.datetime.now()
     percent = ("{0:." + str(decimals) + "f}").format(100 * (current / float(total)))
     filledLength = int(length * current // total)
-    # bar = fill * filledLength + '-' * (length - filledLength)
-    
-    e = datetime.datetime.now()
     style = globals.style
+    # bar = fill * filledLength + '-' * (length - filledLength)
+        
     dt = f'{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}'
     message_type = f'[{style["b"][0]}{style["y"][0]}{prefix}{style["b"][1]}]'
     deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
     # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-    status = f'{percent}% [{current} messages out of {total}] {suffix}'
+    status = f'{percent}% [{current} messages out of {total}] {suffix}, Time Remaining: {remaining_time}s'
 
-    print(f'\r{dt} {message_type} {status}', end=printEnd)
+    print(f'\r{dt} {message_type} {status}', end=print_End)
     
     # Print New Line on Complete
     if current == total: 
@@ -83,7 +88,7 @@ def getDirectorySize(directory, format):
         format (String): format of the mail type
     
     Returns:
-            String: emailFolder
+        String: emailFolder
     """
     
     filePath = os.path.join(directory, "**", "*." + format)
