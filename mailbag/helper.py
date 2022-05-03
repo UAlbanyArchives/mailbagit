@@ -370,17 +370,16 @@ def htmlFormatting(message, external_css, headers=True):
         # Formatting HTML with beautiful soup
         soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
 
-        #Checking if message contains partial html
+        # Checking if message contains partial html
         if not soup.html:
-            html = soup.new_tag("html")
-            soup.insert(0, html)
+            html_content = "<html>" + html_content + "</html>"
+            soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
         if not soup.head:
             head = soup.new_tag("head")
             soup.html.insert(0, head)
         if not soup.body:
             body = soup.new_tag("body")
-            soup.html.insert_after(soup.head, body)
-
+            soup.head.next_element.wrap(body)
 
         # Check Doctype
         doctype = False
