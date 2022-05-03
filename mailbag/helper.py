@@ -316,50 +316,6 @@ def normalizePath(path):
         return out_path
 
 
-def addToHead(tag, soup):
-    """
-    Adds a Beautiful Soup tag to <head>
-    Handles when no <head> exists
-
-    Parameters:
-        tag(BeautifulSoup) The tag to add
-        soup(BeautifulSoup): HTML body
-
-    Returns:
-        BeautifulSoup: HTML body
-    """
-    if soup.head:
-        soup.head.insert(0, tag)
-    else:
-        return path
-
-
-def addToHead(tag, soup):
-    """
-    Adds a Beautiful Soup tag to <head>
-    Handles when no <head> exists
-
-    Parameters:
-        tag(BeautifulSoup) The tag to add
-        soup(BeautifulSoup): HTML body
-
-    Returns:
-        BeautifulSoup: HTML body
-    """
-    if soup.head:
-        soup.head.insert(0, tag)
-    else:
-        head = soup.new_tag("head")
-        if soup.html:
-            soup.html.insert(0, head)
-        else:
-            html = soup.new_tag("html")
-            soup.insert(0, html)
-            soup.html.insert(0, head)
-        soup.head.insert(0, tag)
-    return soup
-
-
 def htmlFormatting(message, external_css, headers=True):
     """
     Creates a formatted html file using message text or html body
@@ -418,12 +374,12 @@ def htmlFormatting(message, external_css, headers=True):
         if not soup.html:
             html = soup.new_tag("html")
             soup.insert(0, html)
-        if not soup.body:
-            body = soup.new_tag("body")
-            soup.html.insert(1, body)
         if not soup.head:
             head = soup.new_tag("head")
             soup.html.insert(0, head)
+        if not soup.body:
+            body = soup.new_tag("body")
+            soup.html.insert_after(soup.head, body)
 
 
         # Check Doctype
@@ -477,12 +433,12 @@ def htmlFormatting(message, external_css, headers=True):
             soupTable = BeautifulSoup(tableSection, "html.parser")
 
             # Add headers table to HTML body
-            soup.html.body.insert(0, soupTable)
+            soup.body.insert(0, soupTable)
 
         # Embedding Encoding with meta
         meta = soup.new_tag("meta")
         meta["charset"] = encoding
-        soup = addToHead(meta, soup)
+        soup.head.insert(0, meta)
 
         # Embedding default styling
         default_css = """
@@ -514,7 +470,7 @@ def htmlFormatting(message, external_css, headers=True):
         """
         style = soup.new_tag("style")
         style.string = default_css
-        soup = addToHead(style, soup)
+        soup.head.append(style)
 
         # Adding external_css
         if external_css:
@@ -522,7 +478,7 @@ def htmlFormatting(message, external_css, headers=True):
             link["rel"] = "stylesheet"
             link["type"] = "text/css"
             link["href"] = "file:///" + external_css
-            soup = addToHead(link, soup)
+            soup.head.append(link)
 
         # Embedding Images
         # HT to extract_msg for this approach
