@@ -28,7 +28,7 @@ class MSG(EmailAccount):
         self.file = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
-        self.iteration_only = True
+        self.iteration_only = False
         log.info("Reading :", File=self.file)
 
     def account_data(self):
