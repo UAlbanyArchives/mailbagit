@@ -129,7 +129,7 @@ def messagePath(headers):
     """
 
     if headers["X-Folder"]:
-        messagePath = headers["X-Folder"].replace("\\", "/")
+        messagePath = Path(headers["X-Folder"]).as_posix()
     else:
         messagePath = ""
     return messagePath
@@ -197,11 +197,6 @@ def saveAttachments(part):
     return (part.get_filename(), part.get_payload(decode=True))
 
 
-def saveFile(filePath, text):
-    with open(filePath, "w") as f:
-        f.write(text)
-
-
 def deleteFile(filePath):
     if os.path.exists(filePath):
         os.remove(filePath)
@@ -223,7 +218,7 @@ def stopServer(dry_run, httpd):
         httpd.server_close()
 
 
-def handle_error(errors, exception, desc):
+def handle_error(errors, exception, desc, level="error"):
     """
     Is called when an exception is raised in the parsers.
     returns a dict of readable and full trace errors that can be appended to.
@@ -234,17 +229,25 @@ def handle_error(errors, exception, desc):
             "stack_trace" contains a list of full stack traces
         exception (Exception): The exception raised
         desc (String): A full email message object desribed in models.py
+        level (String): Whether to log as error or warn. Defaults to error.
     Returns:
         errors (dict):
             "msg" contains a list of human readable error messages
             "stack_trace" contains a list of full stack traces
     """
-    error_msg = desc + ": " + repr(exception)
+    if exception:
+        error_msg = desc + ": " + repr(exception)
+        errors["stack_trace"].append(traceback.format_exc())
+    else:
+        error_msg = desc + "."
+        errors["stack_trace"].append(desc + ".")
     errors["msg"].append(error_msg)
-    errors["stack_trace"].append(traceback.format_exc())
 
     print()
-    log.error(error_msg)
+    if level == "warn":
+        log.warn(error_msg)
+    else:
+        log.error(error_msg)
 
     return errors
 
@@ -299,7 +302,9 @@ def parse_part(part, bodies, attachments, errors):
             attachmentName = part.get_filename()
             attachmentFile = part.get_payload(decode=True)
             attachment = Attachment(
-                Name=attachmentName if attachmentName else str(len(attachments)), File=attachmentFile, MimeType=content_type
+                Name=attachmentName if attachmentName else str(len(attachments)),
+                File=attachmentFile,
+                MimeType=content_type,
             )
             attachments.append(attachment)
         except Exception as e:
@@ -385,7 +390,30 @@ def normalizePath(path):
                 new_path.append(urllib.parse.quote_plus(name))
             else:
                 new_path.append(name)
-        return os.path.join(*new_path)
+        out_path = Path(os.path.join(*new_path)).as_posix()
+    else:
+        out_path = path
+
+    if out_path == ".":
+        return ""
+    else:
+        return out_path
+
+
+def addToHead(tag, soup):
+    """
+    Adds a Beautiful Soup tag to <head>
+    Handles when no <head> exists
+
+    Parameters:
+        tag(BeautifulSoup) The tag to add
+        soup(BeautifulSoup): HTML body
+
+    Returns:
+        BeautifulSoup: HTML body
+    """
+    if soup.head:
+        soup.head.insert(0, tag)
     else:
         return path
 
@@ -488,7 +516,16 @@ def htmlFormatting(message, external_css, headers=True):
             else:
                 h2 = ""
             # Headers to display
-            headerFields = ["Mailbag_Message_ID", "Message_ID", "From", "Date", "To", "Cc", "Bcc", "Subject"]
+            headerFields = [
+                "Mailbag_Message_ID",
+                "Message_ID",
+                "From",
+                "Date",
+                "To",
+                "Cc",
+                "Bcc",
+                "Subject",
+            ]
             # Getting the values of the attrbutes and appending to HTML string
             for headerField in headerFields:
                 value = getattr(message, headerField)
@@ -520,6 +557,10 @@ def htmlFormatting(message, external_css, headers=True):
 
         # Embedding default styling
         default_css = """
+            @media print {
+                /* for Chrome margins */
+                @page { margin: 10; }
+            }
             section#mailbagHeaders table#mailbagHeadersTable {
                 width: 100%;
                 margin-bottom: 35px;

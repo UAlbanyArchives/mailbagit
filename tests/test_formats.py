@@ -4,71 +4,130 @@ from argparse import Namespace
 from mailbag.email_account import EmailAccount
 import mailbag
 import pytest
+import email
 import os
 
 # This is a mock object representing the args returned from argparse/Gooey
 @pytest.fixture
 def cli_args():
-    return Namespace(dry_run=False, mailbag_name="New_Mailbag")
+    return Namespace(dry_run=True, mailbag_name="New_Mailbag")
+
 
 def test_Mbox(cli_args):
-    data = EmailAccount.registry['mbox'](os.path.join("data", "sample1.mbox"), cli_args).messages()
+    testfile = "sample1.mbox"
+    data = EmailAccount.registry["mbox"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    expected.append(Email(
-        Content_Type='multipart/alternative; \n\tboundary="----=_Part_315462_994415758.1467289309709"',
-        Date='Thu, 30 Jun 2016 12:22:39 +0000 (GMT)',
-        From='Chuck Schumer <info@chuckschumer.com>',
-        Message_ID='<1314145029.920292481467289359777.JavaMail.app@rbg21.atlis1>',
-        Subject='=?utf-8?Q?The_GOP=E2=80=99s_horrendous_damage?=',
-        To='ualbanymodernpoliticalarchives@gmail.com'
-    ))
-    expected.append(Email(
-        Content_Type='multipart/alternative; boundary=94eb2c123e4c3234a50535f25ea8',
-        Date='Thu, 23 Jun 2016 13:52:42 +0000',
-        From='Andy from Google <andy-noreply@google.com>',
-        Message_ID='<aad3793892b4891.1466689961655.100038985.377502.en.d9c49a37ba14f4e@google.com>',
-        Subject='UAlbany, welcome to your new Google Account',
-        To='ualbanymodernpoliticalarchives@gmail.com'
-    ))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-    for id, m in enumerate(data):
-        assert m == expected[id]
+        for field in message:
+            if field[0] == "Headers" or field[0] == "Message":
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
+                    for key in compare:
+                        assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
+            else:
+                assert getattr(message, field[0]) == getattr(expected, field[0])
 
 
 def test_MSG(cli_args):
-    data = EmailAccount.registry['msg'](os.path.join("data", "sample1.msg"), cli_args).messages()
+    testfile = "Digitization Archiving Solutions.msg"
+    data = EmailAccount.registry["msg"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    expected.append(Email(
-        Date='Sat, 12 Aug 2006 14:25:25 -0400',
-        From='John Doe <jdoes@someserver.com>',
-        Subject='(outlookEMLandMSGconverter Trial Version Import) BitDaddys Software',
-        To='sales@bitdaddys.com'
-    ))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-    for id, m in enumerate(data):
-        assert m == expected[id]
+        for field in message:
+            if field[0] == "Headers" or field[0] == "Message":
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
+                    for key in compare:
+                        assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
+            else:
+                assert getattr(message, field[0]) == getattr(expected, field[0])
+
+
+def test_EML(cli_args):
+
+    testfile = "2016-06-23_144430_6e449c77fe.eml"
+    data = EmailAccount.registry["eml"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
+
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
+
+        for field in message:
+            if field[0] == "Headers" or field[0] == "Message":
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
+                    for key in compare:
+                        assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
+            else:
+                assert getattr(message, field[0]) == getattr(expected, field[0])
 
 
 def test_PST(cli_args):
-    if not 'pst' in EmailAccount.registry:
+    if not "pst" in EmailAccount.registry:
         raise pytest.skip("PST not installed, cannot test")
 
-    data = EmailAccount.registry['pst'](os.path.join("data", "outlook2019_MSO_16.0.10377.20023_64-bit.pst"), cli_args).messages()
+    testfile = "outlook2019_MSO_16.0.10377.20023_64-bit.pst"
+    data = EmailAccount.registry["pst"](os.path.join("data"), cli_args).messages()
+    dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
-    expected = []
-    expected.append(Email(
-        Cc='gwiedeman@albany.edu',
-        Content_Type='multipart/alternative; boundary=da8640888b204494a76c3a9e1f2a9112f911e113df090efab9b04e884486',
-        Date='Thu, 30 Sep 2021 17:30:56 +0000 (UTC)',
-        Email_Folder=os.path.join('Top of Outlook data file', 'Inbox', 'Today at UAlbany'),
-        From='Today at UAlbany <tau@albany.edu>',
-        Message_ID='<2Y2JQkdFSGmQAIdjAOswdQ@geopod-ismtpd-3-0>',
-        Subject='Today at UAlbany - Focus on Research',
-        To='gwiedeman@albany.edu'
-    ))
+    for i, message in enumerate(data):
+        message.Mailbag_Message_ID = i + 1
+        expected = Email()
+        expected.read(os.path.join(dump_dir, str(i + 1)))
 
-    for id, m in enumerate(data):
-        assert m == expected[id]
-        break
+        for field in message:
+            if field[0] == "Headers" or field[0] == "Message":
+                dump = getattr(expected, field[0])
+                compare = getattr(message, field[0])
+                if not dump is None and compare is None:
+                    for key in compare:
+                        assert compare[key] == dump[key]
+            elif field[0] == "Attachments":
+                for count, attachment in enumerate(message.Attachments):
+                    match = False
+                    for exp_attach in expected.Attachments:
+                        if attachment.Name == exp_attach.Name:
+                            match = True
+                            assert attachment == exp_attach
+                    assert match == True
+            else:
+                assert getattr(message, field[0]) == getattr(expected, field[0])

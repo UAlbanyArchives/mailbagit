@@ -1,4 +1,5 @@
 import os
+import warcio
 from structlog import get_logger
 import mailbag.helper as helper
 from warcio.capture_http import capture_http
@@ -32,13 +33,15 @@ class WarcDerivative(Derivative):
         mailbag_dir = kwargs["mailbag_dir"]
         self.warc_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
         self.httpd = []
+        self.port = 5000
+        self.tmp_file = "tmp.html"
 
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
 
-            self.server_thread = Thread(
-                target=helper.startServer, args=(self.args.dry_run, self.httpd, 5000)
-            )
+            self.server_thread = Thread(target=helper.startServer, args=(self.args.dry_run, self.httpd, self.port))
+            # Make it a daemon so it will stop after ctrl+c
+            self.server_thread.daemon = True
             self.server_thread.start()
 
     def terminate(self):
@@ -60,49 +63,78 @@ class WarcDerivative(Derivative):
 
     def do_task_per_message(self, message):
 
-        if message.HTML_Body is None and message.Text_Body is None:
-            log.warn(
-                "No HTML or plain text body for "
-                + str(message.Mailbag_Message_ID)
-                + ". No HTML derivative will be created."
-            )
-        else:
-            log.debug("self.warc_dir" + str(self.warc_dir))
-            self.saveWARC(self.args.dry_run, self.warc_dir, message)
+        errors = {}
+        errors["msg"] = []
+        errors["stack_trace"] = []
 
-    def saveWARC(self, dry_run, warc_dir, message, port=5000):
-        out_dir = os.path.join(self.warc_dir, message.Derivatives_Path)
-        filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
+        try:
 
-        if not dry_run:
-            if not os.path.isdir(out_dir):
-                os.makedirs(out_dir)
+            if message.HTML_Body is None and message.Text_Body is None:
+                desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no WARC derivative created"
+                errors = helper.handle_error(errors, None, desc, "warn")
+            else:
+                out_dir = os.path.join(self.warc_dir, message.Derivatives_Path)
+                filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
+                log.debug("Writing WARC to " + str(filename))
 
-            with open(filename, "wb") as output:
-                html_formatted, encoding = helper.htmlFormatting(
-                    message, self.args.css, headers=False
-                )
-                helper.saveFile("tmp.html", html_formatted)
+                if not self.args.dry_run:
+                    if not os.path.isdir(out_dir):
+                        os.makedirs(out_dir)
 
-                writer = WARCWriter(output, gzip=True)
-                resp = requests.get(
-                    "http://localhost:" + str(port) + "/tmp.html",
-                    headers={"Accept-Encoding": "identity"},
-                    stream=True,
-                )
+                    with open(filename, "wb") as output:
 
-                # get raw headers from urllib3
-                headers_list = resp.raw.headers.items()
+                        try:
+                            html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
+                            with open(self.tmp_file, "w", encoding=encoding) as f:
+                                f.write(html_formatted)
+                                f.close()
+                        except Exception as e:
+                            desc = "Error formatting HTML for WARC derivative"
+                            errors = helper.handle_error(errors, e, desc)
 
-                http_headers = StatusAndHeaders(
-                    "200 OK", headers_list, protocol="HTTP/1.0"
-                )
+                        writer = WARCWriter(output, gzip=True)
+                        try:
+                            resp = requests.get(
+                                "http://localhost:" + str(self.port) + "/" + self.tmp_file,
+                                headers={"Accept-Encoding": "identity"},
+                                stream=True,
+                            )
+                            resp.raise_for_status()
 
-                record = writer.create_warc_record(
-                    "http://localhost:" + str(port) + "/tmp.html",
-                    "response",
-                    payload=resp.raw,
-                    http_headers=http_headers,
-                )
-                writer.write_record(record)
-            helper.deleteFile("tmp.html")
+                        except requests.exceptions.HTTPError as e:
+                            desc = "Error requesting HTML for WARC derivative"
+                            errors = helper.handle_error(errors, e, desc)
+
+                        try:
+                            # get raw headers from urllib3
+                            headers_list = resp.raw.headers.items()
+
+                            http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
+
+                            record = writer.create_warc_record(
+                                "http://localhost:" + str(self.port) + "/" + self.tmp_file,
+                                "response",
+                                payload=resp.raw,
+                                http_headers=http_headers,
+                            )
+                        except Exception as e:
+                            desc = "Error writing WARC headers"
+                            errors = helper.handle_error(errors, e, desc)
+
+                        try:
+                            writer.write_record(record)
+                        except Exception as e:
+                            desc = "Error writing WARC derivative"
+                            errors = helper.handle_error(errors, e, desc)
+
+                    output.close()
+                    helper.deleteFile(self.tmp_file)
+
+        except Exception as e:
+            desc = "Error creating WARC derivative"
+            errors = helper.handle_error(errors, e, desc)
+
+        message.Error.extend(errors["msg"])
+        message.StackTrace.extend(errors["stack_trace"])
+
+        return message

@@ -6,8 +6,13 @@ log = get_logger()
 
 # Does nothing currently
 from mailbag.derivative import Derivative
+
+
 class ExampleDerivative(Derivative):
-    derivative_name = 'example'
+    derivative_name = "example"
+    derivative_format = "example"
+    derivative_agent = ""
+    derivative_agent_version = ""
 
     def __init__(self, email_account, **kwargs):
         log.debug("Setup account")
@@ -19,5 +24,7 @@ class ExampleDerivative(Derivative):
     def do_task_per_message(self, message):
         if message.Message_ID:
             log.debug(message.Message_ID.strip())
-        else:
+        elif message.Subject:
             log.debug(message.Subject)
+
+        return message
