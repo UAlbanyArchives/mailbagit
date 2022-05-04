@@ -1,0 +1,49 @@
+I"n<h1 id="native-python-install">Native Python Install</h1>
+
+<p>Install <code class="language-plaintext highlighter-rouge">mailbagit</code> with <code class="language-plaintext highlighter-rouge">pip</code>:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install mailbag</code></p>
+
+<h2 id="working-with-pst-files">Working with PST files</h2>
+
+<p>Packaging mailbags from PST files requires additional dependancies. To install these, in addition to <code class="language-plaintext highlighter-rouge">pip install mailbag</code>, you need to run:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install mailbag[pst]</code></p>
+
+<p>Installing this on Windows requires Visual Studio C++ Build Tools. Without this you will get an error. To rectify this:</p>
+
+<ol>
+  <li>Install <a href="https://visualstudio.microsoft.com/downloads/">Visual Studio 2022</a></li>
+  <li>Using the Visual Studio installer, in the Workloads tab make sure to check “Desktop development with C++” and the VS 2019 C++ x64/x86 build tools in the Installation details optional settings on the right side.</li>
+</ol>
+
+<p><img src="/mailbag/windows_install.png" alt="Screenshot of checking the correct options using the Visual Studio Installer." /></p>
+
+<h2 id="using-the-mailbagit-graphical-user-interface-gui">Using the Mailbagit Graphical User Interface (GUI)</h2>
+
+<p>To install the mailbagit GUI, in addition to <code class="language-plaintext highlighter-rouge">pip install mailbag</code>, you need to run:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install mailbag[gui]</code></p>
+
+<p>If it is installed correctly, the GUI will run using the <code class="language-plaintext highlighter-rouge">mailbagit-gui</code> command.</p>
+
+<h3 id="gui-on-windows">GUI on Windows</h3>
+
+<p>There is a <a href="https://github.com/UAlbanyArchives/mailbag/issues/155">known issue</a> where the GUI does not fully run on Windows. It will boot and lets you enter options but then fails to run when you click “start.” Instead, try creating a file called <code class="language-plaintext highlighter-rouge">mailbagit-gui.py</code> with the contents:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from mailbag import gui
+gui()
+</code></pre></div></div>
+
+<p>You should then be able to run the GUI with <code class="language-plaintext highlighter-rouge">python3 mailbagit-gui.py</code>.</p>
+
+<h3 id="gui-on-ubuntu">GUI on Ubuntu</h3>
+
+<p>The GUI dependency wxPython does not install well on some environments, including Ubuntu. If <code class="language-plaintext highlighter-rouge">pip install mailbag[gui]</code> fails, you may want to try a <a href="https://extras.wxpython.org/wxPython4/extras/linux/gtk3/">specific version for your distro</a>.</p>
+
+<p>For example, on Ubuntu 20.04, this seems to work well.</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython</code></p>
+
+<p>After wxPython is installed, try running <code class="language-plaintext highlighter-rouge">pip install mailbag[gui]</code> again.</p>
+:ET

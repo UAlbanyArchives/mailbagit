@@ -1,0 +1,26 @@
+I"ô<h1 id="pdf-derivatives">PDF derivatives</h1>
+
+<p>Unless youâ€™re using a Docker image, mailbagit is unable to make PDF derivatives out-of-the-box. For this option to be available, you need to have either <a href="https://wkhtmltopdf.org/">wkhtmltopdf</a> or <a href="https://www.google.com/chrome/">Google Chome</a> installed and added to your <code class="language-plaintext highlighter-rouge">PATH</code>.</p>
+
+<h2 id="wkhtmltopdf">wkhtmltopdf</h2>
+
+<p>Adding <code class="language-plaintext highlighter-rouge">wkhtmltopdf</code> or <code class="language-plaintext highlighter-rouge">wkhtmltopdf.exe</code> to your <code class="language-plaintext highlighter-rouge">PATH</code> will make the <code class="language-plaintext highlighter-rouge">pdf</code> derivative option available. You can test this with <code class="language-plaintext highlighter-rouge">wkhtmltopdf -V</code> or <code class="language-plaintext highlighter-rouge">wkhtmltopdf.exe -V</code>.</p>
+
+<h2 id="chrome-headless">Chrome Headless</h2>
+
+<p>Adding <code class="language-plaintext highlighter-rouge">chrome</code>, <code class="language-plaintext highlighter-rouge">chrome.exe</code> or <code class="language-plaintext highlighter-rouge">google-chrome</code> to your <code class="language-plaintext highlighter-rouge">PATH</code> will make the <code class="language-plaintext highlighter-rouge">pdf-chrome</code> derivative option available. You can test this with:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chrome https://archives.albany.edu/mailbag
+chrome.exe chrome https://archives.albany.edu/mailbag
+google-chrome chrome https://archives.albany.edu/mailbag
+</code></pre></div></div>
+
+<h2 id="security-concerns">Security concerns</h2>
+
+<p>Automatically converting the HTML within emails to PDFs can cause security vulnerabilities in some contexts. Since it is <a href="https://wkhtmltopdf.org/status.html">no longer actively maintained</a>, wkhtmltopdf does not recommend running it on user-supplied and unsanitized HTML.</p>
+
+<ul>
+  <li><a href="https://www.virtuesecurity.com/kb/wkhtmltopdf-file-inclusion-vulnerability-2/">File Inclusion Vulnerability</a></li>
+</ul>
+
+<p>Using Google Chrome may mitigate some, but not all of these concerns.</p>
+:ET

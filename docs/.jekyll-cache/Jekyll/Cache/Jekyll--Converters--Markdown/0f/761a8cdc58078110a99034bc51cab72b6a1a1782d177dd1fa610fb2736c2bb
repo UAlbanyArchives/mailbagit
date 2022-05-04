@@ -1,0 +1,35 @@
+I"[<h1 id="mailbag-specification">Mailbag Specification</h1>
+
+<h2 id="mailbag-specification-01-call-for-comments"><a href="https://docs.google.com/document/d/1X7pOHxxzZl6PyMAJWd7bIR11rE4FlKty3J7oI6ghAKo">Mailbag Specification 0.1 (Call for Comments)</a></h2>
+
+<p>The Mailbag Project Team is interested in any feedback on this version of the Mailbag Specification!</p>
+
+<p>We received some really wonderful feedback from both the earlier call for comments on the design documents and the specification working meeting! We truly appreciate the thoughtfulness and energy we’ve received from the community so far. Much of the feedback was either positive or easy to fix or incorporate, but there were also a number of thoughts that generated some interesting discussions among the advisory board. We wrote up these decision points as Github issues to document our thinking and hopefully to open up these conversations to the community.</p>
+
+<p>For this round of feedback, we would love to hear what you think about these issues in particular:</p>
+
+<ul>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/2">Can/should a mailbag contain multiple email accounts?</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/3">Can a mailbag be used to package multiple versions of email, such as for weeding or redactions?</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/4">Will a mailbag include descriptive metadata?</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/5">Will a Mailbag include PREMIS events?</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/6">Use of mailbag.csv</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/7">Use of original filenames</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/8">Will mailbag use EA-PDF?</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/9">Use of personas</a></li>
+  <li><a href="https://github.com/UAlbanyArchives/mailbag/issues/10">Line endings and encoding for tag files</a></li>
+</ul>
+
+<p>You are also welcome to comment generally on the specification! We particularly welcome comments that can foster a public discussion, such as a <a href="https://github.com/UAlbanyArchives/mailbag/issues">Github issues</a> or comment directly in the <a href="(https://docs.google.com/document/d/1X7pOHxxzZl6PyMAJWd7bIR11rE4FlKty3J7oI6ghAKo)">Google Doc</a>. You can also email comments directly to gwiedeman [at] albany [dot] edu.</p>
+
+<p>Any feedback is great, and it’s even more actionable for us if you offer specific user stories or make connections to the <a href="https://archives.albany.edu/mailbag/personas/">project personas</a>!</p>
+
+<h2 id="working-meeting-pre-release">Working Meeting Pre-Release</h2>
+
+<ul>
+  <li><a href="Mailbag_Specification_prerelease.pdf">Static PDF</a></li>
+  <li><a href="https://docs.google.com/document/d/1XHSbmHsL-VW2IJzoJVTNjVh-E3RKnUpmvrZygJ8ls0A">Google Doc</a></li>
+</ul>
+
+<p>The project is currently incorporating feedback from the <a href="/mailbag/cfp">Working Meeting</a>. Since this process is taking a bit longer than expected, we decided to publicly  link the Pre-Release for anyone interested. We do expect this document to substantially change, and we hope to soon publish an updated version along with a public call for comments in the coming weeks.</p>
+:ET

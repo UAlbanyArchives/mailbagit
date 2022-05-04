@@ -1,0 +1,11 @@
+I"-<h1 id="installation">Installation</h1>
+
+<p>There a a couple different ways to install and run mailbagit.</p>
+
+<ol>
+  <li><a href="/mailbag/python">Native python install with pip</a></li>
+  <li><a href="#windows-executables">Using Windows executables</a></li>
+  <li>[Using a Docker image]</li>
+</ol>
+
+:ET

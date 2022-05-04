@@ -1,0 +1,13 @@
+I"6<h1 id="windows-executables">Windows Executables</h1>
+
+<p>Executables are available for Windows that contain all dependencies except the PDF dependencies. Download the latest <code class="language-plaintext highlighter-rouge">mailbagit.exe</code> and <code class="language-plaintext highlighter-rouge">mailbagit-gui.exe</code> files from the <a href="https://github.com/UAlbanyArchives/mailbag/releases">Github releases</a>.</p>
+
+<p>You can just double-click on <code class="language-plaintext highlighter-rouge">mailbagit-gui.exe</code> to load the GUI, or use <code class="language-plaintext highlighter-rouge">mailbagit.exe</code> in the command line as you would for a <a href="/mailbag/use/#using-the-mailbagit-command-line-utility">native python install</a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>`mailbagit.exe path/to/files -i pst -d pdf warc -m my_mailbag`
+</code></pre></div></div>
+
+<p>These executables are unsigned, so Windows will likely give you as “Windows protected your PC” warning from Microsoft Defender SmartScreen. You will need sufficient permissions to allow unsigned executables on you machine.</p>
+
+<p><img src="/mailbag/smart_screen.png" alt="Screenshot of Microsoft Defender SmartScreen preventing mailbagit.exe from running." /></p>
+:ET

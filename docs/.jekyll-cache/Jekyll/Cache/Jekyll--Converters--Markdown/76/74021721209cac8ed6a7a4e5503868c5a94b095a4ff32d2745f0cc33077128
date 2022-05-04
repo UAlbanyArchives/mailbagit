@@ -1,0 +1,813 @@
+I"¦;<h1 id="requirements">Requirements</h1>
+
+<p>If you have feedback, please <a href="https://docs.google.com/forms/d/e/1FAIpQLScg34b0NJhuDWaUUvyWJxyK5bBGf9Hh9N0n76XElsoBJd7S1Q/viewform?usp=sf_link">Suggest or prioritize a Requirement</a> by April 25th!</p>
+
+<h2 id="must-have">Must Have</h2>
+
+<table>
+  
+    
+    <tr>
+      
+        <th>Number</th>
+      
+        <th>Category</th>
+      
+        <th>Must have</th>
+      
+        <th>Requirement Type</th>
+      
+        <th>Possible System Dependancies</th>
+      
+    </tr>
+    
+    <tr class="row1">
+<td class="col1">
+      1
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Creates bags that meet the Bagit specification
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      2
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Establish fixity for email by generating commonly used checksums
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      3
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Check fixity by validating checksums
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      4
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Create metadata in bag-info.txt to insure bags are fully actionable
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      5
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Update metadata in bag-info.txt
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      6
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Package attachments and establish fixity by generating checksums
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      7
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Preserve email folder structure and ensure it is actionable
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      8
+    </td><td class="col2">
+      Core-PDF
+    </td><td class="col3">
+      Optionally generate PDFs for each email body that displays basic header information
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      wkhtmltopdf, htmldoc, if not xhtml2pdf
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      9
+    </td><td class="col2">
+      Core-PDF
+    </td><td class="col3">
+      Easy process for exporting PDFs for each email in bulk
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      10
+    </td><td class="col2">
+      Core-PDF
+    </td><td class="col3">
+      Easy process for exporting PDFs for individual emails
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      11
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from MBOX/EML
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      12
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from PST
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      libpff has Windows dependencies
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      13
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from IMAP
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      14
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      All core functionality works on Windows/macOS/Common Linux distros
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      Python on Windows
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      15
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      Documentation of any manually-installed dependencies
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      45
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Preserve the original input data, unless directed to exclude folders or messages
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      46
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Preserve links as attachments
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      48
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Creates mailbags that conform to the Mailbag specification
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+</table>
+
+<h2 id="should-have">Should Have</h2>
+
+<table>
+  
+    
+    <tr>
+      
+        <th>Number</th>
+      
+        <th>Category</th>
+      
+        <th>Should have</th>
+      
+        <th>Requirement Type</th>
+      
+        <th>Possible System Dependancies</th>
+      
+    </tr>
+    
+    <tr class="row1">
+<td class="col1">
+      16
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      A process for compressing Mailbags and managing compressed Mailbags
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      17
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      A process for external tools to use email source data, like RATOM or ePADD to use MBOX data within a Mailbag
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      18
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Provide Beyond the Repository (BTR) compliant BagIt Profiles
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      19
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Provide feedback to users about what the tool is doing and its pace of progress
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      20
+    </td><td class="col2">
+      Core-WARC
+    </td><td class="col3">
+      Optionally generate WARC files that include embedded CSS and Images
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      wget if not warcio
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      21
+    </td><td class="col2">
+      Core-WARC
+    </td><td class="col3">
+      Optionally capture external links within WARC files
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      wget if not warcio
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      22
+    </td><td class="col2">
+      Core-WARC
+    </td><td class="col3">
+      Easy process for exporting or connecting with a tool to replay WARC files
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      23
+    </td><td class="col2">
+      Reporting
+    </td><td class="col3">
+      Report and export attachments
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      24
+    </td><td class="col2">
+      Reporting
+    </td><td class="col3">
+      Report the email folders included in a Mailbag and the number of included email in each folder and the account overall
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      25
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Modular/extendable dependencies that work out-of-the box, but can be overridden
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      26
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Dependancies configurable via YAML or simmilar
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      27
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Multiple conversion options/plugins for PDFs
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      wkhtmltopdf, htmldoc, if not xhtml2pdf
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      28
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Multiple conversion options/plugins for WARCs
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      29
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Process for upgrading and managing dependencies
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      30
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      Provide Docker image
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      31
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      Provide an executable for multiple platforms
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      32
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      Clear documentation for managing system privileges
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      47
+    </td><td class="col2">
+      Core-WARC
+    </td><td class="col3">
+      Optionally capture attached links within WARC files
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      49
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from MSG files
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+</table>
+
+<h2 id="could-have">Could Have</h2>
+
+<table>
+  
+    
+    <tr>
+      
+        <th>Number</th>
+      
+        <th>Category</th>
+      
+        <th>Could have</th>
+      
+        <th>Requirement Type</th>
+      
+        <th>Possible System Dependancies</th>
+      
+    </tr>
+    
+    <tr class="row1">
+<td class="col1">
+      33
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Lists important email metadata separate from source data and filesystem (like a CSV or SQLite), as a tag file
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      34
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Provide an estimated time to completion for users during long-running processes
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      35
+    </td><td class="col2">
+      Core
+    </td><td class="col3">
+      Provide a method of keeping or excluding specific email folders while creating Mailbags
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      36
+    </td><td class="col2">
+      Core-PDF
+    </td><td class="col3">
+      Generate PDFs using customizable CSS
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      wkhtmltopdf, htmldoc, if not xhtml2pdf
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      37
+    </td><td class="col2">
+      Core-WARC
+    </td><td class="col3">
+      Customizable scoping rules for WARC creation
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      wget
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      38
+    </td><td class="col2">
+      Reporting
+    </td><td class="col3">
+      Export reports of email headers or text of individual emails
+    </td><td class="col4">
+      Functional
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      39
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Common dependencies across major platforms
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      40
+    </td><td class="col2">
+      Dependency management
+    </td><td class="col3">
+      Individual mini-specs for future system dependencies
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      41
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      All core dependencies install via a single comand, such as using pip
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      42
+    </td><td class="col2">
+      Installation
+    </td><td class="col3">
+      Able to install on Windows machine without admin privileges
+    </td><td class="col4">
+      Technical
+    </td><td class="col5">
+      
+    </td></tr>
+
+  
+</table>
+
+<h2 id="wont-have">Wonâ€™t Have</h2>
+
+<table>
+  
+    
+    <tr>
+      
+        <th>Number</th>
+      
+        <th>Category</th>
+      
+        <th>Won't have</th>
+      
+        <th>Requirement Type</th>
+      
+    </tr>
+    
+    <tr class="row1">
+<td class="col1">
+      43
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from Office 365 APIs
+    </td><td class="col4">
+      Functional
+    </td></tr>
+
+  
+    
+    <tr class="row1">
+<td class="col1">
+      44
+    </td><td class="col2">
+      Input
+    </td><td class="col3">
+      Input from Gmail APIs
+    </td><td class="col4">
+      Functional
+    </td></tr>
+
+  
+</table>
+:ET
