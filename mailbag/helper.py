@@ -57,7 +57,7 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     message_type = f'[{style["cy"][0]}{prefix}{style["b"][1]}]'
     # deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
     # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-    status = f"{percent}% [{current} messages out of {total}] {suffix}, Estimated Time Remaining: {remaining_time}s"
+    status = f"{percent}% [{current} / {total} messages] {remaining_time}s remaining"
 
     print(f"\r{dt} {message_type} {status}", end=print_End)
 
