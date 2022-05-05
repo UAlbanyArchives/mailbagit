@@ -30,7 +30,7 @@ mailbagit path/to/inbox.mbox -i mbox -d txt pdf-chrome -m my_mailbag -r
 mailbagit path/to/export.pst -i pst -d mbox eml pdf warc -m my_mailbag
 ```
 
-See the [documentation](https://archives.albany.edu/mailbag/use/) for more details on
+See the [documentation](https://archives.albany.edu/mailbag/use/) for more details on:
 
 * [mailbagit](https://archives.albany.edu/mailbag/mailbagit/)
 * [mailbagit-gui](https://archives.albany.edu/mailbag/mailbagit-gui/)
@@ -55,11 +55,12 @@ docker run -it mailbag:dev
 
 #### Building a release
 
+```
 docker build -t mailbag:latest -f Dockerfile.production .
 docker build -t mailbag:dev .
-
 pyinstaller --onefile mailbagit.py
 pyinstaller --onefile mailbagit-gui.py
+```
 
 ## License
 [MIT](LICENSE)
