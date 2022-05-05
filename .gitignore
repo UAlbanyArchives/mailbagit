@@ -27,6 +27,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+docs/.jekyll-cache
+
 sampleData/
 
 # PyInstaller
