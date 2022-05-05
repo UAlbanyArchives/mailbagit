@@ -1,8 +1,0 @@
-I""<h1 id="windows-executables">Windows Executables</h1>
-
-<p>Executables are available for Windows that contain all dependencies except the PDF dependencies. Download the latest <code class="language-plaintext highlighter-rouge">mailbagit.exe</code> and <code class="language-plaintext highlighter-rouge">mailbagit-gui.exe</code> files from the <a href="https://github.com/UAlbanyArchives/mailbag/releases">Github releases</a>.</p>
-
-<p>These executables are unsigned, so Windows will likely give you as “Windows protected your PC” warning from Microsoft Defender SmartScreen. You will need sufficient permissions to allow unsigned executables on you machine.</p>
-
-<p><img src="/mailbag/smart_screen.png" alt="Screenshot of Microsoft Defender SmartScreen preventing mailbagit.exe from running." /></p>
-:ET

@@ -2,7 +2,7 @@
 layout: page
 title: Call for Participation (closed)
 permalink: /cfp/
-nav_order: 8
+nav_order: 10
 ---
 
 # Call for Participation - Mailbag Specification Working Meeting (closed)
