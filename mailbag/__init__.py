@@ -223,27 +223,30 @@ if gooeyCheck:
 
 def main():
     args = mailbag_parser.parse_args()
-    log.debug("Arguments:", args=args)
     args.input = args.input.lower()
+
+    if not os.path.exists(args.path[0]):
+        error_msg = "Invalid path, does not exist as a file or directory."
+        mailbag_parser.error((error_msg))
 
     # handle arg errors
     if args.input not in EmailAccount.registry.keys():
         error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(EmailAccount.registry.keys()) + '"'
-        bagit_parser.error((error_msg))
+        mailbag_parser.error((error_msg))
 
     if isinstance(args.derivatives, str):
         args.derivatives = args.derivatives.split(" ")
         if not all(elem in derivative_types for elem in args.derivatives):
             error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
-            bagit_parser.error((error_msg))
+            mailbag_parser.error((error_msg))
 
     if args.input in args.derivatives:
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
-        bagit_parser.error((error_msg))
+        mailbag_parser.error((error_msg))
 
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"
-        bagit_parser.error((error_msg))
+        mailbag_parser.error((error_msg))
 
     # Raise and error and exit when given multiple inputs
     if len(args.path) > 1:
@@ -252,9 +255,11 @@ def main():
             "You may want to try providing a directory of email or running the command multiple "
             "times to create multiple mailbags."
         )
-        bagit_parser.error((error_msg))
+        mailbag_parser.error((error_msg))
 
     # Okay, if you made it here, args are good!
+    log.debug("Arguments:", args=args)
+
     args.path = args.path[0]
     c = Controller(args)
     return c.generate_mailbag()
