@@ -229,6 +229,7 @@ def main():
         error_msg = "Invalid path, does not exist as a file or directory."
         mailbag_parser.error((error_msg))
 
+    """
     # handle arg errors
     if args.input not in EmailAccount.registry.keys():
         error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(EmailAccount.registry.keys()) + '"'
@@ -243,6 +244,7 @@ def main():
     if args.input in args.derivatives:
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
         mailbag_parser.error((error_msg))
+    """
 
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"
