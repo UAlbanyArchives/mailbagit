@@ -3,7 +3,8 @@ MAINTAINER Gregory Wiedeman gwiedeman@albany.edu
 
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
-    MAILBAG_LOG_LEVEL=info
+    MAILBAG_LOG_LEVEL=info \
+    IN_CONTAINER=true
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
