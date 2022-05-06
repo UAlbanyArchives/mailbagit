@@ -80,6 +80,11 @@ if not skip_registry:
                                 "--print-to-pdf=" + os.path.abspath(pdf_name),
                                 os.path.abspath(html_name),
                             ]
+
+                            # Adds --no-sandbox arg to run as root in docker container if env variable set
+                            if os.environ.get("IN_CONTAINER", "").upper() == "TRUE":
+                                command.insert(4, "--no-sandbox")
+
                             log.debug("Running " + " ".join(command))
                             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 

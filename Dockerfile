@@ -5,7 +5,8 @@ ARG APP_ENV=prod
 
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
-    MAILBAG_LOG_LEVEL=debug
+    MAILBAG_LOG_LEVEL=debug\
+    IN_CONTAINER=true
 
 RUN mkdir /mailbag
 WORKDIR /mailbag
