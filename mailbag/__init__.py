@@ -220,7 +220,7 @@ def cli():
 if gooeyCheck:
 
     @Gooey
-    def gui():
+    def gui(richtext_controls=True):
         """hook for GUI mailbag invocation"""
         main()
 
