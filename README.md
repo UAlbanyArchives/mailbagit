@@ -49,17 +49,19 @@ pip install -e .
 
 Build and run image
 ```
-docker pull gwiedeman1/mailbag:dev
-docker run -it mailbag:dev
+docker pull ualbanyarchives/mailbag:dev
+docker run -it ualbanyarchives/mailbag:dev
 ```
 
 #### Building a release
 
+##### Building and pushing Docker images
+
 ```
 docker build -t mailbag:latest -f Dockerfile.production .
 docker build -t mailbag:dev .
-pyinstaller --onefile mailbagit.py
-pyinstaller --onefile mailbagit-gui.py
+docker push ualbanyarchives/mailbag:latest
+docker push ualbanyarchives/mailbag:dev
 ```
 
 ## License
