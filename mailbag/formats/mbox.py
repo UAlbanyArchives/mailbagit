@@ -3,7 +3,7 @@ import mailbox
 
 from structlog import get_logger
 from pathlib import Path
-import os, shutil, glob
+import os, shutil
 import email.errors
 
 from mailbag.email_account import EmailAccount
@@ -26,26 +26,30 @@ class Mbox(EmailAccount):
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
 
-        self.file = target_account
+        self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.iteration_only = False
-        log.info("Reading : ", File=self.file)
+        log.info("Reading : ", Path=self.path)
 
     def account_data(self):
         return account_data
 
     def messages(self):
 
-        if os.path.isfile(self.file):
-            files = self.file
-            parent_dir = os.path.dirname(self.file)
+        if os.path.isfile(self.path):
+            parent_dir = os.path.dirname(self.path)
+            fileList = [self.path]
         else:
-            files = os.path.join(self.file, "**", "*.mbox")
-            parent_dir = self.file
-        file_list = glob.glob(files, recursive=True)
-        for filePath in file_list:
-            originalFile = helper.relativePath(self.file, filePath)
+            parent_dir = self.path
+            fileList = []
+            for root, dirs, files in os.walk(self.path):
+                for file in files:
+                    if file.lower().endswith("." + self.format_name):
+                        fileList.append(os.path.join(root, file))
+
+        for filePath in fileList:
+            originalFile = helper.relativePath(self.path, filePath)
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
