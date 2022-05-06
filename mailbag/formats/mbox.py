@@ -29,6 +29,7 @@ class Mbox(EmailAccount):
         self.file = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.iteration_only = False
         log.info("Reading : ", File=self.file)
 
     def account_data(self):
@@ -48,6 +49,10 @@ class Mbox(EmailAccount):
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
+
+                if self.iteration_only:
+                    yield None
+                    continue
 
                 attachments = []
                 errors = {}
@@ -117,4 +122,5 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)
+            if not self.iteration_only:
+                new_path = helper.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)

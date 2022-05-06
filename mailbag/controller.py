@@ -10,6 +10,8 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbag.helper as helper
+import mailbag.globals as globals
+from time import time
 import uuid
 import datetime
 import traceback
@@ -139,6 +141,12 @@ class Controller:
         csv_portion = [self.csv_headers]
         error_csv = [self.csv_headers]
 
+        # Count total no. of messages and set start time
+        mail_account.iteration_only = True
+        total_messages = len(list(mail_account.messages()))
+        mail_account.iteration_only = False
+        start_time = time()
+
         for message in mail_account.messages():
             # do stuff you ought to do per message here
 
@@ -177,6 +185,14 @@ class Controller:
                 with open(trace_file, "w") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
+
+            # Show progress
+            # If progress%(total_messages/100)==0 then show progress
+            # This reduces progress update overhead to only 100 updates at max
+            is_last = mailbag_message_id == total_messages
+            if total_messages / 100 < 1 or is_last or mailbag_message_id % int(total_messages / 100) == 0:
+                print_End = "\n" if globals.log_level == "DEBUG" or is_last else "\r"
+                helper.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
 
         # End thread and server for WARC derivatives
         for d in derivatives:
