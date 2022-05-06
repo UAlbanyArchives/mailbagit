@@ -49,15 +49,15 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     remaining_time = round(time_spent * (total / current - 1), 2)
     e = datetime.datetime.now()
     percent = ("{0:." + str(decimals) + "f}").format(100 * (current / float(total)))
-    filledLength = int(length * current // total)
+    # filledLength = int(length * current // total)
     style = globals.style
     # bar = fill * filledLength + '-' * (length - filledLength)
 
     dt = f"{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}"
-    message_type = f'[{style["b"][0]}{style["y"][0]}{prefix}{style["b"][1]}]'
-    deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
+    message_type = f'[{style["cy"][0]}{prefix}{style["b"][1]}]'
+    # deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
     # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-    status = f"{percent}% [{current} messages out of {total}] {suffix}, Estimated Time Remaining: {remaining_time}s"
+    status = f"{percent}% [{current} / {total} messages] {remaining_time}s remaining"
 
     print(f"\r{dt} {message_type} {status}", end=print_End)
 
@@ -203,10 +203,14 @@ def deleteFile(filePath):
 
 
 def startServer(dry_run, httpdShared, port=5000):
+    class QuietHandler(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, format, *args):
+            pass
+
     log.debug("Starting Server")
     if not dry_run:
         Handler = http.server.SimpleHTTPRequestHandler
-        with socketserver.TCPServer(("127.0.0.1", port), Handler) as httpd:
+        with socketserver.TCPServer(("127.0.0.1", port), QuietHandler) as httpd:
             httpdShared.append(httpd)
             httpd.serve_forever()
 
