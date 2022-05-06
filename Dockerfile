@@ -17,6 +17,7 @@ ENV PYTHONPATH=/mailbag
 RUN apt-get -y update && \
     apt-get -y upgrade && \
     apt-get install -y build-essential && \
+    apt-get install -y libgtk-3-dev && \
     apt-get install -y python3-pip && \
     apt-get install -y curl && \
     \
