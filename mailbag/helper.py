@@ -2,9 +2,12 @@ import base64
 import urllib.parse
 from pathlib import Path
 import os, shutil, glob
+import datetime
+from time import time
 import codecs
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
+import mailbag.globals as globals
 from mailbag.models import Attachment
 import mimetypes
 import traceback
@@ -24,6 +27,71 @@ def moveFile(dry_run, oldPath, newPath):
         shutil.move(oldPath, newPath)
     except IOError as e:
         log.error("Unable to move file. %s" % e)
+
+
+def progress(current, total, start_time, prefix="", suffix="", decimals=1, length=100, fill="█", print_End="\r"):
+    """
+    Call in a loop to create terminal progress bar
+
+    Parameters:
+        current (int): current progress
+        total (int): total iterations
+        start_time (float): start time
+        prefix (String): prefix string
+        suffix (String): suffix string
+        decimals (int): positive number of decimals in percent complete
+        length (int): character length of bar (Int)
+        fill (String): bar fill character (Str)
+        printEnd (String): end character (e.g. "\r", "\r\n")
+    """
+
+    time_spent = time() - start_time
+    remaining_time = round(time_spent * (total / current - 1), 2)
+    e = datetime.datetime.now()
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (current / float(total)))
+    filledLength = int(length * current // total)
+    style = globals.style
+    # bar = fill * filledLength + '-' * (length - filledLength)
+
+    dt = f"{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}"
+    message_type = f'[{style["b"][0]}{style["y"][0]}{prefix}{style["b"][1]}]'
+    deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
+    # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
+    status = f"{percent}% [{current} messages out of {total}] {suffix}, Estimated Time Remaining: {remaining_time}s"
+
+    print(f"\r{dt} {message_type} {status}", end=print_End)
+
+
+def processedFile(filePath):
+    """
+    Add size of this file to counter
+
+    Parameters:
+        filePath (String): Location to find the file
+    """
+
+    increment = os.path.getsize(filePath) / (1024**2)
+    globals.processedSize += increment
+    globals.processedSize = round(globals.processedSize, 2)
+
+
+def getDirectorySize(directory, format):
+    """
+    Calculate total size of relevant files in the directory
+
+    Parameters:
+        directory (String): Location to find files
+        format (String): format of the mail type
+
+    Returns:
+        String: emailFolder
+    """
+
+    filePath = os.path.join(directory, "**", "*." + format)
+    total = sum(os.path.getsize(f) for f in glob.iglob(filePath, recursive=True) if os.path.isfile(f))
+    total = round(total / (1024**2), 2)
+    log.debug(f"Total files to be processed: {total}MB")
+    return total
 
 
 def relativePath(mainPath, file):
@@ -67,6 +135,26 @@ def messagePath(headers):
     return messagePath
 
 
+def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
+    """
+    Creates file paths for input mail files and new paths
+
+    Parameters:
+        mainPath (String) :
+        mailbag_name (String) :
+        input (String) :
+        file (String) :
+    """
+    fullPath = Path(mainPath).resolve()
+    fullFilePath = Path(file).resolve()
+    relPath = fullFilePath.relative_to(fullPath).parents[0]
+    filename = fullFilePath.name
+    folder_new = os.path.join(fullPath, mailbag_name, "data", input)
+    file_new_path = os.path.join(folder_new, relPath, filename)
+
+    return fullPath, fullFilePath, file_new_path, relPath
+
+
 def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
@@ -84,15 +172,9 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         file_new_path (Path): The path where the file was moved
     """
 
-    fullPath = Path(mainPath).resolve()
-    fullFilePath = Path(file).resolve()
-    relPath = fullFilePath.relative_to(fullPath).parents[0]
-    filename = fullFilePath.name
-    folder_new = os.path.join(fullPath, mailbag_name, "data", input)
-
-    file_new_path = os.path.join(folder_new, relPath, filename)
-
+    fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
     log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -160,6 +242,8 @@ def handle_error(errors, exception, desc, level="error"):
         error_msg = desc + "."
         errors["stack_trace"].append(desc + ".")
     errors["msg"].append(error_msg)
+
+    print()
     if level == "warn":
         log.warn(error_msg)
     else:
@@ -316,50 +400,6 @@ def normalizePath(path):
         return out_path
 
 
-def addToHead(tag, soup):
-    """
-    Adds a Beautiful Soup tag to <head>
-    Handles when no <head> exists
-
-    Parameters:
-        tag(BeautifulSoup) The tag to add
-        soup(BeautifulSoup): HTML body
-
-    Returns:
-        BeautifulSoup: HTML body
-    """
-    if soup.head:
-        soup.head.insert(0, tag)
-    else:
-        return path
-
-
-def addToHead(tag, soup):
-    """
-    Adds a Beautiful Soup tag to <head>
-    Handles when no <head> exists
-
-    Parameters:
-        tag(BeautifulSoup) The tag to add
-        soup(BeautifulSoup): HTML body
-
-    Returns:
-        BeautifulSoup: HTML body
-    """
-    if soup.head:
-        soup.head.insert(0, tag)
-    else:
-        head = soup.new_tag("head")
-        if soup.html:
-            soup.html.insert(0, head)
-        else:
-            html = soup.new_tag("html")
-            soup.insert(0, html)
-            soup.html.insert(0, head)
-        soup.head.insert(0, tag)
-    return soup
-
-
 def htmlFormatting(message, external_css, headers=True):
     """
     Creates a formatted html file using message text or html body
@@ -414,13 +454,23 @@ def htmlFormatting(message, external_css, headers=True):
         # Formatting HTML with beautiful soup
         soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
 
+        # Checking if message contains partial html
+        if not soup.html:
+            html_content = "<html>" + html_content + "</html>"
+            soup = BeautifulSoup(html_content.encode(encoding), "html.parser", from_encoding=encoding)
+        if not soup.head:
+            head = soup.new_tag("head")
+            soup.html.insert(0, head)
+        if not soup.body:
+            body = soup.new_tag("body")
+            soup.head.next_element.wrap(body)
+
         # Check Doctype
         doctype = False
         for item in soup.contents:
             if isinstance(item, Doctype):
                 doctype = True
         if doctype is False:
-            tag = Doctype("html")
             tag = Doctype("html")
             soup.insert(0, tag)
 
@@ -465,12 +515,12 @@ def htmlFormatting(message, external_css, headers=True):
             soupTable = BeautifulSoup(tableSection, "html.parser")
 
             # Add headers table to HTML body
-            soup.html.body.insert(0, soupTable)
+            soup.body.insert(0, soupTable)
 
         # Embedding Encoding with meta
         meta = soup.new_tag("meta")
         meta["charset"] = encoding
-        soup = addToHead(meta, soup)
+        soup.head.insert(0, meta)
 
         # Embedding default styling
         default_css = """
@@ -502,7 +552,7 @@ def htmlFormatting(message, external_css, headers=True):
         """
         style = soup.new_tag("style")
         style.string = default_css
-        soup = addToHead(style, soup)
+        soup.head.append(style)
 
         # Adding external_css
         if external_css:
@@ -510,7 +560,7 @@ def htmlFormatting(message, external_css, headers=True):
             link["rel"] = "stylesheet"
             link["type"] = "text/css"
             link["href"] = "file:///" + external_css
-            soup = addToHead(link, soup)
+            soup.head.append(link)
 
         # Embedding Images
         # HT to extract_msg for this approach

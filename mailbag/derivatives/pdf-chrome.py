@@ -7,14 +7,12 @@ import mailbag.helper as helper
 
 
 skip_registry = False
+
 try:
-    if distutils.spawn.find_executable("chrome.exe"):
-        chrome = "chrome.exe"
-    elif distutils.spawn.find_executable("chrome"):
-        chrome = "chrome"
-    else:
-        skip_registry = True
-        chrome = None
+    chromes = ["google-chrome", "chrome.exe", "chrome"]
+    chrome = next((c for c in chromes if distutils.spawn.find_executable(c)), None)
+    skip_registry = True if chrome is None else False
+
 except:
     skip_registry = True
 
