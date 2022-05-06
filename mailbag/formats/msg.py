@@ -1,5 +1,5 @@
 import extract_msg
-import glob, os
+import os
 from email import parser
 from structlog import get_logger
 from RTFDE.deencapsulate import DeEncapsulator
@@ -25,24 +25,29 @@ class MSG(EmailAccount):
         # code goes here to set up mailbox and pull out any relevant account_data
         account_data = {}
 
-        self.file = target_account
+        self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.iteration_only = False
-        log.info("Reading :", File=self.file)
+        log.info("Reading :", Path=self.path)
 
     def account_data(self):
         return account_data
 
     def messages(self):
-        files = glob.glob(os.path.join(self.file, "**", "*.msg"), recursive=True)
-        for filePath in files:
+        fileList = []
+        for root, dirs, files in os.walk(self.path):
+            for file in files:
+                if file.lower().endswith("." + self.format_name):
+                    fileList.append(os.path.join(root, file))
+
+        for filePath in fileList:
 
             if self.iteration_only:
                 yield None
                 continue
 
-            originalFile = helper.relativePath(self.file, filePath)
+            originalFile = helper.relativePath(self.path, filePath)
 
             attachments = []
             errors = {}
@@ -135,5 +140,5 @@ class MSG(EmailAccount):
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.file, self.mailbag_name, self.format_name, filePath)
+            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
             yield message
