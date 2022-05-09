@@ -8,11 +8,10 @@ A tool for creating and managing Mailbags, a package for preserving email in mul
 pip install mailbag
 ```
 
-To install PST dependancies: `pip install mailbag[pst]`
+* To install PST dependancies: `pip install mailbag[pst]`
+* To install `mailbagit-gui`: `pip install mailbag[gui]`
 
-To install `mailbagit-gui`: `pip install mailbag[gui]`
-
-You can also run `mailbagit` using [Windows executables](https://archives.albany.edu/mailbag/exe) or a [Docker image](https://archives.albany.edu/mailbag/docker).
+You can also run `mailbagit` using a [Docker image](https://archives.albany.edu/mailbag/docker).
 
 ## Quick start
 
