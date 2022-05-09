@@ -88,13 +88,13 @@ class Controller:
 
     def generate_mailbag(self):
 
-        mail_account: EmailAccount = self.format(self.args.directory, self.args)
+        mail_account: EmailAccount = self.format(self.args.path, self.args)
 
         # Create folder mailbag folder before writing mailbag.csv
-        if os.path.isfile(self.args.directory):
-            parent_dir = os.path.dirname(self.args.directory)
+        if os.path.isfile(self.args.path):
+            parent_dir = os.path.dirname(self.args.path)
         else:
-            parent_dir = self.args.directory
+            parent_dir = self.args.path
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
         attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
         error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")

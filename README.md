@@ -36,8 +36,10 @@ See the [documentation](https://archives.albany.edu/mailbag/use/) for more detai
 * [logging](https://archives.albany.edu/mailbag/logging/)
 * [plugins](https://archives.albany.edu/mailbag/plugins/)
 
+
 ### Development setup
 
+>>>>>>> develop
 ```
 git clone git@github.com:UAlbanyArchives/mailbag.git
 cd mailbag
@@ -47,6 +49,7 @@ pip install -e .
 #### Development with docker
 
 Build and run image
+
 ```
 docker pull ualbanyarchives/mailbag:dev
 docker run -it ualbanyarchives/mailbag:dev

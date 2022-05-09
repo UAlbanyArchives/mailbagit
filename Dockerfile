@@ -5,7 +5,8 @@ ARG APP_ENV=prod
 
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
-    MAILBAG_LOG_LEVEL=debug
+    MAILBAG_LOG_LEVEL=debug\
+    IN_CONTAINER=true
 
 RUN mkdir /mailbag
 WORKDIR /mailbag
@@ -17,6 +18,7 @@ ENV PYTHONPATH=/mailbag
 RUN apt-get -y update && \
     apt-get -y upgrade && \
     apt-get install -y build-essential && \
+    apt-get install -y libgtk-3-dev && \
     apt-get install -y python3-pip && \
     apt-get install -y curl && \
     \
