@@ -10,7 +10,7 @@ nav_order: 2
 
 Mailbag-it includes a very basic graphical user interface (GUI)
 
-You should be able to run the GUI by entering the `mailbagit-gui` command or by double clicking the `mailbag-gui.exe` file if you are using the [Windows executables]({{ site.baseurl }}/exe). The mailbagit GUI is currently not supported while using a docker image.
+If `mailbagit` is [installed](http://localhost:4000/mailbag/python/) you should be able to run the GUI by entering the `mailbagit-gui` command. The mailbagit GUI is currently not supported while running in a docker container.
 
 ## Accessibility
 
@@ -37,7 +37,7 @@ You should then be able to run the GUI with `python3 mailbagit-gui.py`.
 
 ## Using mailbagit-gui 
 
-![Screenshot of the mailbagit GUI.]({{ site.baseurl }}/mailbagit-gui.png)
+![Screenshot of the mailbagit GUI.]({{ site.baseurl }}/img/mailbagit-gui.png)
 
 
 ### Path

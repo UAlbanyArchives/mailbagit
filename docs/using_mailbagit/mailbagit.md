@@ -27,12 +27,6 @@ mailbagit path/to/directory -i eml -d pdf-chrome warc -mailbag-name fundraising_
 
 > This examples also uses the `-r` (dry-run) flag, which will parse all EML files, but will not move, change, or package them into a mailbag. If there are any parsing errors, this will write an error report to the  `fundraising_emails_errors` directory.
 
-If you are using the [Windows executables]({{ site.baseurl }}//install/#windows-executables), substitute `mailbagit.exe` for the `mailbagit` command:
-
-```
-mailbagit.exe path/to/messages -i msg -d mbox pdf-chrome
-```
-
 ## Arguments
 
 The arguments listed below can be entered in the command line when using `mailbagit`or entered in `mailbagit-gui` fields
