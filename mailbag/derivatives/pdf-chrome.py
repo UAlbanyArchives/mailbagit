@@ -9,7 +9,7 @@ import mailbag.helper as helper
 skip_registry = False
 
 try:
-    chromes = ['google-chrome','chrome.exe','chrome']
+    chromes = ["google-chrome", "chrome.exe", "chrome"]
     chrome = next((c for c in chromes if distutils.spawn.find_executable(c)), None)
     skip_registry = True if chrome is None else False
 
@@ -80,6 +80,11 @@ if not skip_registry:
                                 "--print-to-pdf=" + os.path.abspath(pdf_name),
                                 os.path.abspath(html_name),
                             ]
+
+                            # Adds --no-sandbox arg to run as root in docker container if env variable set
+                            if os.environ.get("IN_CONTAINER", "").upper() == "TRUE":
+                                command.insert(4, "--no-sandbox")
+
                             log.debug("Running " + " ".join(command))
                             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
