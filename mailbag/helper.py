@@ -11,7 +11,7 @@ import mailbag.globals as globals
 from mailbag.models import Attachment
 import mimetypes
 import traceback
-
+import chardet, codecs
 import http.server
 import socketserver
 import sys
@@ -286,12 +286,30 @@ def parse_part(part, bodies, attachments, errors):
 
     # Extract body
     try:
-        if content_type == "text/html" and content_disposition != "attachment":
-            bodies["html_encoding"] = part.get_charsets()[0]
-            bodies["html_body"] = part.get_payload(decode=True).decode(bodies["html_encoding"])
-        if content_type == "text/plain" and content_disposition != "attachment":
-            bodies["text_encoding"] = part.get_charsets()[0]
-            bodies["text_body"] = part.get_payload(decode=True).decode(bodies["text_encoding"])
+        if content_disposition != "attachment":
+            if content_type == "text/html" or content_type == "text/plain":
+                part_encoding = part.get_content_charset()
+                if part_encoding:
+                    try:
+                        codecs.lookup(part_encoding)
+                    except:
+                        part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+                else:
+                    part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+
+                try:
+                    message_body = part.get_payload(decode=True).decode(part_encoding)
+                except UnicodeDecodeError as e:
+                    desc = "Error decoding message body with " + part_encoding
+                    errors = handle_error(errors, e, desc)
+                    message_body = part.get_payload(decode=True).decode(part_encoding, errors="ignore")
+
+                if content_type == "text/html":
+                    bodies["html_encoding"] = part_encoding
+                    bodies["html_body"] = message_body
+                elif content_type == "text/plain":
+                    bodies["text_encoding"] = part_encoding
+                    bodies["text_body"] = message_body
     except Exception as e:
         desc = "Error parsing message body"
         errors = handle_error(errors, e, desc)
