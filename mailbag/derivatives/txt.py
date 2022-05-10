@@ -49,7 +49,7 @@ class TxtDerivative(Derivative):
                         if not os.path.isdir(out_dir):
                             os.makedirs(out_dir)
                         if message.Text_Body:
-                            with open(filename, "w", encoding=message.Text_Encoding) as f:
+                            with open(filename, "w", encoding="utf-8") as f:
                                 f.write(message.Text_Body)
                                 f.close()
                     except Exception as e:

@@ -4,7 +4,7 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
-from email import encoders
+from email import encoders, charset
 import platform
 
 log = get_logger()
@@ -68,10 +68,13 @@ class MboxDerivative(Derivative):
                     mbox = mailbox.mbox(filename)
                     mbox.lock()
 
+                    fullObjectWrite = False
                     if message.Message:
                         mbox.add(message.Message)
                     elif message.Headers:
                         msg = MIMEMultipart("mixed")
+                        cs = charset.Charset("utf-8")
+                        msg.set_charset(cs)
 
                         # Add headers
                         try:
@@ -92,10 +95,10 @@ class MboxDerivative(Derivative):
                             if message.HTML_Body or message.Text_Body:
                                 alt = MIMEMultipart("alternative")
                                 if message.Text_Body:
-                                    alt.attach(MIMEText(message.Text_Body, "plain", message.Text_Encoding))
+                                    alt.attach(MIMEText(message.Text_Body, "plain", "utf-8"))
                                 if message.HTML_Body:
                                     alt = MIMEMultipart("alternative")
-                                    alt.attach(MIMEText(message.HTML_Body, "html", message.HTML_Encoding))
+                                    alt.attach(MIMEText(message.HTML_Body, "html", "utf-8"))
                                 msg.attach(alt)
                             else:
                                 desc = (

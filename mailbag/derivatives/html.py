@@ -48,6 +48,7 @@ class HtmlDerivative(Derivative):
             else:
                 log.debug("Writing html derivative to " + filename)
                 # Calling helper function to get formatted html
+                html_formatted = None
                 try:
                     html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
                 except Exception as e:
@@ -55,15 +56,16 @@ class HtmlDerivative(Derivative):
                     errors = helper.handle_error(errors, e, desc)
 
                 if not self.args.dry_run:
-                    try:
-                        if not os.path.isdir(out_dir):
-                            os.makedirs(out_dir)
-                        with open(filename, "w", encoding=encoding) as f:
-                            f.write(html_formatted)
-                            f.close()
-                    except Exception as e:
-                        desc = "Error writing HTML derivative"
-                        errors = helper.handle_error(errors, e, desc)
+                    if html_formatted:
+                        try:
+                            if not os.path.isdir(out_dir):
+                                os.makedirs(out_dir)
+                            with open(filename, "w", encoding="utf-8") as f:
+                                f.write(html_formatted)
+                                f.close()
+                        except Exception as e:
+                            desc = "Error writing HTML derivative"
+                            errors = helper.handle_error(errors, e, desc)
 
         except Exception as e:
             desc = "Error creating HTML derivative"
