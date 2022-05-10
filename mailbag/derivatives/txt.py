@@ -1,6 +1,6 @@
 # Makes txt file derivatives just containing message bodies
 import os
-import mailbag.helper as helper
+import mailbag.helper.common as common
 from structlog import get_logger
 
 log = get_logger()
@@ -41,7 +41,7 @@ class TxtDerivative(Derivative):
 
             if message.Text_Body is None:
                 desc = "No plain text body for " + str(message.Mailbag_Message_ID) + ", no TXT derivative created"
-                errors = helper.handle_error(errors, None, desc, "warn")
+                errors = common.handle_error(errors, None, desc, "warn")
             else:
                 log.debug("Writing txt derivative to " + filename)
                 if not self.args.dry_run:
@@ -54,11 +54,11 @@ class TxtDerivative(Derivative):
                                 f.close()
                     except Exception as e:
                         desc = "Error writing plain text body to file"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
 
         except Exception as e:
             desc = "Error creating plain text derivative"
-            errors = helper.handle_error(errors, e, desc)
+            errors = common.handle_error(errors, e, desc)
 
         message.Error.extend(errors["msg"])
         message.StackTrace.extend(errors["stack_trace"])

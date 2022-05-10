@@ -1,7 +1,8 @@
 import datetime
 import json
 from os.path import join
-import mailbag.helper as helper
+import mailbag.helper.format as format
+import mailbag.helper.common as common
 from structlog import get_logger
 from email import parser
 from mailbag.email_account import EmailAccount
@@ -49,7 +50,7 @@ class EML(EmailAccount):
                 yield None
                 continue
 
-            originalFile = helper.relativePath(self.path, filePath)
+            originalFile = format.relativePath(self.path, filePath)
 
             attachments = []
             errors = {}
@@ -68,22 +69,22 @@ class EML(EmailAccount):
                         bodies["text_encoding"] = None
                         if msg.is_multipart():
                             for part in msg.walk():
-                                bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                                bodies, attachments, errors = format.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                            bodies, attachments, errors = format.parse_part(part, bodies, attachments, errors)
 
                     except Exception as e:
                         desc = "Error parsing message parts"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
 
                     # Look for message arrangement
                     try:
-                        messagePath = helper.messagePath(msg)
+                        messagePath = format.messagePath(msg)
                         unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                        derivativesPath = helper.normalizePath(unsafePath)
+                        derivativesPath = format.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
 
                     message = Email(
                         Error=errors["msg"],
@@ -108,9 +109,9 @@ class EML(EmailAccount):
 
             except (email.errors.MessageParseError, Exception) as e:
                 desc = "Error parsing message"
-                errors = helper.handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
             # Move EML to new mailbag directory structure
             yield message
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)

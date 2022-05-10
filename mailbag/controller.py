@@ -9,7 +9,7 @@ from mailbag.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
-import mailbag.helper as helper
+import mailbag.helper.controller as controller
 import mailbag.globals as globals
 from time import time
 import uuid
@@ -157,7 +157,7 @@ class Controller:
             if len(message.Attachments) > 0:
                 if not os.path.isdir(attachments_dir) and not self.args.dry_run:
                     os.mkdir(attachments_dir)
-                helper.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
+                controller.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
 
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
@@ -192,7 +192,7 @@ class Controller:
             is_last = mailbag_message_id == total_messages
             if total_messages / 100 < 1 or is_last or mailbag_message_id % int(total_messages / 100) == 0:
                 print_End = "\n" if globals.log_level == "DEBUG" or is_last else "\r"
-                helper.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
+                controller.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
 
         # End thread and server for WARC derivatives
         for d in derivatives:

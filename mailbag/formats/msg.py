@@ -6,7 +6,8 @@ from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
 from mailbag.email_account import EmailAccount
 from mailbag.models import Email, Attachment
-import mailbag.helper as helper
+import mailbag.helper.format as format
+import mailbag.helper.common as common
 import mailbag.globals as globals
 from extract_msg import attachment
 
@@ -47,7 +48,7 @@ class MSG(EmailAccount):
                 yield None
                 continue
 
-            originalFile = helper.relativePath(self.path, filePath)
+            originalFile = format.relativePath(self.path, filePath)
 
             attachments = []
             errors = {}
@@ -70,16 +71,16 @@ class MSG(EmailAccount):
                         text_encoding = mail.stringEncoding
                 except Exception as e:
                     desc = "Error parsing message body"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 # Look for message arrangement
                 try:
-                    messagePath = helper.messagePath(mail.header)
+                    messagePath = format.messagePath(mail.header)
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                    derivativesPath = helper.normalizePath(unsafePath)
+                    derivativesPath = format.normalizePath(unsafePath)
                 except Exception as e:
                     desc = "Error reading message path from headers"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 try:
                     for mailAttachment in mail.attachments:
@@ -92,18 +93,18 @@ class MSG(EmailAccount):
                         else:
                             attachmentName = str(len(attachments))
                             desc = "No filename found for attachment " + attachmentName + " for message " + str(message.Mailbag_Message_ID)
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
-                            MimeType=helper.guessMimeType(attachmentName),
+                            MimeType=format.guessMimeType(attachmentName),
                         )
                         attachments.append(attachment)
 
                 except Exception as e:
                     desc = "Error parsing attachments"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 message = Email(
                     Error=errors["msg"],
@@ -134,11 +135,11 @@ class MSG(EmailAccount):
 
             except (email.errors.MessageParseError, Exception) as e:
                 desc = "Error parsing message"
-                errors = helper.handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
                 # Make sure the MSG file is closed
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
             yield message
