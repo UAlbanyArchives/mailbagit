@@ -4,7 +4,6 @@ from pathlib import Path
 import os, shutil, glob
 import datetime
 from time import time
-import codecs
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
 import mailbag.globals as globals
@@ -12,6 +11,7 @@ from mailbag.models import Attachment
 import mimetypes
 import traceback
 import chardet, codecs
+from email.header import Header, decode_header, make_header
 import http.server
 import socketserver
 import sys
@@ -241,7 +241,12 @@ def handle_error(errors, exception, desc, level="error"):
     """
     if exception:
         error_msg = desc + ": " + repr(exception)
-        errors["stack_trace"].append(traceback.format_exc())
+        stack_header = (
+            "**************************************************************************\n"
+            + error_msg
+            + "\n**************************************************************************\n"
+        )
+        errors["stack_trace"].append(stack_header + traceback.format_exc())
     else:
         error_msg = desc + "."
         errors["stack_trace"].append(desc + ".")
@@ -289,18 +294,20 @@ def parse_part(part, bodies, attachments, errors):
         if content_disposition != "attachment":
             if content_type == "text/html" or content_type == "text/plain":
                 part_encoding = part.get_content_charset()
+                enc_source = "read"
                 if part_encoding:
                     try:
                         codecs.lookup(part_encoding)
                     except:
                         part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+                        enc_source = "detected"
                 else:
                     part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
 
                 try:
                     message_body = part.get_payload(decode=True).decode(part_encoding)
                 except UnicodeDecodeError as e:
-                    desc = "Error decoding message body with " + part_encoding
+                    desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
                     errors = handle_error(errors, e, desc)
                     message_body = part.get_payload(decode=True).decode(part_encoding, errors="ignore")
 
@@ -334,6 +341,42 @@ def parse_part(part, bodies, attachments, errors):
             errors = handle_error(errors, e, desc)
 
     return bodies, attachments, errors
+
+
+def parse_header(header):
+    """
+    Used for to decode email headers according to RFC 1342.
+    If the header is a string or None, just return it.
+    For encoded headers it tries to decode it with email.header.decode_header().
+    If we don't get a real encoding, it tries it best to detect it.
+    Errors are logged and documented in the error report.
+
+    Parameters:
+        header (email.header.Header or string or None):
+    Returns:
+        header_string (str or None): A as-best-as-we-can-do decoded string
+    """
+    if header is None:
+        header_string = None
+    elif isinstance(header, str):
+        header_string = header
+    else:
+        headerObj, encoding = decode_header(header)[0]
+        # Did we get a real encoding?
+        try:
+            codecs.lookup(encoding)
+        except:
+            # If not, might as well try to detect it.
+            encoding = chardet.detect(headerObj)["encoding"]
+        try:
+            header_string = headerObj.decode(encoding)
+        except UnicodeDecodeError as e:
+            # Document that the header isn't valid
+            desc = "Error decoding header with " + encoding
+            errors = handle_error(errors, e, desc)
+            header_string = headerObj.decode(encoding, errors="ignore")
+
+    return header_string
 
 
 def saveAttachmentOnDisk(dry_run, attachments_dir, message):

@@ -36,7 +36,10 @@ class HtmlDerivative(Derivative):
 
         try:
 
-            out_dir = os.path.join(self.html_dir, message.Derivatives_Path)
+            if message.Derivatives_Path is None:
+                out_dir = self.html_dir
+            else:
+                out_dir = os.path.join(self.html_dir, message.Derivatives_Path)
             filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".html")
 
             if message.HTML_Body is None and message.Text_Body is None:

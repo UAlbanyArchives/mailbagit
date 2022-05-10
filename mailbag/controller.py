@@ -62,8 +62,9 @@ class Controller:
         Returns:
             list: line
         """
+        error_field = " ".join(message.Error).replace("\r\n", "\\r\\n").replace("\n", "\\n").strip()
         line = [
-            " ".join(message.Error),
+            error_field,
             message.Mailbag_Message_ID,
             message.Message_ID,
             message.Original_File,
