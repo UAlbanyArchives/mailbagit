@@ -4,17 +4,17 @@ from pathlib import Path
 import os, shutil, glob
 import datetime
 from time import time
-import codecs
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
 import mailbag.globals as globals
 from mailbag.models import Attachment
 import mimetypes
 import traceback
-
+import chardet, codecs
+from email.header import Header, decode_header, make_header
 import http.server
 import socketserver
-import sys
+import html
 
 log = get_logger()
 
@@ -60,6 +60,21 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     status = f"{percent}% [{current} / {total} messages] {remaining_time}s remaining"
 
     print(f"\r{dt} {message_type} {status}", end=print_End)
+
+
+def progressMessage(msg, print_End="\r"):
+    """
+    Shows a message as progress. Useful since it make take awhile to save large bags
+    even after all messages have been processed.
+
+    Parameters:
+        msg (String): A message to show as progress
+    """
+    e = datetime.datetime.now()
+    style = globals.style
+    dt = f"{e.year}-{e.month:02d}-{e.day:02d} {e.hour:02d}:{e.minute:02d}.{e.second:02d}"
+    message_type = f'[{style["cy"][0]}{"Progress "}{style["b"][1]}]'
+    print(f"\r{dt} {message_type} {msg}", end=print_End)
 
 
 def processedFile(filePath):
@@ -240,18 +255,24 @@ def handle_error(errors, exception, desc, level="error"):
             "stack_trace" contains a list of full stack traces
     """
     if exception:
-        error_msg = desc + ": " + repr(exception)
-        errors["stack_trace"].append(traceback.format_exc())
+        error_msg = level.upper() + ": " + desc + ": " + repr(exception)
+        stack_header = (
+            "**************************************************************************\n"
+            + error_msg
+            + "\n**************************************************************************\n"
+        )
+        errors["stack_trace"].append(stack_header + traceback.format_exc())
     else:
-        error_msg = desc + "."
+        error_msg = level.upper() + ": " + desc + "."
         errors["stack_trace"].append(desc + ".")
     errors["msg"].append(error_msg)
 
     print()
+    log_msg = (error_msg[:150] + "..") if len(error_msg) > 150 else error_msg
     if level == "warn":
-        log.warn(error_msg)
+        log.warn(log_msg)
     else:
-        log.error(error_msg)
+        log.error(log_msg)
 
     return errors
 
@@ -286,12 +307,51 @@ def parse_part(part, bodies, attachments, errors):
 
     # Extract body
     try:
-        if content_type == "text/html" and content_disposition != "attachment":
-            bodies["html_encoding"] = part.get_charsets()[0]
-            bodies["html_body"] = part.get_payload(decode=True).decode(bodies["html_encoding"])
-        if content_type == "text/plain" and content_disposition != "attachment":
-            bodies["text_encoding"] = part.get_charsets()[0]
-            bodies["text_body"] = part.get_payload(decode=True).decode(bodies["text_encoding"])
+        if content_disposition != "attachment":
+            if content_type == "text/html" or content_type == "text/plain":
+                part_encoding = part.get_content_charset()
+                enc_source = "read"
+                if part_encoding:
+                    try:
+                        part_encoding = codecs.lookup(part_encoding).name.lower()
+                    except:
+                        part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+                        enc_source = "detected"
+                else:
+                    part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+
+                try:
+                    message_body = part.get_payload(decode=True).decode(part_encoding)
+                except UnicodeDecodeError as e:
+                    if enc_source == "read":
+                        print("lies!")
+                        # lies!
+                        detected_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
+                        try:
+                            message_body = part.get_payload(decode=True).decode(detected_encoding)
+                            desc = (
+                                "Failed to decode message body with listed encoding "
+                                + part_encoding
+                                + " (lies!), but successfully decoded with detected encoding "
+                                + detected_encoding
+                            )
+                            errors = handle_error(errors, e, desc, "warn")
+                            part_encoding = detected_encoding
+                        except UnicodeDecodeError as e:
+                            desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
+                            errors = handle_error(errors, e, desc)
+                            message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
+                    else:
+                        desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
+                        errors = handle_error(errors, e, desc)
+                        message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
+
+                if content_type == "text/html":
+                    bodies["html_encoding"] = part_encoding
+                    bodies["html_body"] = message_body
+                elif content_type == "text/plain":
+                    bodies["text_encoding"] = part_encoding
+                    bodies["text_body"] = message_body
     except Exception as e:
         desc = "Error parsing message body"
         errors = handle_error(errors, e, desc)
@@ -303,19 +363,94 @@ def parse_part(part, bodies, attachments, errors):
         pass
     else:
         try:
-            attachmentName = part.get_filename()
-            attachmentFile = part.get_payload(decode=True)
-            attachment = Attachment(
-                Name=attachmentName if attachmentName else str(len(attachments)),
-                File=attachmentFile,
-                MimeType=content_type,
-            )
-            attachments.append(attachment)
+            if not part.get_payload(decode=True):
+                if part.get_filename():
+                    desc = "Missing attachment content, failed to read attachment " + part.get_filename()
+                else:
+                    desc = "Missing attachment content and filename, failed to read attachment"
+                errors = handle_error(errors, None, desc)
+            else:
+                attachmentFile = part.get_payload(decode=True)
+                if part.get_filename():
+                    attachmentName = part.get_filename()
+                else:
+                    desc = "Missing attachment name, using integer"
+                    errors = handle_error(errors, None, desc)
+                    attachmentName = str(len(attachments))
+
+                attachment = Attachment(
+                    Name=attachmentName,
+                    File=attachmentFile,
+                    MimeType=content_type,
+                )
+                attachments.append(attachment)
         except Exception as e:
             desc = "Error parsing attachments"
             errors = handle_error(errors, e, desc)
 
     return bodies, attachments, errors
+
+
+def decode_header_part(header):
+    """
+    Used for to decode strings according to RFC 1342.
+    If the string is not encoded, just return it.
+    For encoded strings it tries to decode it with email.header.decode_header().
+    If we don't get a real encoding, it tries it best to detect it.
+    Errors are logged and documented in the error report.
+
+    Parameters:
+        header (email.header.Header or string or None):
+    Returns:
+        header_string (str or None): A as-best-as-we-can-do decoded string
+    """
+    headerObj, encoding = decode_header(header)[0]
+    if encoding:
+        # Did we get a real encoding?
+        try:
+            encoding = codecs.lookup(encoding).name.lower()
+        except:
+            # If not, might as well try to detect it.
+            encoding = chardet.detect(headerObj)["encoding"]
+        try:
+            header_string = headerObj.decode(encoding)
+        except UnicodeDecodeError as e:
+            # Document that the header isn't valid
+            desc = "Error decoding header with " + encoding
+            errors = handle_error(errors, e, desc)
+            header_string = headerObj.decode(encoding, errors="replace")
+    else:
+        # Not encoded
+        header_string = headerObj
+
+    return header_string
+
+
+def parse_header(header):
+    """
+    Used to handle headers that have RFC 1342 encoding.
+    Sometimes the whole header is encoded, while
+    sometimes only part of the header string is encoded.
+    In some cases we also get a Header object that
+    decode_header_part() also handles.
+
+    Parameters:
+        header (email.header.Header or string or None):
+    Returns:
+        header_string (str or None): A as-best-as-we-can-do decoded string
+    """
+    if header is None:
+        header_string = None
+    else:
+        if isinstance(header, str):
+            header_list = []
+            for header_part in header.split(" "):
+                header_list.append(decode_header_part(header_part))
+            header_string = " ".join(header_list)
+        else:
+            header_string = html.unescape(decode_header_part(header))
+
+    return header_string
 
 
 def saveAttachmentOnDisk(dry_run, attachments_dir, message):
@@ -334,13 +469,17 @@ def saveAttachmentOnDisk(dry_run, attachments_dir, message):
         os.mkdir(message_attachments_dir)
 
     for attachment in message.Attachments:
-        log.debug("Saving Attachment:" + str(attachment.Name))
-        log.debug("Type:" + str(attachment.MimeType))
-        if not dry_run:
-            attachment_path = os.path.join(message_attachments_dir, attachment.Name)
-            f = open(attachment_path, "wb")
-            f.write(attachment.File)
-            f.close()
+        if not attachment.File:
+            desc = "Missing attachment content"
+            errors = handle_error(errors, None, desc)
+        else:
+            log.debug("Saving Attachment:" + str(attachment.Name))
+            log.debug("Type:" + str(attachment.MimeType))
+            if not dry_run:
+                attachment_path = os.path.join(message_attachments_dir, attachment.Name)
+                f = open(attachment_path, "wb")
+                f.write(attachment.File)
+                f.close()
 
 
 def guessMimeType(filename):
@@ -523,7 +662,7 @@ def htmlFormatting(message, external_css, headers=True):
 
         # Embedding Encoding with meta
         meta = soup.new_tag("meta")
-        meta["charset"] = encoding
+        meta["charset"] = "utf-8"
         soup.head.insert(0, meta)
 
         # Embedding default styling

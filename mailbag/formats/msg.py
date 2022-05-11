@@ -104,7 +104,7 @@ class MSG(EmailAccount):
                 except Exception as e:
                     desc = "Error parsing attachments"
                     errors = helper.handle_error(errors, e, desc)
-
+                print(mail.subject)
                 message = Email(
                     Error=errors["msg"],
                     Message_ID=mail.messageId.strip(),

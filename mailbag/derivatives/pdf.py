@@ -77,7 +77,7 @@ if not skip_registry:
                             if not os.path.isdir(out_dir):
                                 os.makedirs(out_dir)
 
-                            with open(html_name, "w", encoding=encoding) as write_html:
+                            with open(html_name, "w", encoding="utf-8") as write_html:
                                 write_html.write(html_formatted)
                                 write_html.close()
                             command = [

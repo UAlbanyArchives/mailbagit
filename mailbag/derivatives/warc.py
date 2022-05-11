@@ -85,7 +85,7 @@ class WarcDerivative(Derivative):
 
                         try:
                             html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
-                            with open(self.tmp_file, "w", encoding=encoding) as f:
+                            with open(self.tmp_file, "w", encoding="utf-8") as f:
                                 f.write(html_formatted)
                                 f.close()
                         except Exception as e:

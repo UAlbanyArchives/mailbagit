@@ -62,8 +62,9 @@ class Controller:
         Returns:
             list: line
         """
+        error_field = " ".join(message.Error).replace("\r\n", "\\r\\n").replace("\n", "\\n").strip()
         line = [
-            " ".join(message.Error),
+            error_field,
             message.Mailbag_Message_ID,
             message.Message_ID,
             message.Original_File,
@@ -182,15 +183,16 @@ class Controller:
                     os.mkdir(error_dir)
                 error_csv.append(self.message_to_csv(message))
                 trace_file = os.path.join(error_dir, str(message.Mailbag_Message_ID) + ".txt")
-                with open(trace_file, "w") as f:
+                with open(trace_file, "w", encoding="utf-8") as f:
                     f.write("\n".join(str(error) for error in message.StackTrace))
                     f.close()
 
             # Show progress
             # If progress%(total_messages/100)==0 then show progress
             # This reduces progress update overhead to only 100 updates at max
+            is_first = mailbag_message_id == 1
             is_last = mailbag_message_id == total_messages
-            if total_messages / 100 < 1 or is_last or mailbag_message_id % int(total_messages / 100) == 0:
+            if total_messages / 100 < 1 or is_first or is_last or mailbag_message_id % int(total_messages / 100) == 0:
                 print_End = "\n" if globals.log_level == "DEBUG" or is_last else "\r"
                 helper.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
 
@@ -223,10 +225,11 @@ class Controller:
                         writer.writerows(portion)
                         f.close()
 
+        helper.progressMessage("Writing CSVs...")
         log.debug("Writing error.csv to " + str(error_dir))
         if len(error_csv) > 1:
             filename = os.path.join(error_dir, "error.csv")
-            with open(filename, "w", encoding="UTF8", newline="") as f:
+            with open(filename, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
 
@@ -240,9 +243,11 @@ class Controller:
             now = datetime.datetime.now()
             bag.info["Bagging-Timestamp"] = now.strftime("%Y-%m-%dT%H:%M:%S")
             bag.info["Bagging-Date"] = now.strftime("%Y-%m-%d")
+            helper.progressMessage("Generating manifests...")
             bag.save(manifests=True)
 
         if self.args.compress and not self.args.dry_run:
+            helper.progressMessage("Compressing mailbag...")
             log.info("Compressing Mailbag")
             compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
             shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
@@ -251,5 +256,7 @@ class Controller:
             if os.path.isfile(mailbag_dir + "." + self.args.compress):
                 # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
+
+        helper.progressMessage("Finished packaging mailbag.", print_End="\n")
 
         return mail_account.messages()

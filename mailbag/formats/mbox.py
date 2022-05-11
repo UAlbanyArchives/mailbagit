@@ -76,7 +76,7 @@ class Mbox(EmailAccount):
                             for part in mailObject.walk():
                                 bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                            bodies, attachments, errors = helper.parse_part(mailObject, bodies, attachments, errors)
                     except Exception as e:
                         desc = "Error parsing message parts"
                         errors = helper.handle_error(errors, e, desc)
@@ -95,16 +95,16 @@ class Mbox(EmailAccount):
 
                     message = Email(
                         Error=errors["msg"],
-                        Message_ID=mail["Message-ID"].strip(),
+                        Message_ID=helper.parse_header(mail["Message-ID"]),
                         Original_File=originalFile,
                         Message_Path=messagePath,
                         Derivatives_Path=derivativesPath,
-                        Date=mail["Date"],
-                        From=mail["From"],
-                        To=mail["To"],
-                        Cc=mail["Cc"],
-                        Bcc=mail["Bcc"],
-                        Subject=mail["Subject"],
+                        Date=helper.parse_header(mail["Date"]),
+                        From=helper.parse_header(mail["From"]),
+                        To=helper.parse_header(mail["To"]),
+                        Cc=helper.parse_header(mail["Cc"]),
+                        Bcc=helper.parse_header(mail["Bcc"]),
+                        Subject=helper.parse_header(mail["Subject"]),
                         Content_Type=mailObject.get_content_type(),
                         Headers=mail,
                         HTML_Body=bodies["html_body"],
@@ -119,7 +119,6 @@ class Mbox(EmailAccount):
                     desc = "Error parsing message"
                     errors = helper.handle_error(errors, e, desc)
                     message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
-                    log.error(error_msg)
 
                 yield message
 

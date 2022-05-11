@@ -70,7 +70,7 @@ class EML(EmailAccount):
                             for part in msg.walk():
                                 bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
                         else:
-                            bodies, attachments, errors = helper.parse_part(part, bodies, attachments, errors)
+                            bodies, attachments, errors = helper.parse_part(msg, bodies, attachments, errors)
 
                     except Exception as e:
                         desc = "Error parsing message parts"
@@ -87,14 +87,14 @@ class EML(EmailAccount):
 
                     message = Email(
                         Error=errors["msg"],
-                        Message_ID=msg["message-id"].strip(),
+                        Message_ID=helper.parse_header(msg["message-id"]),
                         Original_File=originalFile,
                         Message_Path=messagePath,
                         Derivatives_Path=derivativesPath,
-                        Date=msg["date"],
-                        From=msg["from"],
-                        To=msg["to"],
-                        Subject=msg["subject"],
+                        Date=helper.parse_header(msg["date"]),
+                        From=helper.parse_header(msg["from"]),
+                        To=helper.parse_header(msg["to"]),
+                        Subject=helper.parse_header(msg["subject"]),
                         Content_Type=msg.get_content_type(),
                         Headers=msg,
                         HTML_Body=bodies["html_body"],
