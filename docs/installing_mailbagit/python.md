@@ -23,9 +23,11 @@ pip install mailbag
 
 ## Working with PST files
 
-Packaging mailbags from PST files requires additional dependancies. To install these, in addition to `pip install mailbag`, you need to run:
+Packaging mailbags from PST files requires additional dependencies. To install these, in addition to `pip install mailbag`, you need to run:
 
-`pip install mailbag[pst]`
+```
+pip install mailbag[pst]
+```
 
 Installing this on Windows requires Visual Studio C++ Build Tools. Without this you will get an error. To rectify this:
 
@@ -34,11 +36,21 @@ Installing this on Windows requires Visual Studio C++ Build Tools. Without this 
 
 ![Screenshot of checking the correct options using the Visual Studio Installer.]({{ site.baseurl }}/img/windows_install.png)
 
+Once the VS 2019 C++ x64/x86 build tools are installed, you can exit the Visual Studio installer. You won't need to use it directly to run `mailbagit`, it is just required to install the PST dependencies.
+
+You should now be able install the PST dependencies with:
+
+```
+pip install mailbag[pst]
+```
+
 ## Using the Mailbagit Graphical User Interface (GUI)
 
 To install the mailbagit GUI, in addition to `pip install mailbag`, you need to run:
 
-`pip install mailbag[gui]`
+```
+pip install mailbag[gui]
+```
 
 If it is installed correctly, the GUI will run using the `mailbagit-gui` command.
 
@@ -61,6 +73,8 @@ The GUI dependency wxPython does not install well on some environments, includin
 
 For example, on Ubuntu 20.04, this seems to work well.
 
-`pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython`
+```
+pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
+```
 
 After wxPython is installed, try running `pip install mailbag[gui]` again.

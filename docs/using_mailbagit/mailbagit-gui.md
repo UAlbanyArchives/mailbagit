@@ -16,7 +16,7 @@ If `mailbagit` is [installed](http://localhost:4000/mailbag/python/) you should 
 
 The mailbagit GUI currently has severe accessibility limitations. Most notably, when using a screen reader with `mailbagit-gui` the tab key does not change the focus to the input fields. Once you click into the scrollable window, the tab key does work. The multi-option derivatives field is also not accessible using a keyboard and requires clicking with a mouse.
 
-This is due to [accessibility issues](https://github.com/chriskiehl/Gooey/issues/747) with underlying dependancies wxPython and wxWidgets, and unfortunately, we don't have he capacity to do much about it.
+This is due to [accessibility issues](https://github.com/chriskiehl/Gooey/issues/747) with underlying dependencies wxPython and wxWidgets, and unfortunately, we don't have he capacity to do much about it.
 
 Instead, we plan to implement a "guided" command line option, which we hope may provide accessible access to users without command line experience.
 

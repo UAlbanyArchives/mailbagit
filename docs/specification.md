@@ -2,7 +2,7 @@
 layout: page
 title: Mailbag Specification
 permalink: /spec/
-nav_order: 3
+nav_order: 2
 ---
 
 # Mailbag Specification

@@ -8,7 +8,7 @@ nav_order: 4
 
 # Plugins
 
-You can make plugins for both the mailbagit format parsers and derivatives classes. This allows you to easily override the behaviour for how mailbagit reads email exports or creates derivative formats. New input and derivative formats may also be provided to mailbagit to extend its functionality.
+You can make plugins for both the mailbagit format parsers and derivatives classes. This allows you to easily override the behavior for how mailbagit reads email exports or creates derivative formats. New input and derivative formats may also be provided to mailbagit to extend its functionality.
 
 The files that can be overridden can be found in the [Github repo](https://github.com/UAlbanyArchives/mailbag) in the [mailbag/formats](https://github.com/UAlbanyArchives/mailbag/tree/main/mailbag/formats) and [mailbag/derivatives](https://github.com/UAlbanyArchives/mailbag/tree/main/mailbag/derivatives) subdirectories.
 

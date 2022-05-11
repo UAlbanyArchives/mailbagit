@@ -1,8 +1,6 @@
 FROM ubuntu:20.04
 MAINTAINER Gregory Wiedeman gwiedeman@albany.edu
 
-ARG APP_ENV=prod
-
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
     MAILBAG_LOG_LEVEL=debug\

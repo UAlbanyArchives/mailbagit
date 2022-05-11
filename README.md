@@ -39,10 +39,10 @@ See the [documentation](https://archives.albany.edu/mailbag/use/) for more detai
 
 ### Development setup
 
->>>>>>> develop
 ```
 git clone git@github.com:UAlbanyArchives/mailbag.git
 cd mailbag
+git switch develop
 pip install -e .
 ```
 
@@ -60,11 +60,23 @@ docker run -it ualbanyarchives/mailbag:dev
 ##### Building and pushing Docker images
 
 ```
-docker build -t mailbag:latest -f Dockerfile.production .
-docker build -t mailbag:dev .
+docker build -t ualbanyarchives/mailbag:latest -f Dockerfile.production .
+docker build -t ualbanyarchives/mailbag:dev .
 docker push ualbanyarchives/mailbag:latest
 docker push ualbanyarchives/mailbag:dev
 ```
 
 ## License
 [MIT](LICENSE)
+
+## Kudos
+
+This project was made possible by funding from the University of Illinois's [Email Archives: Building Capacity and Community Project](https://emailarchivesgrant.library.illinois.edu/).
+
+We owe a lot to the hard work that goes towards developing and maintaining the libraries `mailbagit` uses to parse email formats and make bags. We'd like to thank these awesome projects, without which `mailbagit` wouldn't be possible:  
+
+* [extractMsg](https://github.com/TeamMsgExtractor/msg-extractor)
+* [libpff](https://github.com/libyal/libpff)
+* [bagit-python](https://github.com/LibraryOfCongress/bagit-python)
+
+We'd also like to thank the [RATOM project](https://ratom.web.unc.edu/) whose documentation was super helpful in guiding us though some roadblocks.

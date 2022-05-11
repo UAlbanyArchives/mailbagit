@@ -8,6 +8,13 @@ nav_order: 1
 
 # Using the `mailbagit` command line utility
 
+
+When `mailbagit` in [installed]({{ site.baseurl }}/install), it makes the `mailbagit` command available in you command line. You should be able to run `mailbagit -h` in Terminal on macOS or Linux, or CMD.exe or Powershell on Windows.
+
+![Screenshot of running the mailbagit command in Windows Powershell.]({{ site.baseurl }}/img/mailbagit-demo1.png)
+
+You can download a [sample MBOX file]({{ site.baseurl }}/data/account.mbox) for testing.
+
 ## Examples
 
 ```
