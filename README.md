@@ -1,6 +1,6 @@
 # Mailbag
 
-A tool for creating and managing Mailbags, a package for preserving email in multiple formats. It contains an open specification for mailbags, as well as the `mailbagit` and `mailbagit-gui` tools for packaging email exports into mailbags.
+A tool for creating and managing Mailbags, a package for preserving email in multiple formats. It contains an open [specification for mailbags](https://archives.albany.edu/mailbag/spec/), as well as the `mailbagit` and `mailbagit-gui` tools for packaging email exports into mailbags.
 
 ## Installation
 
