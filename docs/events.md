@@ -15,6 +15,6 @@ Participants are encouraged to bring their own email data to use or experiment w
 
 ## Register for the following dates:
 
-[**May 27th, 2022 at 2pm-4pm Eastern Time**]()
+[**May 27th, 2022 at 2pm-4pm Eastern Time**](https://albany.zoom.us/meeting/register/tJUod-qspj4sHtKlPU4veaZZmVaZgOacWLwM)
 
-[**June 8th, 2022 at 10am-12pm Eastern Time**]()
+[**June 8th, 2022 at 10am-12pm Eastern Time**](https://albany.zoom.us/meeting/register/tJAodOCsrzwjE9wrzE_8BDVz9fltYfEaj_EG)
