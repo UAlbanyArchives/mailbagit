@@ -14,7 +14,7 @@ import chardet, codecs
 from email.header import Header, decode_header, make_header
 import http.server
 import socketserver
-import sys
+import html
 
 log = get_logger()
 
@@ -255,7 +255,7 @@ def handle_error(errors, exception, desc, level="error"):
             "stack_trace" contains a list of full stack traces
     """
     if exception:
-        error_msg = desc + ": " + repr(exception)
+        error_msg = level.upper() + ": " + desc + ": " + repr(exception)
         stack_header = (
             "**************************************************************************\n"
             + error_msg
@@ -263,7 +263,7 @@ def handle_error(errors, exception, desc, level="error"):
         )
         errors["stack_trace"].append(stack_header + traceback.format_exc())
     else:
-        error_msg = desc + "."
+        error_msg = level.upper() + ": " + desc + "."
         errors["stack_trace"].append(desc + ".")
     errors["msg"].append(error_msg)
 
@@ -391,11 +391,11 @@ def parse_part(part, bodies, attachments, errors):
     return bodies, attachments, errors
 
 
-def parse_header(header):
+def decode_header_part(header):
     """
-    Used for to decode email headers according to RFC 1342.
-    If the header is a string or None, just return it.
-    For encoded headers it tries to decode it with email.header.decode_header().
+    Used for to decode strings according to RFC 1342.
+    If the string is not encoded, just return it.
+    For encoded strings it tries to decode it with email.header.decode_header().
     If we don't get a real encoding, it tries it best to detect it.
     Errors are logged and documented in the error report.
 
@@ -404,12 +404,8 @@ def parse_header(header):
     Returns:
         header_string (str or None): A as-best-as-we-can-do decoded string
     """
-    if header is None:
-        header_string = None
-    elif isinstance(header, str):
-        header_string = header
-    else:
-        headerObj, encoding = decode_header(header)[0]
+    headerObj, encoding = decode_header(header)[0]
+    if encoding:
         # Did we get a real encoding?
         try:
             encoding = codecs.lookup(encoding).name.lower()
@@ -423,6 +419,36 @@ def parse_header(header):
             desc = "Error decoding header with " + encoding
             errors = handle_error(errors, e, desc)
             header_string = headerObj.decode(encoding, errors="replace")
+    else:
+        # Not encoded
+        header_string = headerObj
+
+    return header_string
+
+
+def parse_header(header):
+    """
+    Used to handle headers that have RFC 1342 encoding.
+    Sometimes the whole header is encoded, while
+    sometimes only part of the header string is encoded.
+    In some cases we also get a Header object that
+    decode_header_part() also handles.
+
+    Parameters:
+        header (email.header.Header or string or None):
+    Returns:
+        header_string (str or None): A as-best-as-we-can-do decoded string
+    """
+    if header is None:
+        header_string = None
+    else:
+        if isinstance(header, str):
+            header_list = []
+            for header_part in header.split(" "):
+                header_list.append(decode_header_part(header_part))
+            header_string = " ".join(header_list)
+        else:
+            header_string = html.unescape(decode_header_part(header))
 
     return header_string
 
