@@ -19,7 +19,7 @@ docker pull ualbanyarchives/mailbagit
 To run the image as a Docker container, run:
 
 ```
-docker run -it ualbanyarchives/mailbagit
+docker run -it ualbanyarchives/mailbagit:latest
 ```
 
 You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem.
@@ -32,8 +32,8 @@ Mailbagit will have access to the directory listed in the `source=` argument, wh
 
 Examples:
 ```
-docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbagit:dev
-docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbagit:dev
+docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbagit:latest
+docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbagit:latest
 ```
 
 If you are using Windows, the `source=` argument should be given a Windows path with "`\`", but the container uses Unix-style paths, so it will be accessible to `mailbagit` using `/data` using "`/`".
