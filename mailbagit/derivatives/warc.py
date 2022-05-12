@@ -1,7 +1,7 @@
 import os
 import warcio
 from structlog import get_logger
-import mailbag.helper as helper
+import mailbagit.helper as helper
 from warcio.capture_http import capture_http
 from warcio import WARCWriter
 from warcio.statusandheaders import StatusAndHeaders
@@ -12,7 +12,7 @@ import socketserver
 
 log = get_logger()
 
-from mailbag.derivative import Derivative
+from mailbagit.derivative import Derivative
 
 
 class WarcDerivative(Derivative):

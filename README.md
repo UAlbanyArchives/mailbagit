@@ -1,15 +1,15 @@
-# Mailbag
+# Mailbagit
 
 A tool for creating and managing Mailbags, a package for preserving email in multiple formats. It contains an open [specification for mailbags](https://archives.albany.edu/mailbag/spec/), as well as the `mailbagit` and `mailbagit-gui` tools for packaging email exports into mailbags.
 
 ## Installation
 
 ```
-pip install mailbag
+pip install mailbagit
 ```
 
-* To install PST dependancies: `pip install mailbag[pst]`
-* To install `mailbagit-gui`: `pip install mailbag[gui]`
+* To install PST dependancies: `pip install mailbagit[pst]`
+* To install `mailbagit-gui`: `pip install mailbagit[gui]`
 
 You can also run `mailbagit` using a [Docker image](https://archives.albany.edu/mailbag/docker).
 
@@ -40,8 +40,8 @@ See the [documentation](https://archives.albany.edu/mailbag/use/) for more detai
 ### Development setup
 
 ```
-git clone git@github.com:UAlbanyArchives/mailbag.git
-cd mailbag
+git clone git@github.com:UAlbanyArchives/mailbagit.git
+cd mailbagit
 git switch develop
 pip install -e .
 ```
@@ -51,8 +51,8 @@ pip install -e .
 Build and run image
 
 ```
-docker pull ualbanyarchives/mailbag:dev
-docker run -it ualbanyarchives/mailbag:dev
+docker pull ualbanyarchives/mailbagit:dev
+docker run -it ualbanyarchives/mailbagit:dev
 ```
 
 #### Building a release
@@ -60,10 +60,10 @@ docker run -it ualbanyarchives/mailbag:dev
 ##### Building and pushing Docker images
 
 ```
-docker build -t ualbanyarchives/mailbag:latest -f Dockerfile.production .
-docker build -t ualbanyarchives/mailbag:dev .
-docker push ualbanyarchives/mailbag:latest
-docker push ualbanyarchives/mailbag:dev
+docker build -t ualbanyarchives/mailbagit:latest -f Dockerfile.production .
+docker build -t ualbanyarchives/mailbagit:dev .
+docker push ualbanyarchives/mailbagit:latest
+docker push ualbanyarchives/mailbagit:dev
 ```
 
 ## License

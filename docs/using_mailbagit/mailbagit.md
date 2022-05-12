@@ -53,12 +53,12 @@ The arguments listed below can be entered in the command line when using `mailba
 > e.g. `-i imap` or `-i pst`
 
 * **-d --derivatives**:
-> Specifies a single or list of formats required as results from mailbag.
+> Specifies a single or list of derivative formats that mailbagit will create and package into the mailbag.
 > Argument takes multiple inputs.
 e.g. `-d eml pdf warc`
 
 
-### Mailbag Optional  Arguments
+### Mailbagit Optional  Arguments
 
 * **-r --dry-run**
 > Performs a test run that will not alter any files other than writing an error report. When this flag is used, `mailbagit` parses all the email it is provide and formats derivatives as much as it can without writing anything to disk. If there are any error or warnings, this will create an error report with an `errors.csv` listing all issues as well as a full stack trace in a `.txt` file.
@@ -73,7 +73,7 @@ e.g. `-c zip` or `-c tar.gz`
 
 ### Bagit-python arguments
 
-Mailbag also accepts most [bagit-python](https://github.com/LibraryOfCongress/bagit-python) arguments. Thus, you can provide arguments like `--processes 2` or arguments to add metadata such as `--source-organization University at Albany, SUNY` 
+Mailbagit also accepts most [bagit-python](https://github.com/LibraryOfCongress/bagit-python) arguments. Thus, you can provide arguments like `--processes 2` or arguments to add metadata such as `--source-organization University at Albany, SUNY` 
 
 The only bag-python arguments that `mailbagit` does not support are `-log`, `-quiet`, `-validate`, `-fast`, and `-completeness_only`
 

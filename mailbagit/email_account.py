@@ -10,7 +10,7 @@ class EmailAccount(ABC):
 
     This class serves two purposes.  Firstly, it serves as an abstract base class, defining
     the methods and properties required by a parser that can parse data out of a particular
-    on-disk email storage format for use by Mailbag.
+    on-disk email storage format for use by Mailbagit.
 
     Secondly, it serves as a registry of such formats, with the goal of allowing new formats to
     be implemented in a "plug-in" fashion.  Any class subclassing this one, with the expected
@@ -38,7 +38,7 @@ class EmailAccount(ABC):
 
     @abstractmethod
     def account_data(self):
-        """Return a dict containing any data about the account as a whole that's relevant to mailbag processing."""
+        """Return a dict containing any data about the account as a whole that's relevant to mailbagit processing."""
         pass
 
     @abstractmethod

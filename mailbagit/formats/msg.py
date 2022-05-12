@@ -4,10 +4,10 @@ from email import parser
 from structlog import get_logger
 from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email, Attachment
-import mailbag.helper as helper
-import mailbag.globals as globals
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email, Attachment
+import mailbagit.helper as helper
+import mailbagit.globals as globals
 from extract_msg import attachment
 
 log = get_logger()

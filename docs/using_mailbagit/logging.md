@@ -8,27 +8,27 @@ nav_order: 3
 
 # Configuring Logging
 
-* The level of logs displayed by Mailbag is based on an environment variable `MAILBAG_LOG_LEVEL`.
+* The level of logs displayed by `mailbagit` is based on an environment variable `MAILBAGIT_LOG_LEVEL`.
 
 * Log levels are available in the following order : `NOTSET`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `CRITICAL`.
-For example, when the `MAILBAG_LOG_LEVEL` is `DEBUG`, `Mailbag` displays logs of all levels.
-And when `MAILBAG_LOG_LEVEL` is `WARN`, it displays logs of level `WARN` and above. i.e. `WARN`, `ERROR`, or `CRITICAL`.
+For example, when the `MAILBAGIT_LOG_LEVEL` is `DEBUG`, `mailbagit` displays logs of all levels.
+And when `MAILBAGIT_LOG_LEVEL` is `WARN`, it displays logs of level `WARN` and above. i.e. `WARN`, `ERROR`, or `CRITICAL`.
 
-* If no `MAILBAG_LOG_LEVEL` environment variable is set, mailbag will default to `WARN`.
+* If no `MAILBAGIT_LOG_LEVEL` environment variable is set, `mailbagit` will default to `WARN`.
 
 Unix example:
 
 ```
-export MAILBAG_LOG_LEVEL=info
-echo $MAILBAG_LOG_LEVEL
+export MAILBAGIT_LOG_LEVEL=info
+echo $MAILBAGIT_LOG_LEVEL
 > info
 ```
 
 Windows Powershell example:
 
 ```
-$env:MAILBAG_LOG_LEVEL='debug'
-$env:MAILBAG_LOG_LEVEL
+$env:MAILBAGIT_LOG_LEVEL='debug'
+$env:MAILBAGIT_LOG_LEVEL
 > debug
 ```
 
@@ -40,7 +40,7 @@ On Windows, you can also [set environment variables by searching "edit environme
 
 ```
 from structlog import get_logger
-import mailbag.loggerx
+import mailbagit.loggerx
 loggerx.configure()
 log = get_logger()	
 log.error("Error message here")

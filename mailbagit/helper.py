@@ -6,8 +6,8 @@ import datetime
 from time import time
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
-import mailbag.globals as globals
-from mailbag.models import Attachment
+import mailbagit.globals as globals
+from mailbagit.models import Attachment
 import mimetypes
 import traceback
 import chardet, codecs

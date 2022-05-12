@@ -5,9 +5,9 @@ import chardet
 from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
 from email import parser
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email, Attachment
-import mailbag.helper as helper
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email, Attachment
+import mailbagit.helper as helper
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise

@@ -18,15 +18,15 @@ Pip should come installed with Python on Windows. On Mac or Linux, you should al
 When you have Python >3.7 and pip, to install `mailbagit`, just run:
 
 ```
-pip install mailbag
+pip install mailbagit
 ```
 
 ## Working with PST files
 
-Packaging mailbags from PST files requires additional dependencies. To install these, in addition to `pip install mailbag`, you need to run:
+Packaging mailbags from PST files requires additional dependencies. To install these, in addition to `pip install mailbagit`, you need to run:
 
 ```
-pip install mailbag[pst]
+pip install mailbagit[pst]
 ```
 
 Installing this on Windows requires Visual Studio C++ Build Tools. Without this you will get an error. To rectify this:
@@ -41,27 +41,27 @@ Once the VS 2019 C++ x64/x86 build tools are installed, you can exit the Visual 
 You should now be able install the PST dependencies with:
 
 ```
-pip install mailbag[pst]
+pip install mailbagit[pst]
 ```
 
 ## Using the Mailbagit Graphical User Interface (GUI)
 
-To install the mailbagit GUI, in addition to `pip install mailbag`, you need to run:
+To install the mailbagit GUI, in addition to `pip install mailbagit`, you need to run:
 
 ```
-pip install mailbag[gui]
+pip install mailbagit[gui]
 ```
 
 If it is installed correctly, the GUI will run using the `mailbagit-gui` command.
 
 ### Mailbagit GUI on Windows
 
-There is a [known issue](https://github.com/UAlbanyArchives/mailbag/issues/155) where the GUI does not run with the `mailbagit-gui` command on Windows. It will boot and lets you enter options but then fails to run when you click "start."
+There is a [known issue](https://github.com/UAlbanyArchives/mailbagit/issues/155) where the GUI does not run with the `mailbagit-gui` command on Windows. It will boot and lets you enter options but then fails to run when you click "start."
 
 Instead, try creating a file called `mailbagit-gui.py` with the contents:
 
 ```
-from mailbag import gui
+from mailbagit import gui
 gui()
 ```
 
@@ -69,7 +69,7 @@ You should then be able to run the GUI with `python3 mailbagit-gui.py`.
 
 ### Mailbagit GUI on Ubuntu
 
-The GUI dependency wxPython does not install well on some environments, including Ubuntu. If `pip install mailbag[gui]` fails, you may want to try a [specific version for your distro](https://extras.wxpython.org/wxPython4/extras/linux/gtk3/).
+The GUI dependency wxPython does not install well on some environments, including Ubuntu. If `pip install mailbagit[gui]` fails, you may want to try a [specific version for your distro](https://extras.wxpython.org/wxPython4/extras/linux/gtk3/).
 
 For example, on Ubuntu 20.04, this seems to work well.
 
@@ -77,4 +77,4 @@ For example, on Ubuntu 20.04, this seems to work well.
 pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
 ```
 
-After wxPython is installed, try running `pip install mailbag[gui]` again.
+After wxPython is installed, try running `pip install mailbagit[gui]` again.

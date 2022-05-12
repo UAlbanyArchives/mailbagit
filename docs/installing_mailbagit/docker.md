@@ -10,16 +10,16 @@ nav_order: 3
 
 A docker image is available that includes all dependencies. You just need to install [Docker](https://docs.docker.com/get-docker/). Docker Desktop comes with everything you need, but you really only need Docker Engine.
 
-Once Docker is installed, you can download the mailbag image with the command:
+Once Docker is installed, you can download the mailbagit image with the command:
 
 ```
-docker pull ualbanyarchives/mailbag
+docker pull ualbanyarchives/mailbagit
 ```
 
 To run the image as a Docker container, run:
 
 ```
-docker run -it ualbanyarchives/mailbag
+docker run -it ualbanyarchives/mailbagit
 ```
 
 You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem.
@@ -32,8 +32,8 @@ Mailbagit will have access to the directory listed in the `source=` argument, wh
 
 Examples:
 ```
-docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbag:dev
-docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbag:dev
+docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbagit:dev
+docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbagit:dev
 ```
 
 If you are using Windows, the `source=` argument should be given a Windows path with "`\`", but the container uses Unix-style paths, so it will be accessible to `mailbagit` using `/data` using "`/`".
@@ -52,11 +52,11 @@ which will make the file accessible as `/data/sampleData/export.pst`
 
 ## Using Docker Desktop
 
-Once you've downloaded the docker image with `docker pull ualbanyarchives/mailbag`, you can also run the image using [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+Once you've downloaded the docker image with `docker pull ualbanyarchives/mailbagit`, you can also run the image using [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-The ualbanyarchives/mailbag image should display. To run it, click "Run".
+The ualbanyarchives/mailbagit image should display. To run it, click "Run".
 
-![Screenshot of the ualbanyarchives/mailbag image available in Docker Desktop.]({{ site.baseurl }}/img/docker1.png)
+![Screenshot of the ualbanyarchives/mailbagit image available in Docker Desktop.]({{ site.baseurl }}/img/docker1.png)
 
 To give the container access to your filesystem, click on the optional settings and enter a "Host Path" and an "Container Path". [This follows the same rules as described above](#run-with-access-to-your-filesystem).
 
@@ -73,8 +73,8 @@ Remember to stop the container when your done!
 There is also a development image available:
 
 ```
-docker pull ualbanyarchives/mailbag:dev
-docker run -it ualbanyarchives/mailbag:dev
+docker pull ualbanyarchives/mailbagit:dev
+docker run -it ualbanyarchives/mailbagit:dev
 ```
 
 ### Other helpful docker commands

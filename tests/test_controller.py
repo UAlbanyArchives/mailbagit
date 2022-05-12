@@ -1,9 +1,9 @@
 import pytest
 import os
-from mailbag.controller import Controller
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email
-from mailbag.formats import mbox, msg, pst
+from mailbagit.controller import Controller
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email
+from mailbagit.formats import mbox, msg, pst
 from argparse import Namespace
 
 

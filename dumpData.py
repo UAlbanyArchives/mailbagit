@@ -1,10 +1,10 @@
 import os
 from bagit import _make_parser, Bag
-from mailbag.email_account import EmailAccount
-from mailbag.controller import Controller
+from mailbagit.email_account import EmailAccount
+from mailbagit.controller import Controller
 
 bagit_parser = _make_parser()
-bagit_parser.description = f"Mailbag ({bagit_parser.description})"
+bagit_parser.description = f"Mailbagit ({bagit_parser.description})"
 args = bagit_parser.parse_args()
 parsers = ["pst", "mbox", "msg", "eml"]
 
