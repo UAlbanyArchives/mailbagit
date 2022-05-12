@@ -1,8 +1,8 @@
 ---
 layout: page
-title: About the Project
+title: Project Team
 permalink: /about/
-nav_order: 2
+nav_order: 5
 ---
 
 ### Project Team
@@ -25,3 +25,7 @@ nav_order: 2
 ### Consultant Developer
 
 * Dave Mayo
+
+You can email gwiedeman [at] albany [dot] edu if you're interested in contacting the project team.
+
+The [Email Archiving Interest Group listserv](https://mailman.stanford.edu/mailman/listinfo/email_archiving_interest_group) is also great a community of users focused on email preservation.

@@ -32,7 +32,7 @@ plugins:
 # Aux links for the upper right navigation
 aux_links:
   "Mailbag on Github":
-    - "https://github.com/UAlbanyArchives/mailbag"
+    - "https://github.com/UAlbanyArchives/mailbagit"
 
 
 # Exclude from processing.
