@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mailbag",  # Replace with your own username
+    name="mailbagit",  # Replace with your own username
     version="0.0.1",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
@@ -20,11 +20,12 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={
-        "console_scripts": [
-            "mailbagit=mailbag:cli",
-            "mailbagit-gui=mailbag:gui"
-        ]
+        "console_scripts": ["mailbagit=mailbagit:cli", "mailbagit-gui=mailbagit:gui"]
     },
-    install_requires=["bagit>=1.8.1,<2", "gooey>=1.0.8.1,<2", "jsonmodels>=2.2,<=2.5.0"],
+    install_requires=[
+        "bagit>=1.8.1,<2",
+        "gooey>=1.0.8.1,<2",
+        "jsonmodels>=2.2,<=2.5.0",
+    ],
     python_requires=">=3.6",
 )
