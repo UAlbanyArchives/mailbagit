@@ -94,7 +94,7 @@ class Email(models.Base):
                 data = f.read()
                 f.close()
         else:
-            with open(path, filetype, encoding="utf-8") as f:
+            with open(path, filetype) as f:
                 data = f.read()
                 f.close()
         return data
