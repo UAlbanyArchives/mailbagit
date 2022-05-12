@@ -55,17 +55,6 @@ docker pull ualbanyarchives/mailbagit:dev
 docker run -it ualbanyarchives/mailbagit:dev
 ```
 
-#### Building a release
-
-##### Building and pushing Docker images
-
-```
-docker build -t ualbanyarchives/mailbagit:latest -f Dockerfile.production .
-docker build -t ualbanyarchives/mailbagit:dev .
-docker push ualbanyarchives/mailbagit:latest
-docker push ualbanyarchives/mailbagit:dev
-```
-
 ## License
 [MIT](LICENSE)
 

@@ -26,7 +26,7 @@ pip install mailbagit
 Packaging mailbags from PST files requires additional dependencies. To install these, in addition to `pip install mailbagit`, you need to run:
 
 ```
-pip install mailbagit[pst]
+pip install 'mailbagit[pst]'
 ```
 
 Installing this on Windows requires Visual Studio C++ Build Tools. Without this you will get an error. To rectify this:
@@ -41,7 +41,7 @@ Once the VS 2019 C++ x64/x86 build tools are installed, you can exit the Visual 
 You should now be able install the PST dependencies with:
 
 ```
-pip install mailbagit[pst]
+pip install 'mailbagit[pst]'
 ```
 
 ## Using the Mailbagit Graphical User Interface (GUI)
@@ -49,7 +49,7 @@ pip install mailbagit[pst]
 To install the mailbagit GUI, in addition to `pip install mailbagit`, you need to run:
 
 ```
-pip install mailbagit[gui]
+pip install 'mailbagit[gui]'
 ```
 
 If it is installed correctly, the GUI will run using the `mailbagit-gui` command.
