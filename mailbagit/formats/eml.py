@@ -1,11 +1,11 @@
 import datetime
 import json
 from os.path import join
-import mailbag.helper as helper
+import mailbagit.helper as helper
 from structlog import get_logger
 from email import parser
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email, Attachment
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email, Attachment
 import email
 import os
 from email import policy

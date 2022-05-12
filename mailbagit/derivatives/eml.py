@@ -1,16 +1,16 @@
 # This is Eml derivative
 from os.path import join
-import mailbag.helper as helper
+import mailbagit.helper as helper
 import os, glob
 import mailbox
-from mailbag.email_account import EmailAccount
+from mailbagit.email_account import EmailAccount
 from structlog import get_logger
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders, charset
 from email import generator
-from mailbag.derivative import Derivative
+from mailbagit.derivative import Derivative
 import platform
 
 

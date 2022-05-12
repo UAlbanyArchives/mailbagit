@@ -1,12 +1,11 @@
 # Makes html derivatives just containing message bodies
 import os
-import mailbag.helper as helper
+import mailbagit.helper as helper
 from structlog import get_logger
 
 log = get_logger()
 
-# Does nothing currently
-from mailbag.derivative import Derivative
+from mailbagit.derivative import Derivative
 
 
 class HtmlDerivative(Derivative):

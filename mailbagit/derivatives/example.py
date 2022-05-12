@@ -5,7 +5,7 @@ from structlog import get_logger
 log = get_logger()
 
 # Does nothing currently
-from mailbag.derivative import Derivative
+from mailbagit.derivative import Derivative
 
 
 class ExampleDerivative(Derivative):

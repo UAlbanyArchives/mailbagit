@@ -1,3 +1,3 @@
-from mailbag import cli
+from mailbagit import cli
 
 cli()

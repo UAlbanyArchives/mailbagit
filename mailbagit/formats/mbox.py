@@ -6,9 +6,9 @@ from pathlib import Path
 import os, shutil
 import email.errors
 
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email, Attachment
-import mailbag.helper as helper
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email, Attachment
+import mailbagit.helper as helper
 import platform
 
 log = get_logger()

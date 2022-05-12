@@ -16,7 +16,7 @@ Automatically converting the HTML within emails to PDFs and WARCs can cause secu
 
 These issues primarily apply when running wkhtmltopdf in a web application where a potentially malicious user has access to the PDFs that are generated. Using Google Chrome may mitigate a few of these vulnerabilities, but overall shares most of these risks. This also applies to WARC derivatives.
 
-We don't suggest using `mailbagit` in a web application, as a malicious email may leak information about the computer used to used to process it into a PDF. Since Mailbag is designed for email preservation, in many contexts it may be unlikely for you to encounter malicious emails designed specifically to cause issues with `mailbagit`, but it is still helpful to be aware of this issue. Running `mailbagit` in a [Docker container](({{ site.baseurl}}/docker)) mitigates many of these concerns.
+We don't suggest using `mailbagit` in a web application, as a malicious email may leak information about the computer used to used to process it into a PDF. Since `mailbagit` is designed for email preservation, in many contexts it may be unlikely for you to encounter malicious emails designed specifically to cause issues with `mailbagit`, but it is still helpful to be aware of this issue. Running `mailbagit` in a [Docker container](({{ site.baseurl}}/docker)) mitigates many of these concerns.
 
 ## Email Trackers
 

@@ -6,8 +6,8 @@ import datetime
 from time import time
 from bs4 import BeautifulSoup, Doctype
 from structlog import get_logger
-import mailbag.globals as globals
-from mailbag.models import Attachment
+import mailbagit.globals as globals
+from mailbagit.models import Attachment
 import mimetypes
 import traceback
 import chardet, codecs
@@ -402,28 +402,36 @@ def decode_header_part(header):
     Parameters:
         header (email.header.Header or string or None):
     Returns:
-        header_string (str or None): A as-best-as-we-can-do decoded string
+        header_string (str): A as-best-as-we-can-do decoded string
     """
-    headerObj, encoding = decode_header(header)[0]
-    if encoding:
-        # Did we get a real encoding?
-        try:
-            encoding = codecs.lookup(encoding).name.lower()
-        except:
-            # If not, might as well try to detect it.
-            encoding = chardet.detect(headerObj)["encoding"]
-        try:
-            header_string = headerObj.decode(encoding)
-        except UnicodeDecodeError as e:
-            # Document that the header isn't valid
-            desc = "Error decoding header with " + encoding
-            errors = handle_error(errors, e, desc)
-            header_string = headerObj.decode(encoding, errors="replace")
-    else:
-        # Not encoded
-        header_string = headerObj
+    # headerObj, encoding = decode_header(header)[0]
+    header_string = []
+    for part in decode_header(header):
+        headerObj, encoding = part
+        if encoding:
+            # Did we get a real encoding?
+            try:
+                encoding = codecs.lookup(encoding).name.lower()
+            except:
+                # If not, might as well try to detect it.
+                encoding = chardet.detect(headerObj)["encoding"]
+            try:
+                header_string.append(headerObj.decode(encoding))
+            except UnicodeDecodeError as e:
+                # Document that the header isn't valid
+                desc = "Error decoding header with " + encoding
+                errors = handle_error(errors, e, desc)
+                header_string.append(headerObj.decode(encoding, errors="replace"))
+        else:
+            if isinstance(headerObj, str):
+                # Not encoded
+                header_string.append(headerObj)
+            else:
+                # Oddly, there are weird cases where quotes (") return a binary with no encoding.
+                # Dunno what to do here so just hopefully safely decode it?
+                header_string.append(headerObj.decode(errors="replace"))
 
-    return header_string
+    return "".join(header_string)
 
 
 def parse_header(header):

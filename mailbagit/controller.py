@@ -3,14 +3,14 @@ import bagit
 
 from structlog import get_logger
 import csv
-import mailbag
-from mailbag.email_account import EmailAccount
-from mailbag.derivative import Derivative
+import mailbagit
+from mailbagit.email_account import EmailAccount
+from mailbagit.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
-import mailbag.helper as helper
-import mailbag.globals as globals
+import mailbagit.helper as helper
+import mailbagit.globals as globals
 from time import time
 import uuid
 import datetime
@@ -109,8 +109,8 @@ class Controller:
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
             bag.info["External-Identifier"] = uuid.uuid4()
-            bag.info["Mailbag-Agent"] = mailbag.__name__
-            bag.info["Mailbag-Agent-Version"] = mailbag.__version__
+            bag.info["Mailbag-Agent"] = mailbagit.__name__
+            bag.info["Mailbag-Agent-Version"] = mailbagit.__version__
             # user-supplied mailbag metadata
             user_metadata = ["Capture-Date", "Capture-Agent", "Capture-Agent-Version"]
             for user_field in user_metadata:

@@ -1,6 +1,6 @@
 ---
-name: Mailbag Component
-about: Describes components of the Mailbag tool for assignment
+name: Mailbagit Component
+about: Describes components of the Mailbagit tool for assignment
 title: "[Component Name]"
 labels: ''
 assignees: ''

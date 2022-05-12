@@ -1,8 +1,8 @@
-from mailbag.controller import Controller
-from mailbag.models import Email
+from mailbagit.controller import Controller
+from mailbagit.models import Email
 from argparse import Namespace
-from mailbag.email_account import EmailAccount
-import mailbag
+from mailbagit.email_account import EmailAccount
+import mailbagit
 import pytest
 import email
 import os

@@ -29,4 +29,4 @@ Please check if your PR fulfills the following requirements:
 **Python Version:** …
 
 ## Licensing
-- [ ] I agree that the Mailbag Project and the University at Albany, SUNY can release this code under the [MIT license](https://github.com/UAlbanyArchives/mailbag/blob/main/LICENSE).
+- [ ] I agree that the Mailbag Project and the University at Albany, SUNY can release this code under the [MIT license](https://github.com/UAlbanyArchives/mailbagit/blob/main/LICENSE).

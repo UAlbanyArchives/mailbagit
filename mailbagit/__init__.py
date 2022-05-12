@@ -1,6 +1,6 @@
 # __init__.py
 
-# Version of the mailbag package
+# Version of the mailbagit package
 __version__ = "0.0.1"
 
 import os
@@ -9,11 +9,11 @@ from bagit import _make_parser, Bag, BagHeaderAction, DEFAULT_CHECKSUMS
 import importlib
 from structlog import get_logger
 from argparse import ArgumentParser
-from mailbag.email_account import EmailAccount, import_formats
-from mailbag.derivative import Derivative, import_derivatives
-from mailbag.controller import Controller
-import mailbag.loggerx
-import mailbag.globals
+from mailbagit.email_account import EmailAccount, import_formats
+from mailbagit.derivative import Derivative, import_derivatives
+from mailbagit.controller import Controller
+import mailbagit.loggerx
+import mailbagit.globals
 
 globals.init()
 loggerx.configure()
@@ -25,15 +25,15 @@ if importlib.util.find_spec("gooey"):
 else:
     gooeyCheck = False
 
-plugin_basedir = os.environ.get("MAILBAG_PLUGIN_DIR", None)
+plugin_basedir = os.environ.get("MAILBAGIT_PLUGIN_DIR", None)
 
 # Formats and derivatives are loaded from:
 #   1. formats/derivatives directories inside the package (built-in)
-#   2. .mailbag/{formats,dirivatives} in user home directory
+#   2. .mailbagit/{formats,derivatives} in user home directory
 #   3. {formats,dirivatives} subdirectories in plugin dir set in environment variable
 plugin_dirs = {"formats": [], "derivatives": []}
 for plugin_type, dirs in plugin_dirs.items():
-    dirs.append(Path(f"~/.mailbag/{plugin_type}").expanduser())
+    dirs.append(Path(f"~/.mailbagit/{plugin_type}").expanduser())
     if plugin_basedir:
         dirs.append((Path(plugin_basedir) / plugin_type).expanduser())
 
@@ -45,12 +45,12 @@ log.debug("Derivative:", Registry=Derivative.registry)
 
 bagit_parser = _make_parser()
 if gooeyCheck:
-    mailbag_parser = GooeyParser(description="Mailbag")
+    mailbag_parser = GooeyParser(description="Mailbagit")
 else:
-    mailbag_parser = ArgumentParser(description="Mailbag")
+    mailbag_parser = ArgumentParser(description="Mailbagit")
 mailbag_parser.set_defaults(bag_info={})
-mailbagit_args = mailbag_parser.add_argument_group("Mailbag arguments")
-mailbagit_options = mailbag_parser.add_argument_group("Mailbag options")
+mailbagit_args = mailbag_parser.add_argument_group("Mailbagit arguments")
+mailbagit_options = mailbag_parser.add_argument_group("Mailbagit options")
 mailbagit_metadata = mailbag_parser.add_argument_group("Optional Mailbag Metadata")
 
 # Load relevant args from bagit_parser to mailbag_parser
@@ -135,7 +135,7 @@ mailbagit_args.add_argument(
 )
 
 
-# add mailbag-specific required args here
+# add mailbagit-specific required args here
 mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A directory name for the mailbag root directory.", nargs=None)
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
@@ -162,7 +162,7 @@ else:
         nargs="+",
     )
 
-# add mailbag-specific optional args here
+# add mailbagit-specific optional args here
 mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
 mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
@@ -211,7 +211,7 @@ mailbagit_metadata.add_argument(
 
 
 def cli():
-    """hook for CLI-only mailbag invocation"""
+    """hook for CLI-only mailbagit invocation"""
     main()
 
 
@@ -219,7 +219,7 @@ if gooeyCheck:
 
     @Gooey(richtext_controls=True)
     def gui():
-        """hook for GUI mailbag invocation"""
+        """hook for GUI mailbagit invocation"""
         main()
 
 

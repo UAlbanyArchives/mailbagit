@@ -9,7 +9,7 @@ import platform
 
 log = get_logger()
 
-from mailbag.derivative import Derivative
+from mailbagit.derivative import Derivative
 
 
 class MboxDerivative(Derivative):

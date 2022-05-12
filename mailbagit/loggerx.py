@@ -1,6 +1,6 @@
 import os
 import logging, structlog
-import mailbag.globals as globals
+import mailbagit.globals as globals
 
 
 def configure():
@@ -9,11 +9,11 @@ def configure():
 
     globals.log_level = "WARN"
     try:
-        globals.log_level = os.environ.get("MAILBAG_LOG_LEVEL", None).upper()
+        globals.log_level = os.environ.get("MAILBAGIT_LOG_LEVEL", None).upper()
     except:
-        log.warn("MAILBAG_LOG_LEVEL environment variable not set or incorrect")
+        log.warn("MAILBAGIT_LOG_LEVEL environment variable not set or incorrect")
     level = logging._nameToLevel[globals.log_level]
 
     structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(level))
     log = structlog.get_logger()
-    log.info("MAILBAG_LOG_LEVEL:", LOGS=globals.log_level)
+    log.info("MAILBAGIT_LOG_LEVEL:", LOGS=globals.log_level)

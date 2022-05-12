@@ -6,12 +6,12 @@ ENV TZ=America/New_York \
     MAILBAG_LOG_LEVEL=debug\
     IN_CONTAINER=true
 
-RUN mkdir /mailbag
-WORKDIR /mailbag
-ADD . /mailbag/
+RUN mkdir /mailbagit
+WORKDIR /mailbagit
+ADD . /mailbagit/
 
 # manually add to $PYTHONPATH because https://github.com/python/importlib_metadata/issues/364
-ENV PYTHONPATH=/mailbag
+ENV PYTHONPATH=/mailbagit
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \

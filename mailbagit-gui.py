@@ -1,3 +1,3 @@
-from mailbag import gui
+from mailbagit import gui
 
 gui()

@@ -2,8 +2,8 @@
 # to hook up a real parser
 
 # Does nothing currently
-from mailbag.email_account import EmailAccount
-from mailbag.models import Email
+from mailbagit.email_account import EmailAccount
+from mailbagit.models import Email
 
 
 class ExampleAccount(EmailAccount):
