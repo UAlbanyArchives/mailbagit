@@ -74,11 +74,7 @@ DEPENDENCIES
   jekyll (~> 4.1.0)
   jekyll-feed (~> 0.6)
   just-the-docs
-<<<<<<< HEAD
-  kramdown (>= 2.3.1)
-=======
   kramdown (~> 2.3.1)
->>>>>>> main
   tzinfo-data
 
 BUNDLED WITH
