@@ -28,5 +28,4 @@ jobs:
           pip install libpff-python==20211114
       - name: Test with pytest
         run: |
-          python dumpData.py data
           pytest -vv

@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Call for Participation (closed)
+title: Working Meeting CFP (closed)
 permalink: /cfp/
-nav_order: 6
+nav_order: 10
 ---
 
 # Call for Participation - Mailbag Specification Working Meeting (closed)
