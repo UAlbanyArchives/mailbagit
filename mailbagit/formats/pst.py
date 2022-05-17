@@ -7,7 +7,8 @@ from structlog import get_logger
 from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
-import mailbagit.helper as helper
+import mailbagit.helper.format as format
+import mailbagit.helper.common as common
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -68,7 +69,7 @@ if not skip_registry:
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
                             desc = "Error parsing message body"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         try:
                             # Parse message bodies
@@ -116,17 +117,17 @@ if not skip_registry:
 
                         except Exception as e:
                             desc = "Error parsing message body"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
                             messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = helper.normalizePath(messagePath)
+                            derivativesPath = format.normalizePath(messagePath)
                         except Exception as e:
                             desc = "Error reading message path"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         try:
                             total_attachment_size_bytes = 0
@@ -160,22 +161,18 @@ if not skip_registry:
                                     elif len(attachmentShort) > 0:
                                         attachmentName = attachmentShort
                                     else:
-                                        print(message.Mailbag_Message_ID)
                                         raise ValueError("No attachment name found.")
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
-                                        mime = helper.guessMimeType(attachmentName)
+                                        mime = format.guessMimeType(attachmentName)
 
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
-                                        "No filename found for attachment "
-                                        + attachmentName
-                                        + " for message "
-                                        + str(message.Mailbag_Message_ID)
+                                        "No filename found for attachment " + attachmentName + " for message " + str(headers["Message-ID"])
                                     )
-                                    errors = helper.handle_error(errors, e, desc)
+                                    errors = common.handle_error(errors, e, desc)
 
                                 attachment = Attachment(
                                     Name=attachmentName,
@@ -186,20 +183,20 @@ if not skip_registry:
 
                         except Exception as e:
                             desc = "Error parsing attachments"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         message = Email(
                             Error=errors["msg"],
-                            Message_ID=helper.parse_header(headers["Message-ID"]),
+                            Message_ID=format.parse_header(headers["Message-ID"]),
                             Original_File=originalFile,
                             Message_Path=messagePath,
                             Derivatives_Path=derivativesPath,
-                            Date=helper.parse_header(headers["Date"]),
-                            From=helper.parse_header(headers["From"]),
-                            To=helper.parse_header(headers["To"]),
-                            Cc=helper.parse_header(headers["Cc"]),
-                            Bcc=helper.parse_header(headers["Bcc"]),
-                            Subject=helper.parse_header(headers["Subject"]),
+                            Date=format.parse_header(headers["Date"]),
+                            From=format.parse_header(headers["From"]),
+                            To=format.parse_header(headers["To"]),
+                            Cc=format.parse_header(headers["Cc"]),
+                            Bcc=format.parse_header(headers["Bcc"]),
+                            Subject=format.parse_header(headers["Subject"]),
                             Content_Type=headers.get_content_type(),
                             Headers=headers,
                             HTML_Body=html_body,
@@ -213,7 +210,7 @@ if not skip_registry:
 
                     except (Exception) as e:
                         desc = "Error parsing message"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
                         message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
                     yield message
@@ -240,7 +237,7 @@ if not skip_registry:
                             fileList.append(os.path.join(root, file))
 
             for filePath in fileList:
-                originalFile = helper.relativePath(self.path, filePath)
+                originalFile = format.relativePath(self.path, filePath)
                 if len(originalFile) < 1:
                     pathList = []
                 else:
@@ -260,7 +257,7 @@ if not skip_registry:
 
                 # Move PST to new mailbag directory structure
                 if not self.iteration_only:
-                    new_path = helper.moveWithDirectoryStructure(
+                    new_path = format.moveWithDirectoryStructure(
                         self.dry_run,
                         parent_dir,
                         self.mailbag_name,

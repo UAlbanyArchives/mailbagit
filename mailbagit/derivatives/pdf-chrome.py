@@ -3,7 +3,8 @@ import subprocess
 import distutils.spawn
 from mailbagit.derivative import Derivative
 from structlog import get_logger
-import mailbagit.helper as helper
+import mailbagit.helper.derivative as derivative
+import mailbagit.helper.common as common
 
 
 skip_registry = False
@@ -58,10 +59,10 @@ if not skip_registry:
                     log.debug("Writing HTML to " + str(html_name) + " and converting to " + str(pdf_name))
                     # Calling helper function to get formatted html
                     try:
-                        html_formatted, encoding = helper.htmlFormatting(message, self.args.css)
+                        html_formatted, encoding = derivative.htmlFormatting(message, self.args.css)
                     except Exception as e:
                         desc = "Error formatting HTML for PDF derivative"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
 
                     if not self.args.dry_run:
                         try:
@@ -96,18 +97,18 @@ if not skip_registry:
                                     log.warn("Output converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stdout))
                                 if stderr:
                                     desc = "Error converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + str(stderr)
-                                    errors = helper.handle_error(errors, None, desc, "error")
+                                    errors = common.handle_error(errors, None, desc, "error")
                             # delete the HTML file
                             if os.path.isfile(pdf_name):
                                 os.remove(html_name)
 
                         except Exception as e:
                             desc = "Error writing HTML and converting to PDF derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
             except Exception as e:
                 desc = "Error creating PDF derivative with chrome"
-                errors = helper.handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
 
             message.Error.extend(errors["msg"])
             message.StackTrace.extend(errors["stack_trace"])

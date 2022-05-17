@@ -1,6 +1,7 @@
 from structlog import get_logger
 import mailbox
 import os
+import mailbagit.helper.common as common
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -51,14 +52,14 @@ class MboxDerivative(Derivative):
                     filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")
             except Exception as e:
                 desc = "Error setting up MBOX derivative"
-                errors = helper.handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
 
             log.debug("Writing message to " + str(filename))
             if self.args.dry_run:
                 # Checks for bodies to raise warnings even during a dry run
                 if not message.HTML_Body and not message.Text_Body:
                     desc = "No body present for " + str(message.Mailbag_Message_ID) + ". Added message to MBOX without message body"
-                    errors = helper.handle_error(errors, None, desc, "warn")
+                    errors = common.handle_error(errors, None, desc, "warn")
             else:
                 if not os.path.isdir(out_dir):
                     os.makedirs(out_dir)
@@ -88,7 +89,7 @@ class MboxDerivative(Derivative):
                                 msg["X-Folder"] = message.Message_Path
                         except Exception as e:
                             desc = "Error writing headers for MBOX derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Add message body
                         try:
@@ -106,10 +107,10 @@ class MboxDerivative(Derivative):
                                     + str(message.Mailbag_Message_ID)
                                     + ". Added message to MBOX without message body"
                                 )
-                                errors = helper.handle_error(errors, None, desc, "warn")
+                                errors = common.handle_error(errors, None, desc, "warn")
                         except Exception as e:
                             desc = "Error writing body for MBOX derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Attachments
                         try:
@@ -126,24 +127,24 @@ class MboxDerivative(Derivative):
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to MBOX derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         mbox.add(msg)
 
                     else:
                         desc = "Unable to create MBOX as no body or headers present for " + str(message.Mailbag_Message_ID)
-                        errors = helper.handle_error(errors, None, desc, "error")
+                        errors = common.handle_error(errors, None, desc, "error")
 
                     mbox.flush()
                     mbox.unlock()
 
                 except Exception as e:
                     desc = "Error writing MBOX derivative"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
         except Exception as e:
             desc = "Error creating MBOX derivative"
-            errors = helper.handle_error(errors, e, desc)
+            errors = common.handle_error(errors, e, desc)
 
         message.Error.extend(errors["msg"])
         message.StackTrace.extend(errors["stack_trace"])
