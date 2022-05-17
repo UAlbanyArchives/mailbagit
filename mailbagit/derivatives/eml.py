@@ -1,6 +1,7 @@
 # This is Eml derivative
 from os.path import join
 import mailbagit.helper.common as common
+import mailbagit.helper.derivative as derivative
 import os, glob
 import mailbox
 from mailbagit.email_account import EmailAccount
@@ -73,7 +74,7 @@ class EmlDerivative(Derivative):
                                 outfile.close()
                             fullObjectWrite = True
                     except Exception as e:
-                        common.deleteFile(filename + ".eml")
+                        derivative.deleteFile(filename + ".eml")
                         desc = "Error writing full email object to EML, generating it from the model instead"
                         errors = common.handle_error(errors, e, desc, "warn")
                         fullObjectWrite = False

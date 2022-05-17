@@ -155,7 +155,7 @@ def htmlFormatting(message, external_css, headers=True):
 
         # Embedding Encoding with meta
         meta = soup.new_tag("meta")
-        meta["charset"] = encoding
+        meta["charset"] = "utf-8"
         soup.head.insert(0, meta)
 
         # Embedding default styling

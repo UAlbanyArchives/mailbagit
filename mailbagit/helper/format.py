@@ -5,6 +5,8 @@ import urllib.parse
 import chardet, codecs
 from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
+import mailbagit.helper.common as common
+import html
 
 from structlog import get_logger
 
@@ -91,15 +93,15 @@ def parse_part(part, bodies, attachments, errors):
                                 + " (lies!), but successfully decoded with detected encoding "
                                 + detected_encoding
                             )
-                            errors = handle_error(errors, e, desc, "warn")
+                            errors = common.handle_error(errors, e, desc, "warn")
                             part_encoding = detected_encoding
                         except UnicodeDecodeError as e:
                             desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
-                            errors = handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
                             message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
                     else:
                         desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
-                        errors = handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
                         message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
 
                 if content_type == "text/html":
@@ -110,7 +112,7 @@ def parse_part(part, bodies, attachments, errors):
                     bodies["text_body"] = message_body
     except Exception as e:
         desc = "Error parsing message body"
-        errors = handle_error(errors, e, desc)
+        errors = common.handle_error(errors, e, desc)
 
     # Extract attachments
     if part.get_content_maintype() == "multipart":
@@ -124,14 +126,14 @@ def parse_part(part, bodies, attachments, errors):
                     desc = "Missing attachment content, failed to read attachment " + part.get_filename()
                 else:
                     desc = "Missing attachment content and filename, failed to read attachment"
-                errors = handle_error(errors, None, desc)
+                errors = common.handle_error(errors, None, desc)
             else:
                 attachmentFile = part.get_payload(decode=True)
                 if part.get_filename():
                     attachmentName = part.get_filename()
                 else:
                     desc = "Missing attachment name, using integer"
-                    errors = handle_error(errors, None, desc)
+                    errors = common.handle_error(errors, None, desc)
                     attachmentName = str(len(attachments))
 
                 attachment = Attachment(
@@ -142,7 +144,7 @@ def parse_part(part, bodies, attachments, errors):
                 attachments.append(attachment)
         except Exception as e:
             desc = "Error parsing attachments"
-            errors = handle_error(errors, e, desc)
+            errors = common.handle_error(errors, e, desc)
 
     return bodies, attachments, errors
 
@@ -176,7 +178,7 @@ def decode_header_part(header):
             except UnicodeDecodeError as e:
                 # Document that the header isn't valid
                 desc = "Error decoding header with " + encoding
-                errors = handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
                 header_string.append(headerObj.decode(encoding, errors="replace"))
         else:
             if isinstance(headerObj, str):

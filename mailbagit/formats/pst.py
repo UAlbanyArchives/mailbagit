@@ -161,7 +161,6 @@ if not skip_registry:
                                     elif len(attachmentShort) > 0:
                                         attachmentName = attachmentShort
                                     else:
-                                        print(message.Mailbag_Message_ID)
                                         raise ValueError("No attachment name found.")
 
                                     # Guess the mime if we can't find it
@@ -171,10 +170,7 @@ if not skip_registry:
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
-                                        "No filename found for attachment "
-                                        + attachmentName
-                                        + " for message "
-                                        + str(message.Mailbag_Message_ID)
+                                        "No filename found for attachment " + attachmentName + " for message " + str(headers["Message-ID"])
                                     )
                                     errors = common.handle_error(errors, e, desc)
 
