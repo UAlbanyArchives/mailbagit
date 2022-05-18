@@ -48,10 +48,9 @@ if not skip_registry:
         def folders(self, folder, path, originalFile):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
-            # path is a list that you can create the filepath with os.path.join()
+            # path is the email folder path of the message, separated by "/"
             if folder.number_of_sub_messages:
                 log.debug("Reading folder: " + folder.name)
-                path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
 
                     if self.iteration_only:
@@ -121,7 +120,7 @@ if not skip_registry:
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            messagePath = os.path.join(os.path.splitext(originalFile)[0], path)
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
                             derivativesPath = format.normalizePath(messagePath)
@@ -219,10 +218,12 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path, originalFile)
-            else:
-                # gotta return empty directory to controller somehow
-                log.warn("Empty folder " + folder.name + " not handled.")
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
+            # else:
+            # if not self.iteration_only:
+            # This is an email folder that does not contain any messages.
+            # We are currently ignoring these per issue #117
+            # log.warn("Empty folder " + folder.name + " not handled.")
 
         def messages(self):
             if os.path.isfile(self.path):
@@ -239,9 +240,9 @@ if not skip_registry:
             for filePath in fileList:
                 originalFile = format.relativePath(self.path, filePath)
                 if len(originalFile) < 1:
-                    pathList = []
+                    path = ""
                 else:
-                    pathList = os.path.normpath(originalFile).split(os.sep)
+                    path = os.path.normpath(originalFile)
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -249,10 +250,12 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, pathList, os.path.basename(filePath))
-                    else:
-                        # gotta return empty directory to controller somehow
-                        log.warn("Empty folder " + folder.name + " not handled.")
+                        yield from self.folders(folder, path + "/" + folder.name, os.path.basename(filePath))
+                    # else:
+                    # if not self.iteration_only:
+                    # This is an email folder that does not contain any messages.
+                    # We are currently ignoring these per issue #117
+                    # log.warn("Empty folder " + folder.name + " not handled.")
                 pst.close()
 
                 # Move PST to new mailbag directory structure
