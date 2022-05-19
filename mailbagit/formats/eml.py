@@ -30,6 +30,7 @@ class EML(EmailAccount):
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.companion_files = args.companion_files
         self.iteration_only = False
         log.info("Reading : ", Path=self.path)
 
@@ -39,10 +40,17 @@ class EML(EmailAccount):
     def messages(self):
 
         fileList = []
+        companion_files = []
         for root, dirs, files in os.walk(self.path):
             for file in files:
-                if file.lower().endswith("." + self.format_name):
-                    fileList.append(os.path.join(root, file))
+                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                fileRoot = root + os.sep
+                # don't count the newly-created mailbag
+                if not fileRoot.startswith(mailbag_path):
+                    if file.lower().endswith("." + self.format_name):
+                        fileList.append(os.path.join(root, file))
+                    elif self.companion_files:
+                        companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
 
@@ -115,3 +123,8 @@ class EML(EmailAccount):
             # Move EML to new mailbag directory structure
             yield message
             new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+
+        if self.companion_files:
+            # Move all files into mailbag directory structure
+            for companion_file in companion_files:
+                new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)

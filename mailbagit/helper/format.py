@@ -364,13 +364,13 @@ def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
 def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
-    Useful for MBOX, EML, and MSG files.
-
+    Uses for both email files matching the input file extension and companion files if that option is selected
+    
     Parameters:
         dry_run (Boolean):
         mainPath (String): Parent or provided directory path
         mailbag_name (String): Mailbag name
-        input (String): Mail type
+        input (String): email file format to be packaged into a mailbag
         emailFolder (String): Path of the email export file relative to mainPath
         file (String): Email file path
 
@@ -379,7 +379,10 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     """
 
     fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
-    log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+    if file.lower().endswith("." + input.lower()):
+        log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+    else:
+        log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
 
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)

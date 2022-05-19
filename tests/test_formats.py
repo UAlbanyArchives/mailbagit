@@ -10,7 +10,7 @@ import os
 # This is a mock object representing the args returned from argparse/Gooey
 @pytest.fixture
 def cli_args():
-    return Namespace(dry_run=True, mailbag_name="New_Mailbag")
+    return Namespace(dry_run=True, mailbag_name="New_Mailbag", companion_files=False)
 
 
 def test_Mbox(cli_args):
