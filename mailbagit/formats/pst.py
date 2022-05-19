@@ -9,6 +9,7 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
+from collections import OrderedDict
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -89,32 +90,21 @@ if not skip_registry:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings["PidTagInternetCodepage"] = CODE_PAGES[value]
+                                            encodings[1] = {"name": CODE_PAGES[value], "label": "PidTagInternetCodepage"}
                                     if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings["PidTagMessageCodepage"] = CODE_PAGES[value]
+                                            encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
 
                             if messageObj.html_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    html_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    html_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    html_encoding = chardet.detect(messageObj.html_body)["encoding"]
-                                html_body = messageObj.html_body.decode(html_encoding)
+                                html_body, html_encoding, errors = format.safely_decode(messageObj.html_body, encodings, errors)
                             if messageObj.plain_text_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    text_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    text_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
-                                text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
-                                text_body = messageObj.plain_text_body.decode(text_encoding)
+                                text_body, text_encoding, errors = format.safely_decode(messageObj.plain_text_body, encodings, errors)
 
                         except Exception as e:
+                            print(encodings)
+                            # messageObj.plain_text_body.decode("windows=1252")
                             desc = "Error parsing message body"
                             errors = common.handle_error(errors, e, desc)
 

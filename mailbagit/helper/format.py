@@ -35,6 +35,82 @@ def relativePath(mainPath, file):
         return relPath
 
 
+def safely_decode(binary_text, encodings, errors):
+    """
+    Tries to safely decode text for message bodies using an encodings dict.
+    Goes through encodings by priority and uses the first successful one.
+    Tries to detect encoding if all else fails.
+    Fully documents the encoding and label for each one that fails
+
+    Parameters:
+        binary_text (binary): an encoded string
+        encodings (dict):
+            Integer key denoting priority (dict):
+                "name" (str):
+                "label" (str): a description for the encoding, such as its source
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+
+    Returns:
+        test (str): a decoded unicode string
+        used (str): The encoding used to decode the text
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+    """
+    errorObj = None
+    used = None
+    success = False
+    failed = []
+    valid = []
+    for priority in encodings.keys():
+        try:
+            try:
+                valid_encoding = codecs.lookup(encodings[priority]["name"]).name.lower()
+                valid.append(valid_encoding)
+                text = binary_text.decode(valid_encoding)
+                used = valid_encoding
+                success = True
+                continue
+            except UnicodeDecodeError as e:
+                errorObj = e
+                failed.append(encodings[priority]["name"])
+        except UnicodeDecodeError as e:
+            errorObj = e
+            failed.append(encodings[priority]["name"])
+
+    if success == False:
+        try:
+            detected = chardet.detect(binary_text)["encoding"]
+            text = binary_text.decode(detected)
+            used = detected
+            if len(valid) < 1:
+                desc = "No valid listed encodings, but successfully decoded with detected encoding " + detected
+            else:
+                desc = (
+                    "Failed to decode message body with listed encoding(s) "
+                    + ", ".join(failed)
+                    + " (lies!), but successfully decoded with detected encoding "
+                    + detected
+                )
+            errors = common.handle_error(errors, errorObj, desc, "warn")
+        except UnicodeDecodeError as e:
+            if len(valid) < 1:
+                desc = "No valid listed encodings. Failed to decode message body with detected encoding " + detected
+                # just replace the errors
+                text = binary_text.decode(detected, errors="replace")
+                used = detected
+            else:
+                desc = "Failed to decode message body with listed encoding(s) " + ", ".join(failed)
+                # just replace the errors
+                text = binary_text.decode(valid[0], errors="replace")
+                used = valid[0]
+            errors = common.handle_error(errors, e, desc, "error")
+
+    return text, used, errors
+
+
 def parse_part(part, bodies, attachments, errors):
     """
     Used for EML and MBOX parsers
