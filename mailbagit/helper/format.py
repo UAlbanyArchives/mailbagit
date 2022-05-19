@@ -35,7 +35,7 @@ def relativePath(mainPath, file):
         return relPath
 
 
-def safely_decode(binary_text, encodings, errors):
+def safely_decode(body_type, binary_text, encodings, errors):
     """
     Tries to safely decode text for message bodies using an encodings dict.
     Goes through encodings by priority and uses the first successful one.
@@ -43,6 +43,7 @@ def safely_decode(binary_text, encodings, errors):
     Fully documents the encoding and label for each one that fails
 
     Parameters:
+        body_type (str): a description of the body (i.e. HTML or Text)
         binary_text (binary): an encoded string
         encodings (dict):
             Integer key denoting priority (dict):
@@ -86,10 +87,12 @@ def safely_decode(binary_text, encodings, errors):
             text = binary_text.decode(detected)
             used = detected
             if len(valid) < 1:
-                desc = "No valid listed encodings, but successfully decoded with detected encoding " + detected
+                desc = "No valid listed encodings, but successfully decoded " + body_type + " body with detected encoding " + detected
             else:
                 desc = (
-                    "Failed to decode message body with listed encoding(s) "
+                    "Failed to decode "
+                    + body_type
+                    + " message body with listed encoding(s) "
                     + ", ".join(failed)
                     + " (lies!), but successfully decoded with detected encoding "
                     + detected
@@ -97,12 +100,12 @@ def safely_decode(binary_text, encodings, errors):
             errors = common.handle_error(errors, errorObj, desc, "warn")
         except UnicodeDecodeError as e:
             if len(valid) < 1:
-                desc = "No valid listed encodings. Failed to decode message body with detected encoding " + detected
+                desc = "No valid listed encodings. Failed to decode " + body_type + " message body with detected encoding " + detected
                 # just replace the errors
                 text = binary_text.decode(detected, errors="replace")
                 used = detected
             else:
-                desc = "Failed to decode message body with listed encoding(s) " + ", ".join(failed)
+                desc = "Failed to decode " + body_type + "message body with listed encoding(s) " + ", ".join(failed)
                 # just replace the errors
                 text = binary_text.decode(valid[0], errors="replace")
                 used = valid[0]

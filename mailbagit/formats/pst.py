@@ -98,9 +98,15 @@ if not skip_registry:
                                             encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
 
                             if messageObj.html_body:
-                                html_body, html_encoding, errors = format.safely_decode(messageObj.html_body, encodings, errors)
+                                html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
                             if messageObj.plain_text_body:
-                                text_body, text_encoding, errors = format.safely_decode(messageObj.plain_text_body, encodings, errors)
+                                encodings[len(encodings.keys()) + 1] = {
+                                    "name": chardet.detect(messageObj.plain_text_body)["encoding"],
+                                    "label": "detected",
+                                }
+                                text_body, text_encoding, errors = format.safely_decode(
+                                    "plain text", messageObj.plain_text_body, encodings, errors
+                                )
 
                         except Exception as e:
                             print(encodings)
