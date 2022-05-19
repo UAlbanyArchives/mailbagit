@@ -122,7 +122,7 @@ class EmlDerivative(Derivative):
                                 if mimeType is None:
                                     mimeType = "text/plain"
                                     desc = "Mime type not found for attachment, set as " + mimeType
-                                    errors = common.handle_error(errors, None, desc, "warn")
+                                    errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)

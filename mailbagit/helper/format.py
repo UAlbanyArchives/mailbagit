@@ -35,6 +35,85 @@ def relativePath(mainPath, file):
         return relPath
 
 
+def safely_decode(body_type, binary_text, encodings, errors):
+    """
+    Tries to safely decode text for message bodies using an encodings dict.
+    Goes through encodings by priority and uses the first successful one.
+    Tries to detect encoding if all else fails.
+    Fully documents the encoding and label for each one that fails
+
+    Parameters:
+        body_type (str): a description of the body (i.e. HTML or Text)
+        binary_text (binary): an encoded string
+        encodings (dict):
+            Integer key denoting priority (dict):
+                "name" (str):
+                "label" (str): a description for the encoding, such as its source
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+
+    Returns:
+        test (str): a decoded unicode string
+        used (str): The encoding used to decode the text
+        errors (dict):
+            "msg" contains a list of human readable error messages
+            "stack_trace" contains a list of full stack traces
+    """
+    errorObj = None
+    used = None
+    success = False
+    failed = []
+    valid = []
+    for priority in encodings.keys():
+        # for EML/MBOX could be None
+        if encodings[priority]["name"]:
+            try:
+                valid_encoding = codecs.lookup(encodings[priority]["name"]).name.lower()
+                valid.append(valid_encoding)
+                text = binary_text.decode(valid_encoding)
+                used = encodings[priority]["name"]
+                success = True
+                continue
+            except Exception as e:
+                errorObj = e
+                failed.append(encodings[priority]["name"])
+
+    if success == False:
+        try:
+            detected = chardet.detect(binary_text)["encoding"]
+            text = binary_text.decode(detected)
+            used = detected
+            if len(valid) < 1:
+                # desc = "No valid listed encodings, but successfully decoded " + body_type + " body with detected encoding " + detected
+                # Don't actually raise this warning, not sure if user cares that much?
+                pass
+            else:
+                desc = (
+                    "Failed to decode "
+                    + body_type
+                    + " message body with listed encoding(s) "
+                    + ", ".join(failed)
+                    + " (lies!), but successfully decoded with detected encoding "
+                    + detected
+                )
+                errors = common.handle_error(errors, errorObj, desc, "warn")
+        except UnicodeDecodeError as e:
+            if len(valid) < 1:
+                desc = "No valid listed encodings. Failed to decode " + body_type + " message body with detected encoding " + detected
+                # just replace the errors
+                text = binary_text.decode(detected, errors="replace")
+                used = detected
+            else:
+                desc = "Failed to decode " + body_type + "message body with listed encoding(s) " + ", ".join(failed)
+                # just replace the errors
+                text = binary_text.decode(valid[0], errors="replace")
+                used = valid[0]
+            errors = common.handle_error(errors, e, desc, "error")
+
+    return text, used, errors
+
+
 def parse_part(part, bodies, attachments, errors):
     """
     Used for EML and MBOX parsers
@@ -67,43 +146,9 @@ def parse_part(part, bodies, attachments, errors):
     try:
         if content_disposition != "attachment" and content_disposition != "inline":
             if content_type == "text/html" or content_type == "text/plain":
-                part_encoding = part.get_content_charset()
-                enc_source = "read"
-                if part_encoding:
-                    try:
-                        part_encoding = codecs.lookup(part_encoding).name.lower()
-                    except:
-                        part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
-                        enc_source = "detected"
-                else:
-                    part_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
-                    enc_source = "detected"
-
-                try:
-                    message_body = part.get_payload(decode=True).decode(part_encoding)
-                except UnicodeDecodeError as e:
-                    if enc_source == "read":
-                        # lies!
-                        detected_encoding = chardet.detect(part.get_payload(decode=True))["encoding"]
-                        try:
-                            message_body = part.get_payload(decode=True).decode(detected_encoding)
-                            desc = (
-                                "Failed to decode message body with listed encoding "
-                                + part_encoding
-                                + " (lies!), but successfully decoded with detected encoding "
-                                + detected_encoding
-                            )
-                            errors = common.handle_error(errors, e, desc, "warn")
-                            part_encoding = detected_encoding
-                        except UnicodeDecodeError as e:
-                            desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
-                            errors = common.handle_error(errors, e, desc)
-                            message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
-                    else:
-                        desc = "Error decoding message body with " + part_encoding + " (" + enc_source + ")"
-                        errors = common.handle_error(errors, e, desc)
-                        message_body = part.get_payload(decode=True).decode(part_encoding, errors="replace")
-
+                encodings = {}
+                encodings[1] = {"name": part.get_content_charset(), "label": "listed charset"}
+                message_body, part_encoding, errors = safely_decode(content_type, part.get_payload(decode=True), encodings, errors)
                 if content_type == "text/html":
                     bodies["html_encoding"] = part_encoding
                     bodies["html_body"] = message_body
