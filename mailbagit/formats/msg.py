@@ -28,6 +28,7 @@ class MSG(EmailAccount):
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.companion_files = args.companion_files
         self.iteration_only = False
         log.info("Reading :", Path=self.path)
 
@@ -36,12 +37,20 @@ class MSG(EmailAccount):
 
     def messages(self):
         fileList = []
+        companion_files = []
         for root, dirs, files in os.walk(self.path):
             for file in files:
-                if file.lower().endswith("." + self.format_name):
-                    fileList.append(os.path.join(root, file))
+                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                fileRoot = root + os.sep
+                # don't count the newly-created mailbag
+                if not fileRoot.startswith(mailbag_path):
+                    if file.lower().endswith("." + self.format_name):
+                        fileList.append(os.path.join(root, file))
+                    elif self.companion_files:
+                        companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
+            # Parse email matching the input file extension
 
             if self.iteration_only:
                 yield None
@@ -142,3 +151,8 @@ class MSG(EmailAccount):
             # Move MSG to new mailbag directory structure
             new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
             yield message
+
+        if self.companion_files:
+            # Move all files into mailbag directory structure
+            for companion_file in companion_files:
+                new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)
