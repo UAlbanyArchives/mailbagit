@@ -109,8 +109,6 @@ if not skip_registry:
                                 )
 
                         except Exception as e:
-                            print(encodings)
-                            # messageObj.plain_text_body.decode("windows=1252")
                             desc = "Error parsing message body"
                             errors = common.handle_error(errors, e, desc)
 
