@@ -185,18 +185,16 @@ def htmlFormatting(message, external_css, headers=True):
                 margin-bottom: 2px;
                 font-size: 24px;
                 font-family: Arial sans-serif;
+            }
         """
         style = soup.new_tag("style")
         style.string = default_css
-        soup.head.append(style)
-
         # Adding external_css
         if external_css:
-            link = soup.new_tag("link")
-            link["rel"] = "stylesheet"
-            link["type"] = "text/css"
-            link["href"] = "file:///" + external_css
-            soup.head.append(link)
+            with open(external_css) as css_file:
+                style.string = style.string + "\n" + css_file.read()
+                css_file.close()
+        soup.head.append(style)
 
         # Embedding Images
         # HT to extract_msg for this approach
