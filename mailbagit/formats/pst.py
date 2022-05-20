@@ -102,6 +102,10 @@ if not skip_registry:
                                 html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
                             if messageObj.plain_text_body:
                                 encodings[len(encodings.keys()) + 1] = {
+                                    "name": "utf-8",
+                                    "label": "manual",
+                                }
+                                encodings[len(encodings.keys()) + 2] = {
                                     "name": chardet.detect(messageObj.plain_text_body)["encoding"],
                                     "label": "detected",
                                 }
@@ -273,4 +277,6 @@ if not skip_registry:
             if self.companion_files:
                 # Move all files into mailbag directory structure
                 for companion_file in companion_files:
-                    new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)
+                    new_path = format.moveWithDirectoryStructure(
+                        self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file
+                    )
