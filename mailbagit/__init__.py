@@ -30,7 +30,7 @@ plugin_basedir = os.environ.get("MAILBAGIT_PLUGIN_DIR", None)
 # Formats and derivatives are loaded from:
 #   1. formats/derivatives directories inside the package (built-in)
 #   2. .mailbagit/{formats,derivatives} in user home directory
-#   3. {formats,dirivatives} subdirectories in plugin dir set in environment variable
+#   3. {formats,derivatives} subdirectories in plugin dir set in environment variable
 plugin_dirs = {"formats": [], "derivatives": []}
 for plugin_type, dirs in plugin_dirs.items():
     dirs.append(Path(f"~/.mailbagit/{plugin_type}").expanduser())

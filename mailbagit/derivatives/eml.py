@@ -21,7 +21,7 @@ log = get_logger()
 class EmlDerivative(Derivative):
     derivative_name = "eml"
     derivative_format = "eml"
-    derivative_agent = email.__name__
+    derivative_agent = "email"
     derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, **kwargs):
