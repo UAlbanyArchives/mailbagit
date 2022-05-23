@@ -1,6 +1,6 @@
 import os
 import mailbox
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import chardet
 from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
@@ -118,10 +118,10 @@ if not skip_registry:
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], path)
+                            messagePath = path
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = format.normalizePath(messagePath)
+                            derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
                         except Exception as e:
                             desc = "Error reading message path"
                             errors = common.handle_error(errors, e, desc)
@@ -181,7 +181,7 @@ if not skip_registry:
                         except Exception as e:
                             desc = "Error parsing attachments"
                             errors = common.handle_error(errors, e, desc)
-                        # print (originalFile)
+
                         message = Email(
                             Error=errors["msg"],
                             Message_ID=format.parse_header(headers["Message-ID"]),
@@ -247,15 +247,18 @@ if not skip_registry:
                 if len(rel_path) < 1:
                     originalFile = os.path.basename(filePath)
                 else:
-                    originalFile = rel_path
+                    originalFile = os.path.normpath(rel_path)
                 # original file is now the relative path to the PST from the provided path
+                # print (originalFile)
 
                 # what is this doing?
-                if len(originalFile) < 1:
-                    path = ""
-                else:
-                    path = os.path.normpath(originalFile)
-                print(path)
+                # if len(originalFile) < 1:
+                #    path = ""
+                # else:
+                #    path = os.path.normpath(originalFile)
+                # print (originalFile)
+                # path = os.path.join(os.path.dirname(originalFile), os.path.splitext(originalFile)[0])
+                # print (path)
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -263,7 +266,7 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, path + "/" + folder.name, filePath)
+                        yield from self.folders(folder, folder.name, originalFile)
                     # else:
                     # if not self.iteration_only:
                     # This is an email folder that does not contain any messages.
