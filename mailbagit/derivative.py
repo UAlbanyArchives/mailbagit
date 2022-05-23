@@ -49,11 +49,19 @@ class Derivative(ABC):
         pass
 
 
-def import_derivatives(additional_dirs=None):
-    if not additional_dirs:
-        additional_dirs = []
+def import_derivatives(dirs=None):
+    if not dirs:
+        dirs = []
 
-    dirs = [join(dirname(__file__), "derivatives"), *additional_dirs]
+    # Due to pyinstaller not picking up dynamic imports inside the packed exe,
+    # all built-in derivatives MUST be manually imported here.
+    import mailbagit.derivatives.eml
+    import mailbagit.derivatives.html
+    import mailbagit.derivatives.mbox
+    import mailbagit.derivatives.pdf_chrome
+    import mailbagit.derivatives.pdf
+    import mailbagit.derivatives.txt
+    import mailbagit.derivatives.warc
 
     for derivatives_dir in dirs:
         if not exists(derivatives_dir):

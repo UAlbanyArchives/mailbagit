@@ -44,6 +44,8 @@ You should now be able install the PST dependencies with:
 pip install 'mailbagit[pst]'
 ```
 
+If you have trouble installing the PST dependencies on Windows, try using the [Windows executables]({{ site.baseurl }}/exe).
+
 ## Using the Mailbagit Graphical User Interface (GUI)
 
 To install the mailbagit GUI, in addition to `pip install mailbagit`, you need to run:
