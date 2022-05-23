@@ -1,6 +1,6 @@
 import os
 import mailbox
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
 from structlog import get_logger
@@ -245,20 +245,10 @@ if not skip_registry:
             for filePath in fileList:
                 rel_path = format.relativePath(self.path, filePath)  # returns "" when path is a file
                 if len(rel_path) < 1:
-                    originalFile = os.path.basename(filePath)
+                    originalFile = Path(filePath).name
                 else:
-                    originalFile = os.path.normpath(rel_path)
+                    originalFile = Path(os.path.normpath(rel_path)).as_posix()
                 # original file is now the relative path to the PST from the provided path
-                # print (originalFile)
-
-                # what is this doing?
-                # if len(originalFile) < 1:
-                #    path = ""
-                # else:
-                #    path = os.path.normpath(originalFile)
-                # print (originalFile)
-                # path = os.path.join(os.path.dirname(originalFile), os.path.splitext(originalFile)[0])
-                # print (path)
 
                 pst = pypff.file()
                 pst.open(filePath)

@@ -58,7 +58,12 @@ class Mbox(EmailAccount):
                             companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
-            originalFile = format.relativePath(self.path, filePath)
+            rel_path = format.relativePath(self.path, filePath)
+            if len(rel_path) < 1:
+                originalFile = Path(filePath).name
+            else:
+                originalFile = Path(os.path.normpath(rel_path)).as_posix()
+            # original file is now the relative path to the MBOX from the provided path
 
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
@@ -93,16 +98,16 @@ class Mbox(EmailAccount):
 
                     # Look for message arrangement
                     try:
-                        messagePath = format.messagePath(mailObject)
-                        if len(messagePath) > 0:
-                            unsafePath = os.path.join(os.path.splitext(originalFile)[0], messagePath)
-                        else:
-                            unsafePath = os.path.splitext(originalFile)[0]
-                        derivativesPath = format.normalizePath(unsafePath)
+                        messagePath = Path(format.messagePath(mailObject)).as_posix()
+                        if messagePath == ".":
+                            messagePath = ""
+                        derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
+                    # print (messagePath)
+                    # print (derivativesPath)
                     message = Email(
                         Error=errors["msg"],
                         Message_ID=format.parse_header(mail["Message-ID"]),
