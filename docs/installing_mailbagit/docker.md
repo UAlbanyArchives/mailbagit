@@ -3,7 +3,7 @@ layout: page
 title: Docker Images
 permalink: /docker/
 parent: Installing mailbagit
-nav_order: 3
+nav_order: 4
 ---
 
 # Running mailbagit in a Docker container

@@ -24,7 +24,9 @@ Instead, we plan to implement a "guided" command line option, which we hope may 
 
 There is a [known issue](https://github.com/UAlbanyArchives/mailbagit/issues/155) where the GUI does not fully run on Windows using the `mailbagit-gui` command. It will boot and lets you enter options but then fails to run when you click "Start."
 
-If you are runnig it natively with python, you can also try creating a file called `mailbagit-gui.py` with the contents:
+The GUI will run on Windows without this issue using the `mailbagit-gui.exe` [executables]({{ site.baseurl }}/exe).
+
+If you are running it natively with python, you can also try creating a file called `mailbagit-gui.py` with the contents:
 
 ```
 from mailbagit import gui
