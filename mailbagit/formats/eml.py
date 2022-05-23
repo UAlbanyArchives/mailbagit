@@ -1,6 +1,6 @@
 import datetime
 import json
-from os.path import join
+from pathlib import Path
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
 from structlog import get_logger
@@ -9,7 +9,6 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import email
 import os
-from email import policy
 import platform
 
 log = get_logger()
@@ -58,7 +57,7 @@ class EML(EmailAccount):
                 yield None
                 continue
 
-            originalFile = format.relativePath(self.path, filePath)
+            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
             errors = {}
@@ -66,7 +65,7 @@ class EML(EmailAccount):
             errors["stack_trace"] = []
             try:
                 with open(filePath, "rb") as f:
-                    msg = email.message_from_binary_file(f, policy=policy.default)
+                    msg = email.message_from_binary_file(f, policy=email.policy.default)
 
                     try:
                         # Parse message bodies
@@ -87,7 +86,9 @@ class EML(EmailAccount):
 
                     # Look for message arrangement
                     try:
-                        messagePath = format.messagePath(msg)
+                        messagePath = Path(format.messagePath(msg)).as_posix()
+                        if messagePath == ".":
+                            messagePath = ""
                         unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
                         derivativesPath = format.normalizePath(unsafePath)
                     except Exception as e:

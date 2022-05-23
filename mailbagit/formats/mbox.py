@@ -106,8 +106,6 @@ class Mbox(EmailAccount):
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
-                    # print (messagePath)
-                    # print (derivativesPath)
                     message = Email(
                         Error=errors["msg"],
                         Message_ID=format.parse_header(mail["Message-ID"]),
