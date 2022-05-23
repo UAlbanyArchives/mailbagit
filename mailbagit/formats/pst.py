@@ -9,7 +9,6 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
-from collections import OrderedDict
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -182,7 +181,7 @@ if not skip_registry:
                         except Exception as e:
                             desc = "Error parsing attachments"
                             errors = common.handle_error(errors, e, desc)
-
+                        # print (originalFile)
                         message = Email(
                             Error=errors["msg"],
                             Message_ID=format.parse_header(headers["Message-ID"]),
@@ -244,11 +243,19 @@ if not skip_registry:
                                 companion_files.append(os.path.join(root, file))
 
             for filePath in fileList:
-                originalFile = format.relativePath(self.path, filePath)
+                rel_path = format.relativePath(self.path, filePath)  # returns "" when path is a file
+                if len(rel_path) < 1:
+                    originalFile = os.path.basename(filePath)
+                else:
+                    originalFile = rel_path
+                # original file is now the relative path to the PST from the provided path
+
+                # what is this doing?
                 if len(originalFile) < 1:
                     path = ""
                 else:
                     path = os.path.normpath(originalFile)
+                print(path)
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -256,7 +263,7 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, path + "/" + folder.name, os.path.basename(filePath))
+                        yield from self.folders(folder, path + "/" + folder.name, filePath)
                     # else:
                     # if not self.iteration_only:
                     # This is an email folder that does not contain any messages.
