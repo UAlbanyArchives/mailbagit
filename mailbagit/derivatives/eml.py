@@ -115,19 +115,32 @@ class EmlDerivative(Derivative):
                             desc = "Error writing body for EML derivative"
                             errors = common.handle_error(errors, e, desc)
 
+                        # Get list of <img> files that might reference attachments
+                        if message.HTML_Body:
+                            inline_files = derivative.inlineAttachments(message.HTML_Body, message.HTML_Encoding)
+                        else:
+                            inline_files = []
+
                         # Attachments
                         try:
                             for attachment in message.Attachments:
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
-                                    mimeType = "text/plain"
+                                    mimeType = "application/octet-stream"
                                     desc = "Mime type not found for attachment, set as " + mimeType
                                     errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)
                                 encoders.encode_base64(part)
-                                part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
+
+                                # Check if the attachment is inline in the HTML
+                                if attachment.Name in inline_files:
+                                    content_disposition = "inline"
+                                else:
+                                    content_disposition = "attachment"
+
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to EML derivative"
