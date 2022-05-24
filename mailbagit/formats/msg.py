@@ -1,5 +1,6 @@
 import extract_msg
 import os
+from pathlib import Path
 from email import parser
 from structlog import get_logger
 import email.errors
@@ -56,7 +57,7 @@ class MSG(EmailAccount):
                 yield None
                 continue
 
-            originalFile = format.relativePath(self.path, filePath)
+            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
             errors = {}
@@ -83,9 +84,11 @@ class MSG(EmailAccount):
 
                 # Look for message arrangement
                 try:
-                    messagePath = format.messagePath(mail.header)
+                    messagePath = Path(format.messagePath(mail.header)).as_posix()
+                    if messagePath == ".":
+                        messagePath = ""
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                    derivativesPath = format.normalizePath(unsafePath)
+                    derivativesPath = Path(format.normalizePath(unsafePath)).as_posix()
                 except Exception as e:
                     desc = "Error reading message path from headers"
                     errors = common.handle_error(errors, e, desc)

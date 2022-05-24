@@ -10,7 +10,7 @@ parsers = ["pst", "mbox", "msg", "eml"]
 
 for parser in parsers:
     args.input = parser
-    args.derivatives = ["example"]
+    args.derivatives = ["html"]
     args.dry_run = True
     args.mailbag_name = "test_data"
     args.companion_files = False

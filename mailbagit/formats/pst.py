@@ -9,7 +9,6 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
-from collections import OrderedDict
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -119,10 +118,10 @@ if not skip_registry:
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], path)
+                            messagePath = path
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = format.normalizePath(messagePath)
+                            derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
                         except Exception as e:
                             desc = "Error reading message path"
                             errors = common.handle_error(errors, e, desc)
@@ -244,11 +243,12 @@ if not skip_registry:
                                 companion_files.append(os.path.join(root, file))
 
             for filePath in fileList:
-                originalFile = format.relativePath(self.path, filePath)
-                if len(originalFile) < 1:
-                    path = ""
+                rel_path = format.relativePath(self.path, filePath)  # returns "" when path is a file
+                if len(rel_path) < 1:
+                    originalFile = Path(filePath).name
                 else:
-                    path = os.path.normpath(originalFile)
+                    originalFile = Path(os.path.normpath(rel_path)).as_posix()
+                # original file is now the relative path to the PST from the provided path
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -256,7 +256,7 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, path + "/" + folder.name, os.path.basename(filePath))
+                        yield from self.folders(folder, folder.name, originalFile)
                     # else:
                     # if not self.iteration_only:
                     # This is an email folder that does not contain any messages.
