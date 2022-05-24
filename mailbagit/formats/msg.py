@@ -95,22 +95,6 @@ class MSG(EmailAccount):
 
                 try:
                     for mailAttachment in mail.attachments:
-                        if "MN2PR19MB407776A0698BD977B5EE2F3FB3289@MN2PR19MB4077.namprd19.prod.outlook.com" in mail.messageId:
-                            print(dir(mailAttachment))
-                            print(type(mailAttachment))
-                            print(mailAttachment.contendId)
-                            # print (mailAttachment.existsTypedProperty)
-                            # print (mailAttachment.namedProperties)
-                            print(mailAttachment._getTypedProperty("370e"))
-                            print(mailAttachment.props["370E001F"])
-                            print(mailAttachment._ensureSet("_contentType", "__substg1.0_370e"))
-                            print(mailAttachment._ensureSet("_attachmentMethod", "__substg1.0_3705"))
-                            print(mailAttachment._ensureSetProperty("_contentDisposition", "37050003"))
-                            print(mailAttachment._ensureSetProperty("_renPos", "370B0003"))
-                            print(mailAttachment._ensureSetProperty("_renPosis2", "67F20003"))
-                            # print (mailAttachment.props['37050003'].value)
-                        # print (mailAttachment.renderingPosition)
-
                         if mailAttachment.getFilename():
                             attachmentName = mailAttachment.getFilename()
                         elif mailAttachment.longFilename:
