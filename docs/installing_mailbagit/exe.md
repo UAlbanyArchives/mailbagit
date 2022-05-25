@@ -13,7 +13,7 @@ Executables are available for Windows that contain all dependencies except the [
 You can run `mailbagit.exe` in the command line [just as you would use the `mailbagit` command]({{ site.baseurl }}/mailbagit):
 
 ```
-mailbagit.exe path/to/export.pst -i pst -d eml warc -m my_mailbag -r`
+mailbagit.exe path/to/export.pst -i pst -d eml warc -m my_mailbag -r
 ```
 
 `mailbagit-gui.exe` will run just by double-clicking it.
