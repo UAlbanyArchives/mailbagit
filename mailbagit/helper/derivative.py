@@ -237,8 +237,9 @@ def htmlFormatting(message, external_css, headers=True):
             cid = tag["src"][4:]
 
             for attachment in message.Attachments:
-                if attachment.Name in cid:
-                    data = attachment.File
+                if attachment.Name:
+                    if attachment.Name in cid:
+                        data = attachment.File
 
             # If we found anything, inject it.
             if data:
