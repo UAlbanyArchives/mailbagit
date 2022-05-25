@@ -4,7 +4,7 @@
 2. Bump version in `setup.py` and `mailbagit/__init__.py`
 3. Build and push dev Docker image
 4. PR and merge to main
-5. Build Windows executables
+5. Build and test Windows executables
 6. [Tag a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 7. Write release notes
 8. Upload Windows executables
@@ -22,8 +22,8 @@ docker push ualbanyarchives/mailbagit:dev
 ## Build Windows executables
 
 ```
-pyinstaller mailbagit.py
-pyinstaller mailbagit-gui.py
+pyinstaller --onefile mailbagit.py
+pyinstaller --onefile mailbagit-gui.py
 ```
 
 ## Build and push to pypi
