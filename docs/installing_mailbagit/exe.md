@@ -10,6 +10,8 @@ nav_order: 3
 
 Executables are available for Windows that contain all dependencies except the [PDF dependencies]({{ site.baseurl }}/pdf). Download the latest `mailbagit.exe` and `mailbagit-gui.exe` files from the [Github releases](https://github.com/UAlbanyArchives/mailbag/releases).
 
+![Screenshot showing where to download the executable files under "assets" in the latest Github release.]({{ site.baseurl }}/img/release_assets.png)
+
 You can run `mailbagit.exe` in the command line [just as you would use the `mailbagit` command]({{ site.baseurl }}/mailbagit):
 
 ```
