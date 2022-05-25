@@ -36,6 +36,37 @@ def deleteFile(filePath):
         os.remove(filePath)
 
 
+def inlineAttachments(html_string, encoding):
+    """
+    Reads an HTML body and looks for images that might rely on inline
+    attachments. This loops through all the <img> tags and returns
+    filenames to check against attached files. Used for deciding the
+    Content-Disposition header for MBOX and EML derivatives
+
+    Parameters:
+        HTML_Body(str):
+
+    Returns:
+        Dict: A dict with filenames as keys and full contentIDs (<filename@identifier>) as values
+    """
+
+    inline_files = {}
+
+    # Formatting HTML with beautiful soup
+    soup = BeautifulSoup(html_string.encode(encoding), "html.parser", from_encoding=encoding)
+    tags = (tag for tag in soup.findAll("img") if tag.get("src") and tag.get("src").startswith("cid:"))
+    for tag in tags:
+        # Iterate through the attachments until we get the right one.
+        cid = tag["src"][4:]
+        if "@" in cid:
+            filename, contentID = cid.split("@", 1)
+            inline_files[filename] = cid
+        else:
+            inline_files[cid] = cid
+
+    return inline_files
+
+
 def htmlFormatting(message, external_css, headers=True):
     """
     Creates a formatted html file using message text or html body
@@ -206,8 +237,9 @@ def htmlFormatting(message, external_css, headers=True):
             cid = tag["src"][4:]
 
             for attachment in message.Attachments:
-                if attachment.Name in cid:
-                    data = attachment.File
+                if attachment.Name:
+                    if attachment.Name in cid:
+                        data = attachment.File
 
             # If we found anything, inject it.
             if data:

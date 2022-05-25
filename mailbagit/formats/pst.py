@@ -9,6 +9,7 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
+import uuid
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -158,11 +159,27 @@ if not skip_registry:
                                     elif len(attachmentShort) > 0:
                                         attachmentName = attachmentShort
                                     else:
-                                        raise ValueError("No attachment name found.")
+                                        attachmentName = None
+                                        desc = "No filename found for attachment, integer will be used instead"
+                                        errors = common.handle_error(errors, None, desc)
+
+                                    # Handle attachments.csv conflict
+                                    # helper.controller.writeAttachmentsToDisk() handles this
+                                    if attachmentName:
+                                        if attachmentName.lower() == "attachments.csv":
+                                            desc = (
+                                                "attachment "
+                                                + attachmentName
+                                                + " will be renamed to avoid filename conflict with mailbag spec"
+                                            )
+                                            errors = common.handle_error(errors, None, desc, "warn")
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
                                         mime = format.guessMimeType(attachmentName)
+
+                                    # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                                    contentID = uuid.uuid4().hex
 
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
@@ -175,6 +192,7 @@ if not skip_registry:
                                     Name=attachmentName,
                                     File=attachment_content,
                                     MimeType=mime,
+                                    Content_ID=contentID,
                                 )
                                 attachments.append(attachment)
 

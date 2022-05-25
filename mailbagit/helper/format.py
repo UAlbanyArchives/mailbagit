@@ -7,6 +7,7 @@ from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
 import mailbagit.helper.common as common
 import html
+import uuid
 
 from structlog import get_logger
 
@@ -141,6 +142,7 @@ def parse_part(part, bodies, attachments, errors):
     """
     content_type = part.get_content_type()
     content_disposition = part.get_content_disposition()
+    content_id = part["Content-ID"]
 
     # Extract body
     try:
@@ -162,7 +164,7 @@ def parse_part(part, bodies, attachments, errors):
     # Extract attachments
     if part.get_content_maintype() == "multipart":
         pass
-    elif content_disposition is None:
+    elif content_disposition is None and content_id is None:
         pass
     else:
         try:
@@ -173,18 +175,30 @@ def parse_part(part, bodies, attachments, errors):
                     desc = "Missing attachment content and filename, failed to read attachment"
                 errors = common.handle_error(errors, None, desc)
             else:
+                # Generate a Content-ID if none is available
+                if content_id is None:
+                    content_id = uuid.uuid4().hex
+
                 attachmentFile = part.get_payload(decode=True)
                 if part.get_filename():
                     attachmentName = part.get_filename()
                 else:
-                    desc = "Missing attachment name, using integer"
+                    attachmentName = None
+                    desc = "No filename found for attachment, integer will be used instead"
                     errors = common.handle_error(errors, None, desc)
-                    attachmentName = str(len(attachments))
+
+                # Handle attachments.csv conflict
+                # helper.controller.writeAttachmentsToDisk() handles this
+                if attachmentName:
+                    if attachmentName.lower() == "attachments.csv":
+                        desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                        errors = common.handle_error(errors, None, desc, "warn")
 
                 attachment = Attachment(
                     Name=attachmentName,
                     File=attachmentFile,
                     MimeType=content_type,
+                    Content_ID=content_id,
                 )
                 attachments.append(attachment)
         except Exception as e:
@@ -365,7 +379,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
-    
+
     Parameters:
         dry_run (Boolean):
         mainPath (String): Parent or provided directory path

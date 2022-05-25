@@ -96,7 +96,12 @@ if not skip_registry:
                                 if stdout:
                                     log.debug("Output converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + stdout.decode("utf-8"))
                                 if stderr:
-                                    desc = "Error converting to " + str(message.Mailbag_Message_ID) + ".pdf: " + stderr.decode("utf-8")
+                                    desc = (
+                                        "Error converting to "
+                                        + str(message.Mailbag_Message_ID)
+                                        + ".pdf: "
+                                        + stderr.decode("utf-8").replace("\r", "\n").replace("\n\n", "\n")
+                                    )
                                     errors = common.handle_error(errors, None, desc, "warn")
                             # delete the HTML file
                             if os.path.isfile(pdf_name):

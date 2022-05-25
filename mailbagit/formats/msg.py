@@ -10,6 +10,7 @@ import mailbagit.helper.format as format
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
 from extract_msg import attachment
+import uuid
 
 log = get_logger()
 
@@ -102,14 +103,35 @@ class MSG(EmailAccount):
                         elif mailAttachment.shortFilename:
                             attachmentName = mailAttachment.shortFilename
                         else:
-                            attachmentName = str(len(attachments))
-                            desc = "No filename found for attachment " + attachmentName + " for message " + str(message.Mailbag_Message_ID)
-                            errors = common.handle_error(errors, e, desc)
+                            attachmentName = None
+                            desc = "No filename found for attachment, integer will be used instead"
+                            errors = common.handle_error(errors, None, desc)
+
+                        # Handle attachments.csv conflict
+                        # helper.controller.writeAttachmentsToDisk() handles this
+                        if attachmentName:
+                            if attachmentName.lower() == "attachments.csv":
+                                desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                                errors = common.handle_error(errors, None, desc, "warn")
+
+                        # Try to get the mime, guess it if this doesn't work
+                        mime = None
+                        try:
+                            mime = mailAttachment._ensureSet("_contentType", "__substg1.0_370e")
+                        except Exception as e:
+                            desc = "Error reading mime type, guessing it instead"
+                            errors = common.handle_error(errors, e, desc, "warn")
+                        if mime is None:
+                            mime = format.guessMimeType(attachmentName)
+
+                        # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                        contentID = uuid.uuid4().hex
 
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
-                            MimeType=format.guessMimeType(attachmentName),
+                            MimeType=mime,
+                            Content_ID=contentID,
                         )
                         attachments.append(attachment)
 
