@@ -29,7 +29,7 @@ pyinstaller --onefile mailbagit-gui.py
 ## Build and push to pypi
 ```
 python -m build
-twine upload dist/*
+twine upload dist/*.gz dist/*.whl
 ```
 
 ## Building and pushing prod Docker image
