@@ -109,9 +109,10 @@ class MSG(EmailAccount):
 
                         # Handle attachments.csv conflict
                         # helper.controller.writeAttachmentsToDisk() handles this
-                        if attachmentName.lower() == "attachments.csv":
-                            desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
-                            errors = common.handle_error(errors, None, desc, "warn")
+                        if attachmentName:
+                            if attachmentName.lower() == "attachments.csv":
+                                desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                                errors = common.handle_error(errors, None, desc, "warn")
 
                         # Try to get the mime, guess it if this doesn't work
                         mime = None

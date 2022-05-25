@@ -165,11 +165,14 @@ if not skip_registry:
 
                                     # Handle attachments.csv conflict
                                     # helper.controller.writeAttachmentsToDisk() handles this
-                                    if attachmentName.lower() == "attachments.csv":
-                                        desc = (
-                                            "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
-                                        )
-                                        errors = common.handle_error(errors, None, desc, "warn")
+                                    if attachmentName:
+                                        if attachmentName.lower() == "attachments.csv":
+                                            desc = (
+                                                "attachment "
+                                                + attachmentName
+                                                + " will be renamed to avoid filename conflict with mailbag spec"
+                                            )
+                                            errors = common.handle_error(errors, None, desc, "warn")
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
