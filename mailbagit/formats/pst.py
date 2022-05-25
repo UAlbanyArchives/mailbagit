@@ -9,6 +9,7 @@ from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
+import uuid
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -164,6 +165,9 @@ if not skip_registry:
                                     if mime is None:
                                         mime = format.guessMimeType(attachmentName)
 
+                                    # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                                    contentID = uuid.uuid4().hex
+
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
@@ -175,6 +179,7 @@ if not skip_registry:
                                     Name=attachmentName,
                                     File=attachment_content,
                                     MimeType=mime,
+                                    Content_ID=contentID,
                                 )
                                 attachments.append(attachment)
 

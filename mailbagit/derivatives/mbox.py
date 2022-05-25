@@ -123,7 +123,20 @@ class MboxDerivative(Derivative):
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)
                                 encoders.encode_base64(part)
-                                part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
+
+                                # Check if the attachment is inline in the HTML
+                                if attachment.Content_ID in inline_files.values():
+                                    content_disposition = "inline"
+                                    part.add_header("Content-ID", attachment.Content_ID)
+                                elif attachment.Name in inline_files.keys():
+                                    # If the source was MSG or PST, we generated attachment.Content_ID so it won't match
+                                    content_disposition = "inline"
+                                    part.add_header("Content-ID", "<" + inline_files[attachment.Name] + ">")
+                                else:
+                                    content_disposition = "attachment"
+                                    part.add_header("Content-ID", attachment.Content_ID)
+
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to MBOX derivative"

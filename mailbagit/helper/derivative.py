@@ -47,10 +47,10 @@ def inlineAttachments(html_string, encoding):
         HTML_Body(str):
 
     Returns:
-        List: A list of filenames
+        Dict: A dict with filenames as keys and full contentIDs (<filename@identifier>) as values
     """
 
-    inline_files = []
+    inline_files = {}
 
     # Formatting HTML with beautiful soup
     soup = BeautifulSoup(html_string.encode(encoding), "html.parser", from_encoding=encoding)
@@ -59,8 +59,10 @@ def inlineAttachments(html_string, encoding):
         # Iterate through the attachments until we get the right one.
         cid = tag["src"][4:]
         if "@" in cid:
-            filename = cid.split("@", 1)[0]
-            inline_files.append(filename)
+            filename, contentID = cid.split("@", 1)
+            inline_files[filename] = cid
+        else:
+            inline_files[cid] = cid
 
     return inline_files
 

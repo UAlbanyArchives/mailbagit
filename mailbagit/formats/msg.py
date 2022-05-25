@@ -10,6 +10,7 @@ import mailbagit.helper.format as format
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
 from extract_msg import attachment
+import uuid
 
 log = get_logger()
 
@@ -116,10 +117,14 @@ class MSG(EmailAccount):
                         if mime is None:
                             mime = format.guessMimeType(attachmentName)
 
+                        # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                        contentID = uuid.uuid4().hex
+
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
                             MimeType=mime,
+                            Content_ID=contentID,
                         )
                         attachments.append(attachment)
 

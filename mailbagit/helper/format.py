@@ -7,6 +7,7 @@ from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
 import mailbagit.helper.common as common
 import html
+import uuid
 
 from structlog import get_logger
 
@@ -173,6 +174,11 @@ def parse_part(part, bodies, attachments, errors):
                     desc = "Missing attachment content and filename, failed to read attachment"
                 errors = common.handle_error(errors, None, desc)
             else:
+                contentID = part["Content-ID"]
+                # Generate a Content-ID if none is available
+                if contentID is None:
+                    contentID = uuid.uuid4().hex
+
                 attachmentFile = part.get_payload(decode=True)
                 if part.get_filename():
                     attachmentName = part.get_filename()
@@ -185,6 +191,7 @@ def parse_part(part, bodies, attachments, errors):
                     Name=attachmentName,
                     File=attachmentFile,
                     MimeType=content_type,
+                    Content_ID=contentID,
                 )
                 attachments.append(attachment)
         except Exception as e:
@@ -365,7 +372,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
-    
+
     Parameters:
         dry_run (Boolean):
         mainPath (String): Parent or provided directory path
