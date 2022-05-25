@@ -4,17 +4,26 @@
 2. Bump version in `setup.py` and `mailbagit/__init__.py`
 3. Build and push dev Docker image
 4. PR and merge to main
-5. [Tag a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
-6. Write release notes
-7. Build and publish website
-8. Build and push to pypi
-9. Build and push prod Docker image
+5. Build Windows executables
+6. [Tag a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
+7. Write release notes
+8. Upload Windows executables
+9. Build and publish website
+10. Build and push to pypi
+11. Build and push prod Docker image
 
 ## Building and pushing dev Docker image
 
 ```
 docker build -t ualbanyarchives/mailbagit:dev .
 docker push ualbanyarchives/mailbagit:dev
+```
+
+## Build Windows executables
+
+```
+pyinstaller mailbagit.py
+pyinstaller mailbagit-gui.py
 ```
 
 ## Build and push to pypi

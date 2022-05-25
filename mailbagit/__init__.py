@@ -1,7 +1,7 @@
 # __init__.py
 
 # Version of the mailbagit package
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 import os
 from pathlib import Path
@@ -171,7 +171,11 @@ mailbagit_options.add_argument(
     "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
-    "-f", "--companion_files", help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.", default=False, action="store_true"
+    "-f",
+    "--companion_files",
+    help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.",
+    default=False,
+    action="store_true",
 )
 # Yet-to-be-implemented:
 """
