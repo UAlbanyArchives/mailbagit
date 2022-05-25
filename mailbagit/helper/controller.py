@@ -1,6 +1,7 @@
 import os, shutil, glob
 import datetime
 from time import time
+import csv
 
 import mailbagit.globals as globals
 
@@ -57,10 +58,11 @@ def progressMessage(msg, print_End="\r"):
     print(f"\r{dt} {message_type} {msg}", end=print_End)
 
 
-def saveAttachmentOnDisk(dry_run, attachments_dir, message):
+def writeAttachmentsToDisk(dry_run, attachments_dir, message):
     """
     Takes an email message object and writes any attachments in the model
-    to the attachments subdirectory according to the mailbag spec
+    to the attachments subdirectory according to the mailbag spec.
+    Also creates attachments.csv according to the mailbag spec.
 
     Parameters:
         dry_run (Boolean): Option to do a test run without writing changes
@@ -68,15 +70,44 @@ def saveAttachmentOnDisk(dry_run, attachments_dir, message):
         message (Email): A full email message object desribed in models.py
     """
 
+    message_attachments_dir = os.path.join(attachments_dir, str(message.Mailbag_Message_ID))
     if not dry_run:
-        message_attachments_dir = os.path.join(attachments_dir, str(message.Mailbag_Message_ID))
         os.mkdir(message_attachments_dir)
 
-    for attachment in message.Attachments:
+    # Set up attachments.csv
+    attachments_csv = os.path.join(message_attachments_dir, "attachments.csv")
+    attachments_headers = ["Original-Filename", "Mailbag-Filename", "MimeType", "Content-ID"]
+    attachment_data = [attachments_headers]
+
+    for i, attachment in enumerate(message.Attachments):
+        if attachment.Name:
+            # Need to handle filename conflicts with attachments.csv
+            # The format parsers raise a warning about this
+            if attachment.Name.lower() == "attachments.csv":
+                writtenName = str(i) + os.path.splitext(attachment.Name)[1]
+                desc = ""
+                errors = common.handle_error(errors, None, desc, "warn")
+            else:
+                writtenName = attachment.Name
+            attachment_row = [attachment.Name, writtenName, attachment.MimeType, attachment.Content_ID]
+        else:
+            # If there is no filename available, just use and integer
+            # The format parsers raise an error about this
+            writtenName = str(i)
+            attachment_row = ["", writtenName, attachment.MimeType, attachment.Content_ID]
+        attachment_data.append(attachment_row)
+
         log.debug("Saving Attachment:" + str(attachment.Name))
         log.debug("Type:" + str(attachment.MimeType))
         if not dry_run:
-            attachment_path = os.path.join(message_attachments_dir, attachment.Name)
+            attachment_path = os.path.join(message_attachments_dir, writtenName)
             f = open(attachment_path, "wb")
             f.write(attachment.File)
             f.close()
+
+    # Write attachments.csv
+    if not dry_run:
+        with open(attachments_csv, "w", encoding="utf-8", newline="") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(attachment_data)
+            csv_file.close()

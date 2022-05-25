@@ -159,7 +159,17 @@ if not skip_registry:
                                     elif len(attachmentShort) > 0:
                                         attachmentName = attachmentShort
                                     else:
-                                        raise ValueError("No attachment name found.")
+                                        attachmentName = None
+                                        desc = "No filename found for attachment, integer will be used instead"
+                                        errors = common.handle_error(errors, None, desc)
+
+                                    # Handle attachments.csv conflict
+                                    # helper.controller.writeAttachmentsToDisk() handles this
+                                    if attachmentName.lower() == "attachments.csv":
+                                        desc = (
+                                            "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                                        )
+                                        errors = common.handle_error(errors, None, desc, "warn")
 
                                     # Guess the mime if we can't find it
                                     if mime is None:

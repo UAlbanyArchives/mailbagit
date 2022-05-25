@@ -183,9 +183,15 @@ def parse_part(part, bodies, attachments, errors):
                 if part.get_filename():
                     attachmentName = part.get_filename()
                 else:
-                    desc = "Missing attachment name, using integer"
+                    attachmentName = None
+                    desc = "No filename found for attachment, integer will be used instead"
                     errors = common.handle_error(errors, None, desc)
-                    attachmentName = str(len(attachments))
+
+                # Handle attachments.csv conflict
+                # helper.controller.writeAttachmentsToDisk() handles this
+                if attachmentName.lower() == "attachments.csv":
+                    desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                    errors = common.handle_error(errors, None, desc, "warn")
 
                 attachment = Attachment(
                     Name=attachmentName,

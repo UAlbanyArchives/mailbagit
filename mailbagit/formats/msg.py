@@ -103,9 +103,15 @@ class MSG(EmailAccount):
                         elif mailAttachment.shortFilename:
                             attachmentName = mailAttachment.shortFilename
                         else:
-                            attachmentName = str(len(attachments))
-                            desc = "No filename found for attachment " + attachmentName + " for message " + str(message.Mailbag_Message_ID)
-                            errors = common.handle_error(errors, e, desc)
+                            attachmentName = None
+                            desc = "No filename found for attachment, integer will be used instead"
+                            errors = common.handle_error(errors, None, desc)
+
+                        # Handle attachments.csv conflict
+                        # helper.controller.writeAttachmentsToDisk() handles this
+                        if attachmentName.lower() == "attachments.csv":
+                            desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                            errors = common.handle_error(errors, None, desc, "warn")
 
                         # Try to get the mime, guess it if this doesn't work
                         mime = None

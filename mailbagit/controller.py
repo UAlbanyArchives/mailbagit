@@ -158,7 +158,7 @@ class Controller:
             if len(message.Attachments) > 0:
                 if not os.path.isdir(attachments_dir) and not self.args.dry_run:
                     os.mkdir(attachments_dir)
-                controller.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
+                controller.writeAttachmentsToDisk(self.args.dry_run, attachments_dir, message)
 
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
