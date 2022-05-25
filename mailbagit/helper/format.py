@@ -142,6 +142,7 @@ def parse_part(part, bodies, attachments, errors):
     """
     content_type = part.get_content_type()
     content_disposition = part.get_content_disposition()
+    content_id = part["Content-ID"]
 
     # Extract body
     try:
@@ -163,7 +164,7 @@ def parse_part(part, bodies, attachments, errors):
     # Extract attachments
     if part.get_content_maintype() == "multipart":
         pass
-    elif content_disposition is None:
+    elif content_disposition is None and content_id is None:
         pass
     else:
         try:
@@ -174,10 +175,9 @@ def parse_part(part, bodies, attachments, errors):
                     desc = "Missing attachment content and filename, failed to read attachment"
                 errors = common.handle_error(errors, None, desc)
             else:
-                contentID = part["Content-ID"]
                 # Generate a Content-ID if none is available
-                if contentID is None:
-                    contentID = uuid.uuid4().hex
+                if content_id is None:
+                    content_id = uuid.uuid4().hex
 
                 attachmentFile = part.get_payload(decode=True)
                 if part.get_filename():
@@ -197,7 +197,7 @@ def parse_part(part, bodies, attachments, errors):
                     Name=attachmentName,
                     File=attachmentFile,
                     MimeType=content_type,
-                    Content_ID=contentID,
+                    Content_ID=content_id,
                 )
                 attachments.append(attachment)
         except Exception as e:
