@@ -10,7 +10,7 @@ import os
 # This is a mock object representing the args returned from argparse/Gooey
 @pytest.fixture
 def cli_args():
-    return Namespace(dry_run=True, mailbag_name="New_Mailbag")
+    return Namespace(dry_run=True, mailbag_name="New_Mailbag", companion_files=False)
 
 
 def test_Mbox(cli_args):
@@ -36,7 +36,13 @@ def test_Mbox(cli_args):
                     for exp_attach in expected.Attachments:
                         if attachment.Name == exp_attach.Name:
                             match = True
-                            assert attachment == exp_attach
+                            for attachmentField in attachment:
+                                dump = getattr(exp_attach, attachmentField[0])
+                                compare = getattr(attachment, attachmentField[0])
+                                if attachmentField[0] == "Content_ID":
+                                    assert len(compare) > 0
+                                else:
+                                    assert dump == compare
                     assert match == True
             else:
                 assert getattr(message, field[0]) == getattr(expected, field[0])
@@ -65,7 +71,13 @@ def test_MSG(cli_args):
                     for exp_attach in expected.Attachments:
                         if attachment.Name == exp_attach.Name:
                             match = True
-                            assert attachment == exp_attach
+                            for attachmentField in attachment:
+                                dump = getattr(exp_attach, attachmentField[0])
+                                compare = getattr(attachment, attachmentField[0])
+                                if attachmentField[0] == "Content_ID":
+                                    assert len(compare) > 0
+                                else:
+                                    assert dump == compare
                     assert match == True
             else:
                 assert getattr(message, field[0]) == getattr(expected, field[0])
@@ -95,7 +107,13 @@ def test_EML(cli_args):
                     for exp_attach in expected.Attachments:
                         if attachment.Name == exp_attach.Name:
                             match = True
-                            assert attachment == exp_attach
+                            for attachmentField in attachment:
+                                dump = getattr(exp_attach, attachmentField[0])
+                                compare = getattr(attachment, attachmentField[0])
+                                if attachmentField[0] == "Content_ID":
+                                    assert len(compare) > 0
+                                else:
+                                    assert dump == compare
                     assert match == True
             else:
                 assert getattr(message, field[0]) == getattr(expected, field[0])
@@ -127,7 +145,13 @@ def test_PST(cli_args):
                     for exp_attach in expected.Attachments:
                         if attachment.Name == exp_attach.Name:
                             match = True
-                            assert attachment == exp_attach
+                            for attachmentField in attachment:
+                                dump = getattr(exp_attach, attachmentField[0])
+                                compare = getattr(attachment, attachmentField[0])
+                                if attachmentField[0] == "Content_ID":
+                                    assert len(compare) > 0
+                                else:
+                                    assert dump == compare
                     assert match == True
             else:
                 assert getattr(message, field[0]) == getattr(expected, field[0])

@@ -1,14 +1,16 @@
 import extract_msg
 import os
+from pathlib import Path
 from email import parser
 from structlog import get_logger
-from RTFDE.deencapsulate import DeEncapsulator
 import email.errors
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
-import mailbagit.helper as helper
+import mailbagit.helper.format as format
+import mailbagit.helper.common as common
 import mailbagit.globals as globals
 from extract_msg import attachment
+import uuid
 
 log = get_logger()
 
@@ -28,6 +30,7 @@ class MSG(EmailAccount):
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
+        self.companion_files = args.companion_files
         self.iteration_only = False
         log.info("Reading :", Path=self.path)
 
@@ -36,18 +39,26 @@ class MSG(EmailAccount):
 
     def messages(self):
         fileList = []
+        companion_files = []
         for root, dirs, files in os.walk(self.path):
             for file in files:
-                if file.lower().endswith("." + self.format_name):
-                    fileList.append(os.path.join(root, file))
+                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                fileRoot = root + os.sep
+                # don't count the newly-created mailbag
+                if not fileRoot.startswith(mailbag_path):
+                    if file.lower().endswith("." + self.format_name):
+                        fileList.append(os.path.join(root, file))
+                    elif self.companion_files:
+                        companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
+            # Parse email matching the input file extension
 
             if self.iteration_only:
                 yield None
                 continue
 
-            originalFile = helper.relativePath(self.path, filePath)
+            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
             errors = {}
@@ -70,16 +81,18 @@ class MSG(EmailAccount):
                         text_encoding = mail.stringEncoding
                 except Exception as e:
                     desc = "Error parsing message body"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 # Look for message arrangement
                 try:
-                    messagePath = helper.messagePath(mail.header)
+                    messagePath = Path(format.messagePath(mail.header)).as_posix()
+                    if messagePath == ".":
+                        messagePath = ""
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                    derivativesPath = helper.normalizePath(unsafePath)
+                    derivativesPath = Path(format.normalizePath(unsafePath)).as_posix()
                 except Exception as e:
                     desc = "Error reading message path from headers"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 try:
                     for mailAttachment in mail.attachments:
@@ -90,21 +103,42 @@ class MSG(EmailAccount):
                         elif mailAttachment.shortFilename:
                             attachmentName = mailAttachment.shortFilename
                         else:
-                            attachmentName = str(len(attachments))
-                            desc = "No filename found for attachment " + attachmentName + " for message " + str(message.Mailbag_Message_ID)
-                            errors = helper.handle_error(errors, e, desc)
+                            attachmentName = None
+                            desc = "No filename found for attachment, integer will be used instead"
+                            errors = common.handle_error(errors, None, desc)
+
+                        # Handle attachments.csv conflict
+                        # helper.controller.writeAttachmentsToDisk() handles this
+                        if attachmentName:
+                            if attachmentName.lower() == "attachments.csv":
+                                desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
+                                errors = common.handle_error(errors, None, desc, "warn")
+
+                        # Try to get the mime, guess it if this doesn't work
+                        mime = None
+                        try:
+                            mime = mailAttachment._ensureSet("_contentType", "__substg1.0_370e")
+                        except Exception as e:
+                            desc = "Error reading mime type, guessing it instead"
+                            errors = common.handle_error(errors, e, desc, "warn")
+                        if mime is None:
+                            mime = format.guessMimeType(attachmentName)
+
+                        # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                        contentID = uuid.uuid4().hex
 
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
-                            MimeType=helper.guessMimeType(attachmentName),
+                            MimeType=mime,
+                            Content_ID=contentID,
                         )
                         attachments.append(attachment)
 
                 except Exception as e:
                     desc = "Error parsing attachments"
-                    errors = helper.handle_error(errors, e, desc)
-                print(mail.subject)
+                    errors = common.handle_error(errors, e, desc)
+
                 message = Email(
                     Error=errors["msg"],
                     Message_ID=mail.messageId.strip(),
@@ -134,11 +168,16 @@ class MSG(EmailAccount):
 
             except (email.errors.MessageParseError, Exception) as e:
                 desc = "Error parsing message"
-                errors = helper.handle_error(errors, e, desc)
+                errors = common.handle_error(errors, e, desc)
                 message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
                 # Make sure the MSG file is closed
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = helper.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
             yield message
+
+        if self.companion_files:
+            # Move all files into mailbag directory structure
+            for companion_file in companion_files:
+                new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)

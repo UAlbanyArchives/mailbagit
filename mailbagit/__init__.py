@@ -30,7 +30,7 @@ plugin_basedir = os.environ.get("MAILBAGIT_PLUGIN_DIR", None)
 # Formats and derivatives are loaded from:
 #   1. formats/derivatives directories inside the package (built-in)
 #   2. .mailbagit/{formats,derivatives} in user home directory
-#   3. {formats,dirivatives} subdirectories in plugin dir set in environment variable
+#   3. {formats,derivatives} subdirectories in plugin dir set in environment variable
 plugin_dirs = {"formats": [], "derivatives": []}
 for plugin_type, dirs in plugin_dirs.items():
     dirs.append(Path(f"~/.mailbagit/{plugin_type}").expanduser())
@@ -165,10 +165,13 @@ else:
 # add mailbagit-specific optional args here
 mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
 mailbagit_options.add_argument(
-    "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ", nargs=None, choices=["tar", "zip", "tar.gz"]
+    "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made", default=False, action="store_true"
+    "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+)
+mailbagit_options.add_argument(
+    "-f", "--companion_files", help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.", default=False, action="store_true"
 )
 # Yet-to-be-implemented:
 """

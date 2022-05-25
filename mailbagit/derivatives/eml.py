@@ -1,6 +1,7 @@
 # This is Eml derivative
 from os.path import join
-import mailbagit.helper as helper
+import mailbagit.helper.common as common
+import mailbagit.helper.derivative as derivative
 import os, glob
 import mailbox
 from mailbagit.email_account import EmailAccount
@@ -20,7 +21,7 @@ log = get_logger()
 class EmlDerivative(Derivative):
     derivative_name = "eml"
     derivative_format = "eml"
-    derivative_agent = email.__name__
+    derivative_agent = "email"
     derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, **kwargs):
@@ -50,7 +51,7 @@ class EmlDerivative(Derivative):
             # Build msg
             if not message.Message and not message.Headers:
                 desc = "Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID)
-                errors = helper.handle_error(errors, None, desc, "error")
+                errors = common.handle_error(errors, None, desc, "error")
             else:
                 fullObjectWrite = False
                 if message.Message:
@@ -73,9 +74,9 @@ class EmlDerivative(Derivative):
                                 outfile.close()
                             fullObjectWrite = True
                     except Exception as e:
-                        helper.deleteFile(filename + ".eml")
+                        derivative.deleteFile(filename + ".eml")
                         desc = "Error writing full email object to EML, generating it from the model instead"
-                        errors = helper.handle_error(errors, e, desc, "warn")
+                        errors = common.handle_error(errors, e, desc, "warn")
                         fullObjectWrite = False
 
                 if fullObjectWrite == False:
@@ -95,7 +96,7 @@ class EmlDerivative(Derivative):
                                 msg["X-Folder"] = message.Message_Path
                         except Exception as e:
                             desc = "Error writing headers for EML derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Add message body
                         try:
@@ -109,28 +110,47 @@ class EmlDerivative(Derivative):
                                 msg.attach(alt)
                             else:
                                 desc = "No body present for " + str(message.Mailbag_Message_ID) + ". Created EML without message body"
-                                errors = helper.handle_error(errors, None, desc, "warn")
+                                errors = common.handle_error(errors, None, desc, "warn")
                         except Exception as e:
                             desc = "Error writing body for EML derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
+
+                        # Get list of <img> files that might reference attachments
+                        if message.HTML_Body:
+                            inline_files = derivative.inlineAttachments(message.HTML_Body, message.HTML_Encoding)
+                        else:
+                            inline_files = {}
 
                         # Attachments
                         try:
                             for attachment in message.Attachments:
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
-                                    mimeType = "text/plain"
+                                    mimeType = "application/octet-stream"
                                     desc = "Mime type not found for attachment, set as " + mimeType
-                                    errors = helper.handle_error(errors, None, desc, "warn")
+                                    errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)
                                 encoders.encode_base64(part)
-                                part.add_header("Content-Disposition", "attachment", filename=attachment.Name)
+
+                                # Check if the attachment is inline in the HTML
+                                if attachment.Content_ID in inline_files.values():
+                                    content_disposition = "inline"
+                                    part.add_header("Content-ID", attachment.Content_ID)
+                                elif attachment.Name in inline_files.keys():
+                                    # If the source was MSG or PST, we generated attachment.Content_ID so it won't match
+                                    content_disposition = "inline"
+                                    part.add_header("Content-ID", "<" + inline_files[attachment.Name] + ">")
+                                else:
+                                    content_disposition = "attachment"
+                                    part.add_header("Content-ID", attachment.Content_ID)
+
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to EML derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Write generated EML to disk
                         log.debug("Writing generated EML to " + str(out_dir))
@@ -144,15 +164,15 @@ class EmlDerivative(Derivative):
                                     outfile.close()
                         except Exception as e:
                             desc = "Error writing EML derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                     else:
                         desc = "Unable to create EML as no body or headers present for " + str(message.Mailbag_Message_ID)
-                        errors = helper.handle_error(errors, None, desc, "error")
+                        errors = common.handle_error(errors, None, desc, "error")
 
         except Exception as e:
             desc = "Error creating EML derivative"
-            errors = helper.handle_error(errors, e, desc)
+            errors = common.handle_error(errors, e, desc)
 
         message.Error.extend(errors["msg"])
         message.StackTrace.extend(errors["stack_trace"])

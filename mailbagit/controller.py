@@ -9,7 +9,7 @@ from mailbagit.derivative import Derivative
 from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
-import mailbagit.helper as helper
+import mailbagit.helper.controller as controller
 import mailbagit.globals as globals
 from time import time
 import uuid
@@ -158,7 +158,7 @@ class Controller:
             if len(message.Attachments) > 0:
                 if not os.path.isdir(attachments_dir) and not self.args.dry_run:
                     os.mkdir(attachments_dir)
-                helper.saveAttachmentOnDisk(self.args.dry_run, attachments_dir, message)
+                controller.writeAttachmentsToDisk(self.args.dry_run, attachments_dir, message)
 
             # Setting up CSV data
             # checking if the count of messages exceed 100000 and creating a new portion if it exceeds
@@ -194,7 +194,9 @@ class Controller:
             is_last = mailbag_message_id == total_messages
             if total_messages / 100 < 1 or is_first or is_last or mailbag_message_id % int(total_messages / 100) == 0:
                 print_End = "\n" if globals.log_level == "DEBUG" or is_last else "\r"
-                helper.progress(mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End)
+                controller.progress(
+                    mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End
+                )
 
         # End thread and server for WARC derivatives
         for d in derivatives:
@@ -225,7 +227,7 @@ class Controller:
                         writer.writerows(portion)
                         f.close()
 
-        helper.progressMessage("Writing CSVs...")
+        controller.progressMessage("Writing CSVs...")
         log.debug("Writing error.csv to " + str(error_dir))
         if len(error_csv) > 1:
             filename = os.path.join(error_dir, "error.csv")
@@ -243,11 +245,11 @@ class Controller:
             now = datetime.datetime.now()
             bag.info["Bagging-Timestamp"] = now.strftime("%Y-%m-%dT%H:%M:%S")
             bag.info["Bagging-Date"] = now.strftime("%Y-%m-%d")
-            helper.progressMessage("Generating manifests...")
+            controller.progressMessage("Generating manifests...")
             bag.save(manifests=True)
 
         if self.args.compress and not self.args.dry_run:
-            helper.progressMessage("Compressing mailbag...")
+            controller.progressMessage("Compressing mailbag...")
             log.info("Compressing Mailbag")
             compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
             shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
@@ -257,6 +259,6 @@ class Controller:
                 # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
 
-        helper.progressMessage("Finished packaging mailbag.", print_End="\n")
+        controller.progressMessage("Finished packaging mailbag.", print_End="\n")
 
         return mail_account.messages()

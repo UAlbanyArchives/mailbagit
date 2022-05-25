@@ -3,7 +3,7 @@ layout: page
 title: PDF Derivatives
 permalink: /pdf/
 parent: Installing mailbagit
-nav_order: 3
+nav_order: 5
 ---
 
 # PDF derivatives

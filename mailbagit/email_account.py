@@ -47,11 +47,16 @@ class EmailAccount(ABC):
         pass
 
 
-def import_formats(additional_dirs=None):
-    if not additional_dirs:
-        additional_dirs = []
+def import_formats(dirs=None):
+    if not dirs:
+        dirs = []
 
-    dirs = [join(dirname(__file__), "formats"), *additional_dirs]
+    # Since pyinstaller can't pick up dynamically install modules within the exe,
+    # all built-in formats must be manually imported
+    import mailbagit.formats.eml
+    import mailbagit.formats.mbox
+    import mailbagit.formats.msg
+    import mailbagit.formats.pst
 
     for formats_dir in reversed(dirs):
         if not exists(formats_dir):

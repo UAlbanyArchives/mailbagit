@@ -7,6 +7,7 @@ class Attachment(models.Base):
     Name = fields.StringField()
     File = fields.EmbeddedField(bytes)
     MimeType = fields.StringField()
+    Content_ID = fields.StringField()
 
 
 class Email(models.Base):

@@ -7,7 +7,9 @@ from structlog import get_logger
 from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
-import mailbagit.helper as helper
+import mailbagit.helper.format as format
+import mailbagit.helper.common as common
+import uuid
 
 # only create format if pypff is successfully importable -
 # pst is not supported otherwise
@@ -38,6 +40,7 @@ if not skip_registry:
             self.path = target_account
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
+            self.companion_files = args.companion_files
             self.iteration_only = False
             log.info("Reading :", Path=self.path)
 
@@ -47,10 +50,9 @@ if not skip_registry:
         def folders(self, folder, path, originalFile):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
-            # path is a list that you can create the filepath with os.path.join()
+            # path is the email folder path of the message, separated by "/"
             if folder.number_of_sub_messages:
                 log.debug("Reading folder: " + folder.name)
-                path.append(folder.name)
                 for index in range(folder.number_of_sub_messages):
 
                     if self.iteration_only:
@@ -68,7 +70,7 @@ if not skip_registry:
                             headers = headerParser.parsestr(messageObj.transport_headers)
                         except Exception as e:
                             desc = "Error parsing message body"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         try:
                             # Parse message bodies
@@ -89,44 +91,41 @@ if not skip_registry:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings["PidTagInternetCodepage"] = CODE_PAGES[value]
+                                            encodings[1] = {"name": CODE_PAGES[value], "label": "PidTagInternetCodepage"}
                                     if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings["PidTagMessageCodepage"] = CODE_PAGES[value]
+                                            encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
 
                             if messageObj.html_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    html_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    html_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    html_encoding = chardet.detect(messageObj.html_body)["encoding"]
-                                html_body = messageObj.html_body.decode(html_encoding)
+                                html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
                             if messageObj.plain_text_body:
-                                if encodings["PidTagInternetCodepage"]:
-                                    text_encoding = encodings["PidTagInternetCodepage"]
-                                elif encodings["PidTagMessageCodepage"]:
-                                    text_encoding = encodings["PidTagMessageCodepage"]
-                                else:
-                                    text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
-                                text_encoding = chardet.detect(messageObj.plain_text_body)["encoding"]
-                                text_body = messageObj.plain_text_body.decode(text_encoding)
+                                encodings[len(encodings.keys()) + 1] = {
+                                    "name": "utf-8",
+                                    "label": "manual",
+                                }
+                                encodings[len(encodings.keys()) + 2] = {
+                                    "name": chardet.detect(messageObj.plain_text_body)["encoding"],
+                                    "label": "detected",
+                                }
+                                text_body, text_encoding, errors = format.safely_decode(
+                                    "plain text", messageObj.plain_text_body, encodings, errors
+                                )
 
                         except Exception as e:
                             desc = "Error parsing message body"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         # Build message and derivatives paths
                         try:
-                            messagePath = os.path.join(os.path.splitext(originalFile)[0], *path)
+                            messagePath = path
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = helper.normalizePath(messagePath)
+                            derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
                         except Exception as e:
                             desc = "Error reading message path"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         try:
                             total_attachment_size_bytes = 0
@@ -160,46 +159,59 @@ if not skip_registry:
                                     elif len(attachmentShort) > 0:
                                         attachmentName = attachmentShort
                                     else:
-                                        print(message.Mailbag_Message_ID)
-                                        raise ValueError("No attachment name found.")
+                                        attachmentName = None
+                                        desc = "No filename found for attachment, integer will be used instead"
+                                        errors = common.handle_error(errors, None, desc)
+
+                                    # Handle attachments.csv conflict
+                                    # helper.controller.writeAttachmentsToDisk() handles this
+                                    if attachmentName:
+                                        if attachmentName.lower() == "attachments.csv":
+                                            desc = (
+                                                "attachment "
+                                                + attachmentName
+                                                + " will be renamed to avoid filename conflict with mailbag spec"
+                                            )
+                                            errors = common.handle_error(errors, None, desc, "warn")
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
-                                        mime = helper.guessMimeType(attachmentName)
+                                        mime = format.guessMimeType(attachmentName)
+
+                                    # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                                    contentID = uuid.uuid4().hex
 
                                 except Exception as e:
                                     attachmentName = str(len(attachments))
                                     desc = (
-                                        "No filename found for attachment "
-                                        + attachmentName
-                                        + " for message "
-                                        + str(message.Mailbag_Message_ID)
+                                        "No filename found for attachment " + attachmentName + " for message " + str(headers["Message-ID"])
                                     )
-                                    errors = helper.handle_error(errors, e, desc)
+                                    errors = common.handle_error(errors, e, desc)
 
                                 attachment = Attachment(
                                     Name=attachmentName,
                                     File=attachment_content,
                                     MimeType=mime,
+                                    Content_ID=contentID,
                                 )
                                 attachments.append(attachment)
 
                         except Exception as e:
                             desc = "Error parsing attachments"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
                         message = Email(
                             Error=errors["msg"],
-                            Message_ID=helper.parse_header(headers["Message-ID"]),
+                            Message_ID=format.parse_header(headers["Message-ID"]),
                             Original_File=originalFile,
                             Message_Path=messagePath,
                             Derivatives_Path=derivativesPath,
-                            Date=helper.parse_header(headers["Date"]),
-                            From=helper.parse_header(headers["From"]),
-                            To=helper.parse_header(headers["To"]),
-                            Cc=helper.parse_header(headers["Cc"]),
-                            Bcc=helper.parse_header(headers["Bcc"]),
-                            Subject=helper.parse_header(headers["Subject"]),
+                            Date=format.parse_header(headers["Date"]),
+                            From=format.parse_header(headers["From"]),
+                            To=format.parse_header(headers["To"]),
+                            Cc=format.parse_header(headers["Cc"]),
+                            Bcc=format.parse_header(headers["Bcc"]),
+                            Subject=format.parse_header(headers["Subject"]),
                             Content_Type=headers.get_content_type(),
                             Headers=headers,
                             HTML_Body=html_body,
@@ -213,7 +225,7 @@ if not skip_registry:
 
                     except (Exception) as e:
                         desc = "Error parsing message"
-                        errors = helper.handle_error(errors, e, desc)
+                        errors = common.handle_error(errors, e, desc)
                         message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
 
                     yield message
@@ -222,12 +234,15 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path, originalFile)
-            else:
-                # gotta return empty directory to controller somehow
-                log.warn("Empty folder " + folder.name + " not handled.")
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
+            # else:
+            # if not self.iteration_only:
+            # This is an email folder that does not contain any messages.
+            # We are currently ignoring these per issue #117
+            # log.warn("Empty folder " + folder.name + " not handled.")
 
         def messages(self):
+            companion_files = []
             if os.path.isfile(self.path):
                 parent_dir = os.path.dirname(self.path)
                 fileList = [self.path]
@@ -236,15 +251,22 @@ if not skip_registry:
                 fileList = []
                 for root, dirs, files in os.walk(self.path):
                     for file in files:
-                        if file.lower().endswith("." + self.format_name):
-                            fileList.append(os.path.join(root, file))
+                        mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                        fileRoot = root + os.sep
+                        # don't count the newly-created mailbag
+                        if not fileRoot.startswith(mailbag_path):
+                            if file.lower().endswith("." + self.format_name):
+                                fileList.append(os.path.join(root, file))
+                            elif self.companion_files:
+                                companion_files.append(os.path.join(root, file))
 
             for filePath in fileList:
-                originalFile = helper.relativePath(self.path, filePath)
-                if len(originalFile) < 1:
-                    pathList = []
+                rel_path = format.relativePath(self.path, filePath)  # returns "" when path is a file
+                if len(rel_path) < 1:
+                    originalFile = Path(filePath).name
                 else:
-                    pathList = os.path.normpath(originalFile).split(os.sep)
+                    originalFile = Path(os.path.normpath(rel_path)).as_posix()
+                # original file is now the relative path to the PST from the provided path
 
                 pst = pypff.file()
                 pst.open(filePath)
@@ -252,18 +274,27 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, pathList, os.path.basename(filePath))
-                    else:
-                        # gotta return empty directory to controller somehow
-                        log.warn("Empty folder " + folder.name + " not handled.")
+                        yield from self.folders(folder, folder.name, originalFile)
+                    # else:
+                    # if not self.iteration_only:
+                    # This is an email folder that does not contain any messages.
+                    # We are currently ignoring these per issue #117
+                    # log.warn("Empty folder " + folder.name + " not handled.")
                 pst.close()
 
                 # Move PST to new mailbag directory structure
                 if not self.iteration_only:
-                    new_path = helper.moveWithDirectoryStructure(
+                    new_path = format.moveWithDirectoryStructure(
                         self.dry_run,
                         parent_dir,
                         self.mailbag_name,
                         self.format_name,
                         filePath,
+                    )
+
+            if self.companion_files:
+                # Move all files into mailbag directory structure
+                for companion_file in companion_files:
+                    new_path = format.moveWithDirectoryStructure(
+                        self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file
                     )

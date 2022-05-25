@@ -1,6 +1,7 @@
 # Makes html derivatives just containing message bodies
 import os
-import mailbagit.helper as helper
+import mailbagit.helper.derivative as derivative
+import mailbagit.helper.common as common
 from structlog import get_logger
 
 log = get_logger()
@@ -43,16 +44,16 @@ class HtmlDerivative(Derivative):
 
             if message.HTML_Body is None and message.Text_Body is None:
                 desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no HTML derivative created"
-                errors = helper.handle_error(errors, None, desc, "warn")
+                errors = common.handle_error(errors, None, desc, "warn")
             else:
                 log.debug("Writing html derivative to " + filename)
                 # Calling helper function to get formatted html
                 html_formatted = None
                 try:
-                    html_formatted, encoding = helper.htmlFormatting(message, self.args.css, headers=False)
+                    html_formatted, encoding = derivative.htmlFormatting(message, self.args.css, headers=False)
                 except Exception as e:
                     desc = "Error formatting HTML for HTML derivative"
-                    errors = helper.handle_error(errors, e, desc)
+                    errors = common.handle_error(errors, e, desc)
 
                 if not self.args.dry_run:
                     if html_formatted:
@@ -64,11 +65,11 @@ class HtmlDerivative(Derivative):
                                 f.close()
                         except Exception as e:
                             desc = "Error writing HTML derivative"
-                            errors = helper.handle_error(errors, e, desc)
+                            errors = common.handle_error(errors, e, desc)
 
         except Exception as e:
             desc = "Error creating HTML derivative"
-            errors = helper.handle_error(errors, e, desc)
+            errors = common.handle_error(errors, e, desc)
 
         message.Error.extend(errors["msg"])
         message.StackTrace.extend(errors["stack_trace"])
