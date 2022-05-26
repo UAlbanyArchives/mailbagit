@@ -2,6 +2,7 @@ from structlog import get_logger
 import mailbox
 import os
 import mailbagit.helper.common as common
+import mailbagit.helper.derivative as derivative
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -111,6 +112,12 @@ class MboxDerivative(Derivative):
                         except Exception as e:
                             desc = "Error writing body for MBOX derivative"
                             errors = common.handle_error(errors, e, desc)
+
+                        # Get list of <img> files that might reference attachments
+                        if message.HTML_Body:
+                            inline_files = derivative.inlineAttachments(message.HTML_Body, message.HTML_Encoding)
+                        else:
+                            inline_files = {}
 
                         # Attachments
                         try:
