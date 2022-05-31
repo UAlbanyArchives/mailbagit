@@ -173,7 +173,10 @@ def htmlFormatting(message, external_css, headers=True):
                 table += "<tr>"
                 table += "<td class='header'>Attachments</td><td>"
                 for i, attachment in enumerate(message.Attachments):
-                    table += attachment.Name
+                    if attachment.Name:
+                        table += attachment.Name
+                    else:
+                        table += str(i)
                     if i + 1 < attachmentNumber:
                         table += "<br/>"
                 table += "</td>"
