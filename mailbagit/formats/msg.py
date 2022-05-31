@@ -92,7 +92,6 @@ class MSG(EmailAccount):
                     errors = common.handle_error(errors, e, desc)
 
                 try:
-                    blah
                     for mailAttachment in mail.attachments:
                         if mailAttachment.getFilename():
                             attachmentName = mailAttachment.getFilename()
