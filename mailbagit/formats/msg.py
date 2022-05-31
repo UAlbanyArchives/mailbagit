@@ -61,12 +61,9 @@ class MSG(EmailAccount):
             originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
-            errors = {}
-            errors["msg"] = []
-            errors["stack_trace"] = []
+            errors = []
             try:
                 mail = extract_msg.openMsg(filePath)
-
                 # Parse message bodies
                 html_body = None
                 text_body = None
@@ -95,6 +92,7 @@ class MSG(EmailAccount):
                     errors = common.handle_error(errors, e, desc)
 
                 try:
+                    blah
                     for mailAttachment in mail.attachments:
                         if mailAttachment.getFilename():
                             attachmentName = mailAttachment.getFilename()
@@ -126,7 +124,6 @@ class MSG(EmailAccount):
 
                         # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
                         contentID = uuid.uuid4().hex
-
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
@@ -140,7 +137,7 @@ class MSG(EmailAccount):
                     errors = common.handle_error(errors, e, desc)
 
                 message = Email(
-                    Error=errors["msg"],
+                    Errors=errors,
                     Message_ID=mail.messageId.strip(),
                     Original_File=originalFile,
                     Message_Path=messagePath,
@@ -161,7 +158,6 @@ class MSG(EmailAccount):
                     # Doesn't look like we can feasibly get a full email.message.Message object for .msg
                     Message=None,
                     Attachments=attachments,
-                    StackTrace=errors["stack_trace"],
                 )
                 # Make sure the MSG file is closed
                 mail.close()
@@ -169,7 +165,7 @@ class MSG(EmailAccount):
             except (email.errors.MessageParseError, Exception) as e:
                 desc = "Error parsing message"
                 errors = common.handle_error(errors, e, desc)
-                message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                message = Email(Errors=errors)
                 # Make sure the MSG file is closed
                 mail.close()
 

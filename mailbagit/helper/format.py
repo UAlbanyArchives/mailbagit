@@ -50,16 +50,12 @@ def safely_decode(body_type, binary_text, encodings, errors):
             Integer key denoting priority (dict):
                 "name" (str):
                 "label" (str): a description for the encoding, such as its source
-        errors (dict):
-            "msg" contains a list of human readable error messages
-            "stack_trace" contains a list of full stack traces
+        errors (List): List of Error objects defined in models.py
 
     Returns:
         test (str): a decoded unicode string
         used (str): The encoding used to decode the text
-        errors (dict):
-            "msg" contains a list of human readable error messages
-            "stack_trace" contains a list of full stack traces
+        errors (List): List of Error objects defined in models.py
     """
     errorObj = None
     used = None
@@ -128,17 +124,13 @@ def parse_part(part, bodies, attachments, errors):
             "msg" contains a list of human readable error messages
             "stack_trace" contains a list of full stack traces
         attachments (list): a list of attachment object as defined in models.py
-        errors (dict):
-            "msg" contains a list of human readable error messages
-            "stack_trace" contains a list of full stack traces
+        errors (List): List of Error objects defined in models.py
     Returns:
         bodies (dict):
             "msg" contains a list of human readable error messages
             "stack_trace" contains a list of full stack traces
         attachments (list): a list of attachment object as defined in models.py
-        errors (dict):
-            "msg" contains a list of human readable error messages
-            "stack_trace" contains a list of full stack traces
+        errors (List): List of Error objects defined in models.py
     """
     content_type = part.get_content_type()
     content_disposition = part.get_content_disposition()

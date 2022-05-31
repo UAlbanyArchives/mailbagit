@@ -39,10 +39,7 @@ class EmlDerivative(Derivative):
 
     def do_task_per_message(self, message):
 
-        errors = {}
-        errors["msg"] = []
-        errors["stack_trace"] = []
-
+        errors = []
         try:
 
             out_dir = os.path.join(self.eml_dir, message.Derivatives_Path)
@@ -174,7 +171,6 @@ class EmlDerivative(Derivative):
             desc = "Error creating EML derivative"
             errors = common.handle_error(errors, e, desc)
 
-        message.Error.extend(errors["msg"])
-        message.StackTrace.extend(errors["stack_trace"])
+        message.Errors.extend(errors)
 
         return message
