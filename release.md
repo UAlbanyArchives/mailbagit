@@ -15,7 +15,7 @@
 ## Building and pushing dev Docker image
 
 ```
-docker build -t ualbanyarchives/mailbagit:dev .
+docker build --no-cache -t ualbanyarchives/mailbagit:dev .
 docker push ualbanyarchives/mailbagit:dev
 ```
 
@@ -35,6 +35,6 @@ twine upload dist/*.gz dist/*.whl
 ## Building and pushing prod Docker image
 
 ```
-docker build -t ualbanyarchives/mailbagit:latest -f Dockerfile.production .
+docker build --no-cache -t ualbanyarchives/mailbagit:latest -f Dockerfile.production .
 docker push ualbanyarchives/mailbagit:latest
 ```

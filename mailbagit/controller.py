@@ -41,7 +41,7 @@ class Controller:
             "Cc",
             "Bcc",
             "Subject",
-            "Content_Type",
+            "Content-Type",
         ]
 
     @property
