@@ -238,7 +238,9 @@ if not skip_registry:
                     # Currently, we are only warning about empty folders pending the possibility of
                     # a better solution described in #117
                     desc = "Folder '" + path + "/" + folder.name + "' contains no messages and will be ignored"
-                    errors = common.handle_error(errors, None, desc, "warn")
+                    # handle_error() won't work here as-is because the errors list is added to the Message model
+                    # errors = common.handle_error(errors, None, desc, "warn")
+                    log.warn(desc)
 
         def messages(self):
             companion_files = []
@@ -280,7 +282,9 @@ if not skip_registry:
                             # Currently, we are only warning about empty folders pending the possibility of
                             # a better solution described in #117
                             desc = "Folder '" + folder.name + "' contains no messages and will be ignored"
-                            errors = common.handle_error(errors, None, desc, "warn")
+                            # handle_error() won't work here as-is because the errors list is added to the Message model
+                            # errors = common.handle_error(errors, None, desc, "warn")
+                            log.warn(desc)
 
                 pst.close()
 
