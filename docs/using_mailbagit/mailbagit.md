@@ -63,13 +63,20 @@ e.g. `-d eml pdf warc`
 * **-r --dry-run**
 > Performs a test run that will not alter any files other than writing an error report. When this flag is used, `mailbagit` parses all the email it is provide and formats derivatives as much as it can without writing anything to disk. If there are any error or warnings, this will create an error report with an `errors.csv` listing all issues as well as a full stack trace in a `.txt` file.
 
+* **-v --version**
+> Reports the version number and exits.
+
 * **--css**
 > Path to a CSS file to override the included CSS when creating PDF or HTML derivatives
 > Argument takes single file path as input.
 
 * **-c --compress**
 > Compresses the mailbag as a ZIP, TAR, or TAR.GZ
-e.g. `-c zip` or `-c tar.gz`
+> e.g. `-c zip` or `-c tar.gz`
+
+* **-f, --companion_files**
+> Allows for companion metadata files to be packaged alongside email export files.
+> When this option is used, `mailbagit` will recursively include all the files in the directory provided into a mailbag.
 
 ### Bagit-python arguments
 

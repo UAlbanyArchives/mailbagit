@@ -73,9 +73,7 @@ class Mbox(EmailAccount):
                     continue
 
                 attachments = []
-                errors = {}
-                errors["msg"] = []
-                errors["stack_trace"] = []
+                errors = []
 
                 try:
                     mailObject = email.message_from_bytes(mail.as_bytes(), policy=email.policy.default)
@@ -107,7 +105,7 @@ class Mbox(EmailAccount):
                         errors = common.handle_error(errors, e, desc)
 
                     message = Email(
-                        Error=errors["msg"],
+                        Errors=errors,
                         Message_ID=format.parse_header(mail["Message-ID"]),
                         Original_File=originalFile,
                         Message_Path=messagePath,
@@ -126,12 +124,11 @@ class Mbox(EmailAccount):
                         Text_Encoding=bodies["text_encoding"],
                         Message=mailObject,
                         Attachments=attachments,
-                        StackTrace=errors["stack_trace"],
                     )
                 except (email.errors.MessageParseError, Exception) as e:
                     desc = "Error parsing message"
                     errors = common.handle_error(errors, e, desc)
-                    message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                    message = Email(Errors=errors)
 
                 yield message
 

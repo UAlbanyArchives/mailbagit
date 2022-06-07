@@ -1,7 +1,7 @@
 # __init__.py
 
 # Version of the mailbagit package
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 import os
 from pathlib import Path
@@ -163,6 +163,7 @@ else:
     )
 
 # add mailbagit-specific optional args here
+mailbagit_options.add_argument("-v", "--version", action="version", version="%(prog)s " + __version__)
 mailbagit_options.add_argument("--css", help="Path to a CSS file to customize PDF derivatives.", nargs=None)
 mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]

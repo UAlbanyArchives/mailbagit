@@ -41,7 +41,7 @@ class Controller:
             "Cc",
             "Bcc",
             "Subject",
-            "Content_Type",
+            "Content-Type",
         ]
 
     @property
@@ -52,7 +52,7 @@ class Controller:
     def derivative_map(self):
         return Derivative.registry
 
-    def message_to_csv(self, message):
+    def message_to_csv(self, message, csv_type="all"):
         """
         Builds a list used for CSV output lines for mailbag.csv and error reports
 
@@ -62,9 +62,12 @@ class Controller:
         Returns:
             list: line
         """
-        error_field = " ".join(message.Error).replace("\r\n", "\\r\\n").replace("\n", "\\n").strip()
+        error_field = []
+        for error in message.Errors:
+            if csv_type == "all" or csv_type == error.Level.lower():
+                error_field.append(error.Description)
         line = [
-            error_field,
+            " ".join(error_field),
             message.Mailbag_Message_ID,
             message.Message_ID,
             message.Original_File,
@@ -99,6 +102,7 @@ class Controller:
         mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
         attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
         error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
+        warn_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_warnings")
 
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
@@ -106,6 +110,7 @@ class Controller:
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir, self.args.bag_info, processes=self.args.processes, checksums=self.args.checksums)
             bag.info["Bag-Type"] = "Mailbag"
+            bag.info["Mailbag-Specification-Version"] = "0.3"
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
             bag.info["External-Identifier"] = uuid.uuid4()
@@ -141,6 +146,7 @@ class Controller:
         csv_portion_count = 0
         csv_portion = [self.csv_headers]
         error_csv = [self.csv_headers]
+        warn_csv = [self.csv_headers]
 
         # Count total no. of messages and set start time
         mail_account.iteration_only = True
@@ -176,16 +182,37 @@ class Controller:
             for d in derivatives:
                 message = d.do_task_per_message(message)
 
-            # creating text file and csv if error is present
-            if len(message.Error) > 0:
-                if not os.path.isdir(error_dir):
-                    # making error directory if error is present
-                    os.mkdir(error_dir)
-                error_csv.append(self.message_to_csv(message))
-                trace_file = os.path.join(error_dir, str(message.Mailbag_Message_ID) + ".txt")
-                with open(trace_file, "w", encoding="utf-8") as f:
-                    f.write("\n".join(str(error) for error in message.StackTrace))
-                    f.close()
+            # Error and Warning Reports
+            if len(message.Errors) > 0:
+                error_stack_trace = []
+                warn_stack_trace = []
+                for error in message.Errors:
+                    if error.Level.lower() == "warn":
+                        warn_stack_trace.append(error.StackTrace)
+                    else:
+                        error_stack_trace.append(error.StackTrace)
+
+                # Write Error Report
+                if len(error_stack_trace) > 0:
+                    if not os.path.isdir(error_dir):
+                        # making error directory if error is present
+                        os.mkdir(error_dir)
+                    error_csv.append(self.message_to_csv(message, "error"))
+                    error_trace_file = os.path.join(error_dir, str(message.Mailbag_Message_ID) + ".txt")
+                    with open(error_trace_file, "w", encoding="utf-8") as f:
+                        f.write("\n".join(error_stack_trace))
+                        f.close()
+
+                # Write Warning Report
+                if len(warn_stack_trace) > 0:
+                    if not os.path.isdir(warn_dir):
+                        # making error directory if error is present
+                        os.mkdir(warn_dir)
+                    warn_csv.append(self.message_to_csv(message, "warn"))
+                    warn_trace_file = os.path.join(warn_dir, str(message.Mailbag_Message_ID) + ".txt")
+                    with open(warn_trace_file, "w", encoding="utf-8") as f:
+                        f.write("\n".join(warn_stack_trace))
+                        f.close()
 
             # Show progress
             # If progress%(total_messages/100)==0 then show progress
@@ -234,6 +261,12 @@ class Controller:
             with open(filename, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerows(error_csv)
+        log.debug("Writing warnings.csv to " + str(warn_dir))
+        if len(warn_csv) > 1:
+            filename = os.path.join(warn_dir, "warnings.csv")
+            with open(filename, "w", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerows(warn_csv)
 
         if not self.args.dry_run:
             bag_size = 0
