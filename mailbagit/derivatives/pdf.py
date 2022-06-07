@@ -50,9 +50,7 @@ if not skip_registry:
 
         def do_task_per_message(self, message):
 
-            errors = {}
-            errors["msg"] = []
-            errors["stack_trace"] = []
+            errors = []
 
             try:
 
@@ -115,7 +113,6 @@ if not skip_registry:
                 desc = "Error creating PDF derivative"
                 errors = common.handle_error(errors, e, desc)
 
-            message.Error.extend(errors["msg"])
-            message.StackTrace.extend(errors["stack_trace"])
+            message.Errors.extend(errors)
 
             return message

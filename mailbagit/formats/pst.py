@@ -59,9 +59,7 @@ if not skip_registry:
                         yield None
                         continue
                     attachments = []
-                    errors = {}
-                    errors["msg"] = []
-                    errors["stack_trace"] = []
+                    errors = []
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -201,7 +199,7 @@ if not skip_registry:
                             errors = common.handle_error(errors, e, desc)
 
                         message = Email(
-                            Error=errors["msg"],
+                            Errors=errors,
                             Message_ID=format.parse_header(headers["Message-ID"]),
                             Original_File=originalFile,
                             Message_Path=messagePath,
@@ -220,13 +218,12 @@ if not skip_registry:
                             Text_Encoding=text_encoding,
                             Message=None,
                             Attachments=attachments,
-                            StackTrace=errors["stack_trace"],
                         )
 
                     except (Exception) as e:
                         desc = "Error parsing message"
                         errors = common.handle_error(errors, e, desc)
-                        message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                        message = Email(Errors=errors)
 
                     yield message
 

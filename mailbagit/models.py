@@ -10,10 +10,16 @@ class Attachment(models.Base):
     Content_ID = fields.StringField()
 
 
+class Error(models.Base):
+    Level = fields.StringField()
+    Description = fields.StringField()
+    StackTrace = fields.StringField()
+
+
 class Email(models.Base):
     """EmailModel - model class for email formats"""
 
-    Error = fields.ListField(str)
+    Errors = fields.ListField(Error)
     Mailbag_Message_ID = fields.IntField()
     Message_ID = fields.StringField()
     Original_File = fields.StringField()
@@ -33,7 +39,6 @@ class Email(models.Base):
     Text_Encoding = fields.StringField()
     Message = fields.EmbeddedField(Message)
     Attachments = fields.ListField(Attachment)
-    StackTrace = fields.ListField(str)
 
     def dump_string(self, value, outpath, encoding=None):
         with open(outpath + ".txt", "w", encoding="utf-8", newline="\n") as f:

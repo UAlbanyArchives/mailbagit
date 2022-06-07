@@ -60,9 +60,7 @@ class EML(EmailAccount):
             originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
-            errors = {}
-            errors["msg"] = []
-            errors["stack_trace"] = []
+            errors = []
             try:
                 with open(filePath, "rb") as f:
                     msg = email.message_from_binary_file(f, policy=email.policy.default)
@@ -96,7 +94,7 @@ class EML(EmailAccount):
                         errors = common.handle_error(errors, e, desc)
 
                     message = Email(
-                        Error=errors["msg"],
+                        Errors=errors,
                         Message_ID=format.parse_header(msg["message-id"]),
                         Original_File=originalFile,
                         Message_Path=messagePath,
@@ -113,13 +111,12 @@ class EML(EmailAccount):
                         Text_Encoding=bodies["text_encoding"],
                         Message=msg,
                         Attachments=attachments,
-                        StackTrace=errors["stack_trace"],
                     )
 
             except (email.errors.MessageParseError, Exception) as e:
                 desc = "Error parsing message"
                 errors = common.handle_error(errors, e, desc)
-                message = Email(Error=errors["msg"], StackTrace=errors["stack_trace"])
+                message = Email(Errors=errors)
 
             # Move EML to new mailbag directory structure
             yield message
