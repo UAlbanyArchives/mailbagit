@@ -110,6 +110,7 @@ class Controller:
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir, self.args.bag_info, processes=self.args.processes, checksums=self.args.checksums)
             bag.info["Bag-Type"] = "Mailbag"
+            bag.info["Mailbag-Specification-Version"] = "0.3"
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
             bag.info["External-Identifier"] = uuid.uuid4()

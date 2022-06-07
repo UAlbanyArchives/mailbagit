@@ -2,15 +2,16 @@
 
 1. Test develop
 2. Bump version in `setup.py` and `mailbagit/__init__.py`
-3. Build and push dev Docker image
-4. PR and merge to main
-5. Build and test Windows executables
-6. [Tag a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
-7. Write release notes
-8. Upload Windows executables
-9. Build and publish website
-10. Build and push to pypi
-11. Build and push prod Docker image
+3. Update [Spec compliance version](https://github.com/UAlbanyArchives/mailbagit/blob/develop/mailbagit/controller.py#L113) if neccessary.
+4. Build and push dev Docker image
+5. PR and merge to main
+6. Build and test Windows executables
+7. [Tag a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
+8. Write release notes
+9. Upload Windows executables
+10. Build and publish website
+11. Build and push to pypi
+12. Build and push prod Docker image
 
 ## Building and pushing dev Docker image
 
