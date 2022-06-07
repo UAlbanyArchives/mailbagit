@@ -232,11 +232,16 @@ if not skip_registry:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
                     yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
-            # else:
-            # if not self.iteration_only:
-            # This is an email folder that does not contain any messages.
-            # We are currently ignoring these per issue #117
-            # log.warn("Empty folder " + folder.name + " not handled.")
+            else:
+                if not self.iteration_only:
+                    if not folder.number_of_sub_messages:
+                        # This is an email folder that does not contain any messages.
+                        # Currently, we are only warning about empty folders pending the possibility of
+                        # a better solution described in #117
+                        desc = "Folder '" + path + "' contains no messages and will be ignored"
+                        # handle_error() won't work here as-is because the errors list is added to the Message model
+                        # errors = common.handle_error(errors, None, desc, "warn")
+                        log.warn(desc + ".")
 
         def messages(self):
             companion_files = []
@@ -272,11 +277,16 @@ if not skip_registry:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
                         yield from self.folders(folder, folder.name, originalFile)
-                    # else:
-                    # if not self.iteration_only:
-                    # This is an email folder that does not contain any messages.
-                    # We are currently ignoring these per issue #117
-                    # log.warn("Empty folder " + folder.name + " not handled.")
+                    else:
+                        if not self.iteration_only:
+                            # This is an email folder that does not contain any messages.
+                            # Currently, we are only warning about empty folders pending the possibility of
+                            # a better solution described in #117
+                            desc = "Folder '" + folder.name + "' contains no messages and will be ignored"
+                            # handle_error() won't work here as-is because the errors list is added to the Message model
+                            # errors = common.handle_error(errors, None, desc, "warn")
+                            log.warn(desc + ".")
+
                 pst.close()
 
                 # Move PST to new mailbag directory structure
