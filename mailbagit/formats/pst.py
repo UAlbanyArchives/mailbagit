@@ -234,13 +234,14 @@ if not skip_registry:
                     yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
             else:
                 if not self.iteration_only:
-                    # This is an email folder that does not contain any messages.
-                    # Currently, we are only warning about empty folders pending the possibility of
-                    # a better solution described in #117
-                    desc = "Folder '" + path + "/" + folder.name + "' contains no messages and will be ignored"
-                    # handle_error() won't work here as-is because the errors list is added to the Message model
-                    # errors = common.handle_error(errors, None, desc, "warn")
-                    log.warn(desc)
+                    if not folder.number_of_sub_messages:
+                        # This is an email folder that does not contain any messages.
+                        # Currently, we are only warning about empty folders pending the possibility of
+                        # a better solution described in #117
+                        desc = "Folder '" + path + "' contains no messages and will be ignored"
+                        # handle_error() won't work here as-is because the errors list is added to the Message model
+                        # errors = common.handle_error(errors, None, desc, "warn")
+                        log.warn(desc + ".")
 
         def messages(self):
             companion_files = []
@@ -284,7 +285,7 @@ if not skip_registry:
                             desc = "Folder '" + folder.name + "' contains no messages and will be ignored"
                             # handle_error() won't work here as-is because the errors list is added to the Message model
                             # errors = common.handle_error(errors, None, desc, "warn")
-                            log.warn(desc)
+                            log.warn(desc + ".")
 
                 pst.close()
 
