@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 from mailbagit.email_account import EmailAccount, import_formats
 from mailbagit.derivative import Derivative, import_derivatives
 from mailbagit.controller import Controller
+from mailbagit.guided import prompts
 import mailbagit.loggerx
 import mailbagit.globals
 
@@ -169,7 +170,7 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+    "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
     "-f",
@@ -220,7 +221,15 @@ mailbagit_metadata.add_argument(
 
 def cli():
     """hook for CLI-only mailbagit invocation"""
-    main()
+    args = mailbag_parser.parse_args()
+    main(args)
+
+
+def guided():
+    """hook for Guided CLI mailbagit invocation"""
+    prompts(input_types, derivative_types)
+    args = mailbag_parser.parse_args()
+    main(args)
 
 
 if gooeyCheck:
@@ -228,11 +237,12 @@ if gooeyCheck:
     @Gooey(richtext_controls=True)
     def gui():
         """hook for GUI mailbagit invocation"""
-        main()
+        args = mailbag_parser.parse_args()
+        main(args)
 
 
-def main():
-    args = mailbag_parser.parse_args()
+def main(args):
+
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):
