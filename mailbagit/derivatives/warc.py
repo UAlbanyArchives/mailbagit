@@ -2,6 +2,7 @@ import os
 import warcio
 import mailbagit.helper.derivative as derivative
 import mailbagit.helper.common as common
+import mailbagit.helper.format as format
 from warcio.capture_http import capture_http
 from warcio import WARCWriter
 from warcio.statusandheaders import StatusAndHeaders
@@ -9,6 +10,8 @@ import requests  # requests *must* be imported after capture_http
 from threading import Thread
 import http.server
 import socketserver
+import json
+from io import BytesIO
 
 from structlog import get_logger
 
@@ -74,61 +77,77 @@ class WarcDerivative(Derivative):
                 errors = common.handle_error(errors, None, desc, "warn")
             else:
                 out_dir = os.path.join(self.warc_dir, message.Derivatives_Path)
-                filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
+                filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc")
                 log.debug("Writing WARC to " + str(filename))
+
+                # Write Headers to UTF-8 JSON
+                try:
+                    headers = {}
+                    for key in message.Headers:
+                        headers[key] = format.parse_header(message.Headers[key])
+                    headers_json = json.dumps(headers, indent=4, sort_keys=True).encode("utf-8")
+                except Exception as e:
+                    desc = "Error formatting headers as UTF-8 JSON"
+                    errors = common.handle_error(errors, e, desc)
+
+                # Format HTML for WARC file
+                try:
+                    html_formatted, encoding = derivative.htmlFormatting(message, self.args.css, headers=False)
+                except Exception as e:
+                    desc = "Error formatting HTML for WARC derivative"
+                    errors = common.handle_error(errors, e, desc)
 
                 if not self.args.dry_run:
                     if not os.path.isdir(out_dir):
                         os.makedirs(out_dir)
 
                     with open(filename, "wb") as output:
+                        writer = WARCWriter(output, gzip=False)
 
+                        # Write HTML to tmp.html file where it will be served
                         try:
-                            html_formatted, encoding = derivative.htmlFormatting(message, self.args.css, headers=False)
                             with open(self.tmp_file, "w", encoding="utf-8") as f:
                                 f.write(html_formatted)
                                 f.close()
                         except Exception as e:
-                            desc = "Error formatting HTML for WARC derivative"
+                            desc = "Error writing HTML to disk for WARC derivative"
                             errors = common.handle_error(errors, e, desc)
 
-                        writer = WARCWriter(output, gzip=True)
                         try:
                             resp = requests.get(
                                 "http://localhost:" + str(self.port) + "/" + self.tmp_file,
                                 headers={"Accept-Encoding": "identity"},
                                 stream=True,
                             )
-                            resp.raise_for_status()
-
-                        except requests.exceptions.HTTPError as e:
-                            desc = "Error requesting HTML for WARC derivative"
-                            errors = common.handle_error(errors, e, desc)
-
-                        try:
                             # get raw headers from urllib3
                             headers_list = resp.raw.headers.items()
-
                             http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
-
                             record = writer.create_warc_record(
                                 "http://localhost:" + str(self.port) + "/" + self.tmp_file,
                                 "response",
                                 payload=resp.raw,
                                 http_headers=http_headers,
                             )
+                            writer.write_record(record)
                         except Exception as e:
-                            desc = "Error writing WARC headers"
+                            desc = "Error creating WARC response record"
                             errors = common.handle_error(errors, e, desc)
 
                         try:
+                            record = writer.create_warc_record(
+                                "http://localhost:" + str(self.port) + "/headers.json",
+                                "metadata",
+                                payload=BytesIO(headers_json),
+                                length=len(headers_json),
+                                warc_content_type="application/json",
+                            )
                             writer.write_record(record)
                         except Exception as e:
-                            desc = "Error writing WARC derivative"
+                            desc = "Error creating JSON metadata record"
                             errors = common.handle_error(errors, e, desc)
 
-                    output.close()
                     derivative.deleteFile(self.tmp_file)
+                    # derivative.deleteFile("headers.json")
 
         except Exception as e:
             desc = "Error creating WARC derivative"
