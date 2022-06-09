@@ -1,6 +1,5 @@
 import os
 import sys
-import pyreadline3
 from structlog import get_logger
 
 log = get_logger()
