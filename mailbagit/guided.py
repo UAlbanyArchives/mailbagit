@@ -6,11 +6,24 @@ log = get_logger()
 
 
 def allow_exit(input_string):
+    """
+    This allows a user to enter "exit" to exit the program for any prompt.
+    """
     if input_string.lower() == "exit":
         sys.exit()
 
 
 def yes_no(query):
+    """
+    A reusable guided prompt with validation for yes/no queries.
+    Allows users to try again for invalid input.
+    Accepts "yes", "y", "no", and "n" and is not case sensative
+
+    Parameters:
+        query (String): The question that will be displayed to the user in input()
+    Returns:
+        (Boolean)
+    """
     input_string = ""
     input_options = ["yes", "y", "no", "n"]
     yes = False
@@ -28,6 +41,16 @@ def yes_no(query):
 
 
 def in_options(query, options):
+    """
+    A reusable guided prompt with validation for queries where the
+    Allows users to try again for invalid input.
+    input must be one of a number of options
+
+    Parameters:
+        query (String): The question that will be displayed to the user in input()
+    Returns:
+        input_string (String): A string that must be inv
+    """
     input_string = ""
     while not input_string.lower() in options:
         input_string = input(f"{query} ({', '.join(options)}): ")
@@ -38,7 +61,18 @@ def in_options(query, options):
 
 
 def prompts(input_types, derivative_types, hashes, metadata_fields):
+    """
+    A set of guided prompts with validation to guide users with minimal command line experience
+    to providing the options to create a mailbag.
+    Does not return any values, but instead replaces sys.argv with user-provided input
+    This is called by mailbagit.guided() to allow for options to be enterd via input().
 
+    Parameters:
+        input_types (List): The possible input formats
+        derivative_types (List): The possible derivatives formats
+        hashes (List): The possible custom checksums allowed by bagit-python
+        metadata_fields (List): The possible bag-info.txt metadata fields
+    """
     print('Mailbagit packages email export formats into a "mailbag".')
 
     # Which input format?
