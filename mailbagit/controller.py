@@ -113,9 +113,11 @@ class Controller:
             bag.info["Mailbag-Specification-Version"] = "0.3"
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
-            bag.info["External-Identifier"] = uuid.uuid4()
             bag.info["Mailbag-Agent"] = mailbagit.__name__
             bag.info["Mailbag-Agent-Version"] = mailbagit.__version__
+            # Make sure now custom external-idenifier is in args
+            if not "external-identifier" in set(key.lower() for key in self.args.bag_info.keys()):
+                bag.info["External-Identifier"] = uuid.uuid4()
             # user-supplied mailbag metadata
             user_metadata = ["Capture-Date", "Capture-Agent", "Capture-Agent-Version"]
             for user_field in user_metadata:
