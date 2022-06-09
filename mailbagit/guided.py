@@ -109,7 +109,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
             css = ""
             cssValid = False
             while cssValid == False:
-                css = input("Would you like to apply custom CSS to HTML and PDF derivatives? ({path}, no, n): ")
+                css = input("Would you like to apply custom CSS to HTML and PDF derivatives? ({path/to/file.css}, no, n): ")
                 allow_exit(css)
                 if css.lower().strip() == "no" or css.lower().strip() == "n":
                     cssValid = True
