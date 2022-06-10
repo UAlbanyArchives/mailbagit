@@ -59,8 +59,8 @@ class WarcDerivative(Derivative):
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc")
                 log.debug("Writing WARC to " + str(filename))
 
-                # This is a temporary HTML file that is written, requested into the WARC, and then deleted
-                tmp_file = str(message.Mailbag_Message_ID) + ".html"
+                # This is used for the WARC-Target-URI in the WARC derivatives
+                warc_uri = f"http://{self.args.mailbag_name}-{str(message.Mailbag_Message_ID)}"
 
                 # Write Headers to UTF-8 JSON
                 try:
@@ -105,7 +105,7 @@ class WarcDerivative(Derivative):
                         try:
                             http_headers = StatusAndHeaders("200 OK", [("Content-Type", 'text/html; charset="utf-8"')], protocol="HTTP/1.0")
                             record = writer.create_warc_record(
-                                f"http://localhost:{str(self.port)}/{tmp_file}",
+                                f"{warc_uri}/body.html",
                                 "response",
                                 payload=BytesIO(html_formatted.encode("utf-8")),
                                 length=len(html_formatted.encode("utf-8")),
@@ -161,7 +161,7 @@ class WarcDerivative(Derivative):
                                 ]
                                 http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                                 record = writer.create_warc_record(
-                                    f"http://localhost:{str(self.port)}/{quote_plus(attachment.Name)}",
+                                    f"{warc_uri}/{quote_plus(attachment.Name)}",
                                     "response",
                                     payload=BytesIO(attachment.File),
                                     length=len(attachment.File),
@@ -175,7 +175,7 @@ class WarcDerivative(Derivative):
 
                         try:
                             record = writer.create_warc_record(
-                                f"http://localhost:{str(self.port)}/headers.json",
+                                f"{warc_uri}/headers.json",
                                 "metadata",
                                 payload=BytesIO(headers_json),
                                 length=len(headers_json),
