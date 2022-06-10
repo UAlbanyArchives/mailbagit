@@ -42,6 +42,27 @@ class WarcDerivative(Derivative):
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
 
+    def external_resources(self, soup):
+        """
+        Reads an HTML body string and looks for all externally-hosted
+        resources in tags that are supported by email clients
+
+        Parameters:
+            soup(obj): A BeautifulSoup object
+
+        Returns:
+            List: A list of URLs
+        """
+        external_urls = []
+        external_resources = {"img": "src", "link": "href", "object": "data", "source": "src"}
+        for tag in external_resources.keys():
+            attr = external_resources[tag]
+            for tag in soup.findAll(tag):
+                if tag.get(attr) and tag.get(attr).lower().strip().startswith("http"):
+                    external_urls.append(tag.get(attr))
+
+        return external_urls
+
     def do_task_per_account(self):
         log.debug(self.account.account_data())
 
@@ -80,20 +101,13 @@ class WarcDerivative(Derivative):
                     errors = common.handle_error(errors, e, desc)
 
                 # Parse HTML for external resources
-                external_urls = []
                 soup = BeautifulSoup(html_formatted, "html.parser")
-                external_resources = {"img": "src", "link": "href", "object": "data", "source": "src"}
-                for tag in external_resources.keys():
-                    attr = external_resources[tag]
-                    for tag in soup.findAll(tag):
-                        if tag.get(attr) and tag.get(attr).lower().strip().startswith("http"):
-                            external_urls.append(tag.get(attr))
+                external_urls = self.external_resources(soup)
                 # If external links option is selected, also crawl <a> urls and their external resources
                 if self.args.external_links:
                     for a_tag in soup.findAll("a"):
-                        if tag.get("href") and tag.get("href").lower().strip().startswith("http"):
-                            external_urls.append(tag.get("href"))
-                            print(tag.get("href"))
+                        if a_tag.get("href") and a_tag.get("href").lower().strip().startswith("http"):
+                            external_urls.append(a_tag.get("href"))
 
                 if not self.args.dry_run:
                     if not os.path.isdir(out_dir):
@@ -118,36 +132,30 @@ class WarcDerivative(Derivative):
                             errors = common.handle_error(errors, e, desc)
 
                         try:
-                            for resource_url in external_urls:
-                                # First try with SSL verification. If fails, raise a warning and turn off
-                                try:
-                                    resp = requests.get(
-                                        resource_url,
-                                        headers={"Accept-Encoding": "identity"},
-                                        stream=True,
-                                    )
-                                except:
-                                    desc = f"Failed to request external URL for WARC derivatives ({resource_url}). Retrying without SSL verification"
-                                    errors = common.handle_error(errors, None, desc, "warn")
-                                    import urllib3
+                            s = requests.Session()
+                            request_headers = {
+                                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
+                            }
+                            i = 0
+                            while i < len(external_urls):
+                                print("capturing " + external_urls[i])
+                                with capture_http(writer):
+                                    # First try with SSL verification. If fails, raise a warning and turn off
+                                    try:
+                                        r = s.get(external_urls[i], headers=request_headers)
+                                    except:
+                                        desc = f"Failed to request external URL for WARC derivatives ({external_urls[i]}). Retrying without SSL verification"
+                                        errors = common.handle_error(errors, None, desc, "warn")
+                                        import urllib3
 
-                                    urllib3.disable_warnings()
-                                    resp = requests.get(
-                                        resource_url,
-                                        headers={"Accept-Encoding": "identity"},
-                                        stream=True,
-                                        verify=False,
-                                    )
-                                # get raw headers from urllib3
-                                headers_list = resp.raw.headers.items()
-                                http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
-                                record = writer.create_warc_record(
-                                    resource_url,
-                                    "response",
-                                    payload=resp.raw,
-                                    http_headers=http_headers,
-                                )
-                                writer.write_record(record)
+                                        urllib3.disable_warnings()
+                                        r = s.get(external_urls[i], headers=request_headers, verify=False)
+                                    if r.headers["content-type"] == "text/html":
+                                        # Gotta get these external resources as well
+                                        new_soup = BeautifulSoup(r.text, "html.parser")
+                                        new_external_urls = self.external_resources(new_soup)
+                                        external_urls.extend(new_external_urls)
+                                i += 1
                         except Exception as e:
                             desc = "Error capturing external URL in WARC derivative"
                             errors = common.handle_error(errors, e, desc)
