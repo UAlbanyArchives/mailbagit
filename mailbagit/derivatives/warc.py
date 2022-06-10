@@ -7,11 +7,10 @@ from warcio.capture_http import capture_http
 from warcio import WARCWriter
 from warcio.statusandheaders import StatusAndHeaders
 import requests  # requests *must* be imported after capture_http
-from threading import Thread
-import http.server
-import socketserver
 import json
 from io import BytesIO
+from bs4 import BeautifulSoup
+from urllib.parse import quote_plus
 
 from structlog import get_logger
 
@@ -39,29 +38,9 @@ class WarcDerivative(Derivative):
         self.warc_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
         self.httpd = []
         self.port = 5000
-        self.tmp_file = "tmp.html"
 
         if not self.args.dry_run:
             os.makedirs(self.warc_dir)
-
-            self.server_thread = Thread(target=derivative.startServer, args=(self.args.dry_run, self.httpd, self.port))
-            # Make it a daemon so it will stop after ctrl+c
-            self.server_thread.daemon = True
-            self.server_thread.start()
-
-    def terminate(self):
-
-        # Terminate the process
-        try:
-            if not self.args.dry_run:
-                derivative.stopServer(self.args.dry_run, self.httpd[0])
-                self.server_thread.join()
-        except SystemExit:
-            pass
-        except:
-            import traceback
-
-            traceback.print_exc()
 
     def do_task_per_account(self):
         log.debug(self.account.account_data())
@@ -80,6 +59,9 @@ class WarcDerivative(Derivative):
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc")
                 log.debug("Writing WARC to " + str(filename))
 
+                # This is a temporary HTML file that is written, requested into the WARC, and then deleted
+                tmp_file = str(message.Mailbag_Message_ID) + ".html"
+
                 # Write Headers to UTF-8 JSON
                 try:
                     headers = {}
@@ -97,6 +79,22 @@ class WarcDerivative(Derivative):
                     desc = "Error formatting HTML for WARC derivative"
                     errors = common.handle_error(errors, e, desc)
 
+                # Parse HTML for external resources
+                external_urls = []
+                soup = BeautifulSoup(html_formatted, "html.parser")
+                external_resources = {"img": "src", "link": "href", "object": "data", "source": "src"}
+                for tag in external_resources.keys():
+                    attr = external_resources[tag]
+                    for tag in soup.findAll(tag):
+                        if tag.get(attr) and tag.get(attr).lower().strip().startswith("http"):
+                            external_urls.append(tag.get(attr))
+                # If external links option is selected, also crawl <a> urls and their external resources
+                if self.args.external_links:
+                    for a_tag in soup.findAll("a"):
+                        if tag.get("href") and tag.get("href").lower().strip().startswith("http"):
+                            external_urls.append(tag.get("href"))
+                            print(tag.get("href"))
+
                 if not self.args.dry_run:
                     if not os.path.isdir(out_dir):
                         os.makedirs(out_dir)
@@ -104,38 +102,80 @@ class WarcDerivative(Derivative):
                     with open(filename, "wb") as output:
                         writer = WARCWriter(output, gzip=False)
 
-                        # Write HTML to tmp.html file where it will be served
                         try:
-                            with open(self.tmp_file, "w", encoding="utf-8") as f:
-                                f.write(html_formatted)
-                                f.close()
-                        except Exception as e:
-                            desc = "Error writing HTML to disk for WARC derivative"
-                            errors = common.handle_error(errors, e, desc)
-
-                        try:
-                            resp = requests.get(
-                                "http://localhost:" + str(self.port) + "/" + self.tmp_file,
-                                headers={"Accept-Encoding": "identity"},
-                                stream=True,
-                            )
-                            # get raw headers from urllib3
-                            headers_list = resp.raw.headers.items()
-                            http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
+                            http_headers = StatusAndHeaders("200 OK", [("Content-Type", 'text/html; charset="utf-8"')], protocol="HTTP/1.0")
                             record = writer.create_warc_record(
-                                "http://localhost:" + str(self.port) + "/" + self.tmp_file,
+                                f"http://localhost:{str(self.port)}/{tmp_file}",
                                 "response",
-                                payload=resp.raw,
+                                payload=BytesIO(html_formatted.encode("utf-8")),
+                                length=len(html_formatted.encode("utf-8")),
                                 http_headers=http_headers,
+                                warc_content_type="text/html",
                             )
                             writer.write_record(record)
                         except Exception as e:
-                            desc = "Error creating WARC response record"
+                            desc = "Error creating WARC response record for HTML body"
+                            errors = common.handle_error(errors, e, desc)
+
+                        try:
+                            for resource_url in external_urls:
+                                # First try with SSL verification. If fails, raise a warning and turn off
+                                try:
+                                    resp = requests.get(
+                                        resource_url,
+                                        headers={"Accept-Encoding": "identity"},
+                                        stream=True,
+                                    )
+                                except:
+                                    desc = f"Failed to request external URL for WARC derivatives ({resource_url}). Retrying without SSL verification"
+                                    errors = common.handle_error(errors, None, desc, "warn")
+                                    import urllib3
+
+                                    urllib3.disable_warnings()
+                                    resp = requests.get(
+                                        resource_url,
+                                        headers={"Accept-Encoding": "identity"},
+                                        stream=True,
+                                        verify=False,
+                                    )
+                                # get raw headers from urllib3
+                                headers_list = resp.raw.headers.items()
+                                http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
+                                record = writer.create_warc_record(
+                                    resource_url,
+                                    "response",
+                                    payload=resp.raw,
+                                    http_headers=http_headers,
+                                )
+                                writer.write_record(record)
+                        except Exception as e:
+                            desc = "Error capturing external URL in WARC derivative"
+                            errors = common.handle_error(errors, e, desc)
+
+                        try:
+                            for attachment in message.Attachments:
+                                headers_list = [
+                                    ("Content-Type", attachment.MimeType),
+                                    ("Content-ID", attachment.Content_ID),
+                                    ("Filename", attachment.Name),
+                                ]
+                                http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
+                                record = writer.create_warc_record(
+                                    f"http://localhost:{str(self.port)}/{quote_plus(attachment.Name)}",
+                                    "response",
+                                    payload=BytesIO(attachment.File),
+                                    length=len(attachment.File),
+                                    http_headers=http_headers,
+                                    warc_content_type="text/html",
+                                )
+                                writer.write_record(record)
+                        except Exception as e:
+                            desc = "Error adding attachments to WARC derivative"
                             errors = common.handle_error(errors, e, desc)
 
                         try:
                             record = writer.create_warc_record(
-                                "http://localhost:" + str(self.port) + "/headers.json",
+                                f"http://localhost:{str(self.port)}/headers.json",
                                 "metadata",
                                 payload=BytesIO(headers_json),
                                 length=len(headers_json),
@@ -143,11 +183,8 @@ class WarcDerivative(Derivative):
                             )
                             writer.write_record(record)
                         except Exception as e:
-                            desc = "Error creating JSON metadata record"
+                            desc = "Error creating JSON metadata record to WARC derivative"
                             errors = common.handle_error(errors, e, desc)
-
-                    derivative.deleteFile(self.tmp_file)
-                    # derivative.deleteFile("headers.json")
 
         except Exception as e:
             desc = "Error creating WARC derivative"

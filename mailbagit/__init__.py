@@ -169,11 +169,14 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+    "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+)
+mailbagit_options.add_argument(
+    "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
     "-f",
-    "--companion_files",
+    "--companion-files",
     help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.",
     default=False,
     action="store_true",
