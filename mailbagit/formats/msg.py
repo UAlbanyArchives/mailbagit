@@ -2,7 +2,7 @@ import extract_msg
 import os
 from pathlib import Path
 from email import parser
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import email.errors
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment

@@ -3,7 +3,8 @@ import traceback
 import urllib.parse
 from pathlib import Path
 from mailbagit.models import Error
-from structlog import get_logger
+
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 

@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 from bagit import _make_parser, Bag, BagHeaderAction, DEFAULT_CHECKSUMS
 import importlib
-from structlog import get_logger
-from argparse import ArgumentParser
+from mailbagit.loggerx import get_logger
+from argparse import ArgumentParser, FileType
 from mailbagit.email_account import EmailAccount, import_formats
 from mailbagit.derivative import Derivative, import_derivatives
 from mailbagit.controller import Controller
@@ -17,8 +17,6 @@ import mailbagit.loggerx
 import mailbagit.globals
 
 globals.init()
-loggerx.configure()
-log = get_logger()
 
 if importlib.util.find_spec("gooey"):
     gooeyCheck = True
@@ -40,9 +38,6 @@ for plugin_type, dirs in plugin_dirs.items():
 
 import_formats(plugin_dirs["formats"])
 import_derivatives(plugin_dirs["derivatives"])
-
-log.debug("EmailAccount:", Registry=EmailAccount.registry)
-log.debug("Derivative:", Registry=Derivative.registry)
 
 bagit_parser = _make_parser()
 if gooeyCheck:
@@ -150,6 +145,7 @@ mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A direc
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
 )
+
 if gooeyCheck:
     mailbagit_args.add_argument(
         "-d",
@@ -191,6 +187,13 @@ mailbagit_options.add_argument(
     default=False,
     action="store_true",
 )
+mailbagit_options.add_argument(
+    "--log_to_file",
+    help="File to direct logs to",
+    default=None,
+    nargs="?",
+    type=FileType(mode='a', encoding='UTF-8')
+)
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -219,15 +222,14 @@ mailbagit_options.add_argument("-n", "--no-headers", help="will not include emai
 
 # Optional user-supplied mailbag metadata
 mailbagit_metadata.add_argument(
-    "--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.", nargs=None
+    "--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.",
 )
 mailbagit_metadata.add_argument(
-    "--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.", nargs=None
+    "--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.",
 )
 mailbagit_metadata.add_argument(
     "--capture-agent-version",
     help="A string field describing the version of the agent used to capture the email included in a mailbag.",
-    nargs=None,
 )
 # Prepend user-supplied mailbag metadata fields to guided input options
 metadata_fields.insert(0, "capture-agent-version")
@@ -237,15 +239,13 @@ metadata_fields.insert(0, "capture-date")
 
 def cli():
     """hook for CLI-only mailbagit invocation"""
-    args = mailbag_parser.parse_args()
-    main(args)
+    main()
 
 
 def guided():
     """hook for Guided CLI mailbagit invocation"""
     prompts(input_types, derivative_types, hashes, metadata_fields)
-    args = mailbag_parser.parse_args()
-    main(args)
+    main()
     input("Mailbag complete. Press any key to continue.")
 
 
@@ -254,12 +254,12 @@ if gooeyCheck:
     @Gooey(richtext_controls=True)
     def gui():
         """hook for GUI mailbagit invocation"""
-        args = mailbag_parser.parse_args()
-        main(args)
+        main()
 
 
-def main(args):
-
+def main():
+    args = mailbag_parser.parse_args()
+    setup_logging(filename=args.log_to_file)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):

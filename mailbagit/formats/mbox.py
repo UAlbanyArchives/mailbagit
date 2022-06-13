@@ -1,7 +1,7 @@
 import email
 import mailbox
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from pathlib import Path
 import os, shutil
 import email.errors

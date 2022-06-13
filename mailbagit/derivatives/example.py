@@ -1,6 +1,6 @@
 # This is an example derivative, meant to show how
 # to hook up a real parser
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 

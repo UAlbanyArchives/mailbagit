@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment

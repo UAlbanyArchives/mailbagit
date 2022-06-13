@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 from datetime import datetime
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
