@@ -5,7 +5,7 @@ import mailbagit.helper.derivative as derivative
 import os, glob
 import mailbox
 from mailbagit.email_account import EmailAccount
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText

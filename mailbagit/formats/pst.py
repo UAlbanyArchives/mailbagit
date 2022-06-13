@@ -3,7 +3,7 @@ import mailbox
 from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment

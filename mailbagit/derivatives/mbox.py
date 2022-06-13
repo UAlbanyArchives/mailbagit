@@ -1,4 +1,4 @@
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import mailbox
 import os
 import mailbagit.helper.common as common

@@ -2,7 +2,7 @@ import os
 import subprocess
 import distutils.spawn
 from mailbagit.derivative import Derivative
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import mailbagit.helper.derivative as derivative
 import mailbagit.helper.common as common
 

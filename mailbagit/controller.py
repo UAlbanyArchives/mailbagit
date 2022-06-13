@@ -1,7 +1,7 @@
 import argparse
 import bagit
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import csv
 import mailbagit
 from mailbagit.email_account import EmailAccount

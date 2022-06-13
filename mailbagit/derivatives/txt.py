@@ -1,7 +1,7 @@
 # Makes txt file derivatives just containing message bodies
 import os
 import mailbagit.helper.common as common
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 

@@ -10,7 +10,7 @@ from threading import Thread
 import http.server
 import socketserver
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
