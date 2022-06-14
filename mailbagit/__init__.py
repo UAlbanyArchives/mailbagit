@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from bagit import _make_parser, Bag, BagHeaderAction, DEFAULT_CHECKSUMS
 import importlib
-from mailbagit.loggerx import get_logger
+from mailbagit.loggerx import setup_logging, get_logger
 from argparse import ArgumentParser, FileType
 from mailbagit.email_account import EmailAccount, import_formats
 from mailbagit.derivative import Derivative, import_derivatives
@@ -17,6 +17,7 @@ import mailbagit.loggerx
 import mailbagit.globals
 
 globals.init()
+log = get_logger()
 
 if importlib.util.find_spec("gooey"):
     gooeyCheck = True
@@ -187,13 +188,7 @@ mailbagit_options.add_argument(
     default=False,
     action="store_true",
 )
-mailbagit_options.add_argument(
-    "--log_to_file",
-    help="File to direct logs to",
-    default=None,
-    nargs="?",
-    type=FileType(mode='a', encoding='UTF-8')
-)
+mailbagit_options.add_argument("--log_to_file", help="File to direct logs to", default=None, nargs="?")
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -222,10 +217,12 @@ mailbagit_options.add_argument("-n", "--no-headers", help="will not include emai
 
 # Optional user-supplied mailbag metadata
 mailbagit_metadata.add_argument(
-    "--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.",
+    "--capture-date",
+    help="Timestamp denoting when the email included in a mailbag was originally captured.",
 )
 mailbagit_metadata.add_argument(
-    "--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.",
+    "--capture-agent",
+    help="A string field describing the agent used to capture the email included in a mailbag.",
 )
 mailbagit_metadata.add_argument(
     "--capture-agent-version",
