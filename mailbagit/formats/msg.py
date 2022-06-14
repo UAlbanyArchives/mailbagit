@@ -114,15 +114,22 @@ class MSG(EmailAccount):
                         # Try to get the mime, guess it if this doesn't work
                         mime = None
                         try:
-                            mime = mailAttachment._ensureSet("_contentType", "__substg1.0_370e")
+                            mime = mailAttachment.mimetype
                         except Exception as e:
                             desc = "Error reading mime type, guessing it instead"
                             errors = common.handle_error(errors, e, desc, "warn")
                         if mime is None:
                             mime = format.guessMimeType(attachmentName)
 
-                        # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
-                        contentID = uuid.uuid4().hex
+                        contentID = None
+                        try:
+                            contentID = mailAttachment.contendId
+                        except Exception as e:
+                            desc = "Error reading ContentID, creating an ID instead"
+                            errors = common.handle_error(errors, e, desc, "warn")
+                        if contentID is None:
+                            contentID = uuid.uuid4().hex
+
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
