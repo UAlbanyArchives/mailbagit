@@ -12,7 +12,8 @@ nav_order: 1
 A Stable Package for Email in Multiple Formats
 {: .fs-6 .fw-300 }
 
-[GitHub](https://github.com/UAlbanyArchives/mailbag){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Mailbag Specification]({{ site.baseurl }}/spec){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Mailbagit Github](https://github.com/UAlbanyArchives/mailbagit){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 
 ---
 

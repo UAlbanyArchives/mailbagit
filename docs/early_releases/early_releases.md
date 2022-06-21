@@ -1,11 +1,22 @@
 ---
 layout: page
-title: Mailbag Specification
-permalink: /spec/
-nav_order: 2
+title: Releases
+permalink: /releases/
+parent: Mailbag Specification
+nav_order: 1
 ---
 
-# Mailbag Specification
+# Mailbag Specification Releases
+
+## [Mailbag Specification 1.0.0](https://github.com/UAlbanyArchives/mailbag-specification)
+
+### Release Notes
+
+* Old `original_filenames.txt` for attachments renamed as `attachments.csv` and now required to better handle missing filenames and filename normalization.
+* CSV rules clarified and moved to Section 5.5 as they now impact both `mailbag.csv` and `attachments.csv`.
+* Added explicit support for "companion" metadata files in mailbags.
+* Added PREMIS XML examples provided by [@asciim0](https://github.com/asciim0).
+* Reworded sections based on comments on [0.3 release](https://docs.google.com/document/d/1BZHklc6MKktXJBPcvFvlxLRoX8lCidFemflppqpUQ7s/edit#heading=h.7l1mpm88wrx5). 
 
 ## [Mailbag Specification 0.3 (Release Candidate)](https://docs.google.com/document/d/1BZHklc6MKktXJBPcvFvlxLRoX8lCidFemflppqpUQ7s)
 
