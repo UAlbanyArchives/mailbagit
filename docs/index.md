@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
-nav_order: 1
+#nav_order: 1
 ---
 
 # Mailbag

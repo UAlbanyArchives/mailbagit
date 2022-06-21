@@ -28,6 +28,7 @@ group :jekyll_plugins do
   gem "jekyll-sitemap"
   gem "jekyll-watch"
   gem "jekyll-sass-converter"
+  #gem "github-pages", "226"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
