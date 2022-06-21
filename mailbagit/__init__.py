@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 from mailbagit.email_account import EmailAccount, import_formats
 from mailbagit.derivative import Derivative, import_derivatives
 from mailbagit.controller import Controller
+from mailbagit.guided import prompts
 import mailbagit.loggerx
 import mailbagit.globals
 
@@ -53,6 +54,10 @@ mailbagit_args = mailbag_parser.add_argument_group("Mailbagit arguments")
 mailbagit_options = mailbag_parser.add_argument_group("Mailbagit options")
 mailbagit_metadata = mailbag_parser.add_argument_group("Optional Mailbag Metadata")
 
+# Get possible hashes and metadata fields from bagit_parser for guided input
+hashes = []
+metadata_fields = []
+
 # Load relevant args from bagit_parser to mailbag_parser
 # This is necessary as mailbagit does not support --validate, --fast, or --completeness-only
 # Checksum args also do not action="store_true" so they don't display as checkboxes with Gooey
@@ -64,7 +69,9 @@ for arg_group in bagit_parser._action_groups:
     group.description = arg_group.__dict__["description"]
     for i, action in enumerate(arg_group._actions):
         if action.container == arg_group and not action.dest in exclude_args:
-            # print ("\t" + action.dest)
+            # Get possible hashes from bagit_parser for guided input
+            if action.dest == "checksums":
+                hashes.append(action.option_strings[0][2:])
             if action.nargs == 0:
                 # checksum options
                 if gooeyCheck:
@@ -90,16 +97,19 @@ for arg_group in bagit_parser._action_groups:
                     )
             else:
                 if arg_group.__dict__["title"].lower() == "optional bag metadata":
-                    group.add_argument(
-                        action.option_strings[0],
-                        required=action.required,
-                        default=action.default,
-                        help=action.help,
-                        type=str,
-                        dest=action.dest,
-                        action=BagHeaderAction,
-                        nargs=action.nargs,
-                    )
+                    # bag_size is automatically set and cannot be overridden
+                    if action.dest != "bag_size":
+                        metadata_fields.append(action.dest.replace("_", "-"))
+                        group.add_argument(
+                            action.option_strings[0],
+                            required=action.required,
+                            default=action.default,
+                            help=action.help,
+                            type=str,
+                            dest=action.dest.replace("_", "-"),
+                            action=BagHeaderAction,
+                            nargs=action.nargs,
+                        )
                 elif action.dest.lower() == "processes":
                     group.add_argument(
                         action.option_strings[0],
@@ -169,7 +179,7 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+    "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
     "-f",
@@ -216,11 +226,24 @@ mailbagit_metadata.add_argument(
     help="A string field describing the version of the agent used to capture the email included in a mailbag.",
     nargs=None,
 )
+# Prepend user-supplied mailbag metadata fields to guided input options
+metadata_fields.insert(0, "capture-agent-version")
+metadata_fields.insert(0, "capture-agent")
+metadata_fields.insert(0, "capture-date")
 
 
 def cli():
     """hook for CLI-only mailbagit invocation"""
-    main()
+    args = mailbag_parser.parse_args()
+    main(args)
+
+
+def guided():
+    """hook for Guided CLI mailbagit invocation"""
+    prompts(input_types, derivative_types, hashes, metadata_fields)
+    args = mailbag_parser.parse_args()
+    main(args)
+    input("Mailbag complete. Press any key to continue.")
 
 
 if gooeyCheck:
@@ -228,11 +251,12 @@ if gooeyCheck:
     @Gooey(richtext_controls=True)
     def gui():
         """hook for GUI mailbagit invocation"""
-        main()
+        args = mailbag_parser.parse_args()
+        main(args)
 
 
-def main():
-    args = mailbag_parser.parse_args()
+def main(args):
+
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):

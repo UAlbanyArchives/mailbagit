@@ -19,7 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    entry_points={"console_scripts": ["mailbagit=mailbagit:cli", "mailbagit-gui=mailbagit:gui"]},
+    entry_points={"console_scripts": ["mailbagit=mailbagit:cli", "mailbagit-gui=mailbagit:gui", "mailbagit-guided=mailbagit:guided"]},
     install_requires=[
         "bagit>=1.8.1,<2",
         "beautifulsoup4>=4.11.1,<5",
