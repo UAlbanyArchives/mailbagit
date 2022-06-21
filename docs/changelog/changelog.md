@@ -1,12 +1,12 @@
 ---
 layout: page
-title: Releases
-permalink: /spec/releases/
+title: Changelog
+permalink: /spec/changelog/
 parent: Mailbag Specification
 nav_order: 1
 ---
 
-# Mailbag Specification Releases
+# Mailbag Specification Changelog
 
 ## [Mailbag Specification 1.0.0](https://github.com/UAlbanyArchives/mailbag-specification/tree/v1.0.0)
 
