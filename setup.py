@@ -33,7 +33,7 @@ setuptools.setup(
         "chardet>=4.0.0,<5",
         "warcio>=1.7.4,<2",
         "requests >=2.27.1,<3",
-        "cssutils >=2.4.2,<3"
+        "cssutils >=2.4.2,<3",
         # for black
         "typed-ast>=1.5.3,<2",
     ],
