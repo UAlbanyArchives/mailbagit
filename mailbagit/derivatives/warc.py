@@ -185,7 +185,7 @@ class WarcDerivative(Derivative):
                         os.makedirs(out_dir)
 
                     with open(filename, "wb") as output:
-                        writer = WARCWriter(output, gzip=False)
+                        writer = WARCWriter(output, gzip=True)
                         # Write HTML Body
                         try:
                             headers_list = [
