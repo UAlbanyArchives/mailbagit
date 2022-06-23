@@ -8,12 +8,14 @@ import mailbagit.helper.format as format
 from warcio.capture_http import capture_http
 from warcio import WARCWriter
 from warcio.statusandheaders import StatusAndHeaders
+from warcio.timeutils import datetime_to_http_date
 import requests  # requests *must* be imported after capture_http
 import json
 import urllib.parse
 from io import BytesIO
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
+from datetime import datetime
 
 from structlog import get_logger
 
@@ -183,11 +185,17 @@ class WarcDerivative(Derivative):
                         os.makedirs(out_dir)
 
                     with open(filename, "wb") as output:
-                        writer = WARCWriter(output, gzip=True)
-
+                        writer = WARCWriter(output, gzip=False)
                         # Write HTML Body
                         try:
-                            http_headers = StatusAndHeaders("200 OK", [("Content-Type", 'text/html; charset="utf-8"')], protocol="HTTP/1.0")
+                            headers_list = [
+                                ("Content-Type", 'text/html; charset="utf-8"'),
+                                ("Date", datetime_to_http_date(datetime.now())),
+                                ("Content-Length", str(len(html_formatted.encode("utf-8")))),
+                            ]
+                            if message.Date:
+                                headers_list.append(("Last-Modified", message.Date))
+                            http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                             record = writer.create_warc_record(
                                 f"{warc_uri}/body.html",
                                 "response",
@@ -217,14 +225,15 @@ class WarcDerivative(Derivative):
                                         if r.status_code != 200:
                                             desc = f"When writing WARC derivative, HTTP {r.status_code} {r.reason} for external resource {external_urls[i]}"
                                             errors = common.handle_error(errors, None, desc, "warn")
-                                        if r.headers["content-type"] == "text/html":
-                                            # Gotta get these external resources as well
-                                            new_soup = BeautifulSoup(r.text, "html.parser")
-                                            new_external_urls = self.html_external_resources(new_soup)
-                                            external_urls.extend(new_external_urls)
-                                        elif r.headers["content-type"] == "text/css":
-                                            new_external_urls = self.css_external_resources(r.text, r.url)
-                                            external_urls.extend(new_external_urls)
+                                        if "content-type" in r.headers.keys():
+                                            if r.headers["content-type"] == "text/html":
+                                                # Gotta get these external resources as well
+                                                new_soup = BeautifulSoup(r.text, "html.parser")
+                                                new_external_urls = self.html_external_resources(new_soup)
+                                                external_urls.extend(new_external_urls)
+                                            elif r.headers["content-type"] == "text/css":
+                                                new_external_urls = self.css_external_resources(r.text, r.url)
+                                                external_urls.extend(new_external_urls)
                                     except Exception as e:
                                         desc = f"Failed to request external URL for WARC derivatives ({external_urls[i]})"
                                         errors = common.handle_error(errors, e, desc)
@@ -240,6 +249,8 @@ class WarcDerivative(Derivative):
                                     ("Content-Type", attachment.MimeType),
                                     ("Content-ID", attachment.Content_ID),
                                     ("Filename", attachment.Name),
+                                    ("Content-Length", str(len(attachment.File))),
+                                    ("Date", datetime_to_http_date(datetime.now())),
                                 ]
                                 http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                                 record = writer.create_warc_record(
@@ -259,6 +270,8 @@ class WarcDerivative(Derivative):
                         try:
                             headers_list = [
                                 ("Content-Type", "application/json"),
+                                ("Date", datetime_to_http_date(datetime.now())),
+                                ("Content-Length", str(len(headers_json))),
                             ]
                             http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                             record = writer.create_warc_record(
