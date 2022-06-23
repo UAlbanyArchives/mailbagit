@@ -95,7 +95,9 @@ Exit with code 1 due to network error: ProtocolUnknownError
 
 * WARC derivatives generate warnings when external resources do not return a HTTP 200 response.
 
-	WARN: When writing WARC derivative, HTTP 403 Forbidden for external resource https://www.example.com/.
+```
+WARN: When writing WARC derivative, HTTP 403 Forbidden for external resource https://www.example.com/.
+```
 
 ### Missing message bodies
 
