@@ -3,18 +3,72 @@ layout: page
 title: Error and warning reports
 permalink: /errors/
 parent: Using mailbagit
-nav_order: 7
+nav_order: 3
 ---
 
 # Error and warning reports
 
-Mailbagit optional argument `-r` or `--dry-run` creates error or warning reports during a test run.  
+When there are issues during packaging `mailbagit` creates separate directories using the `-m` or `--mailbag-name` argument. `fundraising_emails_errors` and `fundraising_emails_warnings`, for example. These contain reports of any errors or warnings experienced during packaging. Within the reports directory `mailbagit` creates `errors.csv` or `warnings.csv` files listing all issues. Reports also include a `.txt` file for each message with an issue that contains a full stack trace when relevant. 
 
-When there are errors `mailbagit` creates a directory using the `-m` or `--mailbag-name` argument. `fundraising_emails_errors`, for example. Within the directory `mailbagit`  creates an error report with an errors.csv listing all issues as well as a full stack trace in a .txt file.  
+## Reports when using `--dry-run`
 
-When there are warnings 'mailbagit' creates a directory using the `-m` or `--mailbag-name` argument. `fundraising_emails_warnings`, for example. Within the directory `mailbagit` creates a warning report with an warnings.csv listing all issues as well as a full stack trace in a .txt file. Both csvs contain the same fields as the mailbagit.csv.
+Mailbagit creates error and warning reports during a test run using the optional argument `-r` or `--dry-run`. We recommend using this argument first to show if anything unexpected will happen during packaging.
+
+Most, but not all errors and warnings will be included in the reports during a test run. Using `--dry-run` fully parses the provided email messages, so any issues found there will be included. However a test run does not write anything to the filesystem, so errors or warnings that may happend during that process will not be included using `--dry-run`.
+
+Examples of errors and warnings that are not included when using `--dry-run`:
+	* Issues writing files or directories to disk
+	* Issues when using `wkhtmltopdf` or `chrome --headless` to generate PDF derivatives
+	* Issues when writing WARC derivatives, like 404 or 400 HTTP responses or SSL errors.
+
+## Example Error report
+
+	fundraising_emails/
+	|    |
+    |    +-- bagit.txt
+    |    |
+    |    +-- bag-info.txt
+    |    |
+    |    +-- mailbag.csv
+    |    |
+    |    ...
+	fundraising_emails_errors/
+    |    |
+    |    +-- 136.txt
+    |    |
+    |    +-- 2284.txt
+    |    |
+    |    +-- errors.csv
+    |     
+    fundraising_emails_warnings/
+         |
+         +-- 25.txt
+         |
+         +-- 514.txt
+         |
+         +-- 835.txt
+         |
+         +-- 1485.txt
+         |
+         +-- 3263.txt
+         |
+         +-- warnings.csv
+
 
 ## Common Warnings
-`wkhtmltopdf` raises warnings when image URLs are not found (404) when a PDF is created.  
 
-`No Body Present` is a warning that occurs when a message subject is found but `mailbagit` doesn't parse any message text.
+### 404s for external resources
+
+`wkhtmltopdf` raises warnings when image URLs and other externally-hosted resources are not found (404) when a PDF is created. These raise a warning and are included in warnings reports when the `pdf` derivative option is selected. These warnings are not included when the `--dry-run` option is used.
+
+`chrome --headless` DOES NOT raise any issues when 404s are found, so when the `pdf-chrome` derivative option is selected this information will not be including in any error or warning reports.
+
+WARC derivatives generate warnings when external resources do not return a HTTP 200 response.
+
+	WARN: When writing WARC derivatives, HTTP 403 Forbidden for external resource https://www.example.com/.
+
+### Missing message bodies
+
+`No Body Present` is a warning that occurs when `mailbagit` finds a message that does not contain a HTML or plain text body.
+
+	No HTML or plain text body for 524, no HTML derivative created.

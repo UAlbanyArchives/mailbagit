@@ -3,7 +3,7 @@ layout: page
 title: Plugins
 permalink: /plugins/
 parent: Using mailbagit
-nav_order: 4
+nav_order: 5
 ---
 
 # Plugins
