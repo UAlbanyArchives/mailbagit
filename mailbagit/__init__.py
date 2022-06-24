@@ -180,12 +180,10 @@ mailbagit_options.add_argument(
 )
 mailbagit_options.add_argument(
     "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
- warc_headers-22
 )
 mailbagit_options.add_argument(
     "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
 
- develop
 )
 mailbagit_options.add_argument(
     "-f",
