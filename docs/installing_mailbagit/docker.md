@@ -66,7 +66,7 @@ You can then click the "CLI" button for command line access to `mailbagit`.
 
 ![Screenshot showing how to get command line access to the container using Docker Desktop.]({{ site.baseurl }}/img/docker3.png)
 
-Remember to stop the container when your done!
+Remember to stop the container when you're done!
 
 ## Development Docker image
 

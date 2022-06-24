@@ -38,18 +38,23 @@ class EML(EmailAccount):
 
     def messages(self):
 
-        fileList = []
         companion_files = []
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
-                fileRoot = root + os.sep
-                # don't count the newly-created mailbag
-                if not fileRoot.startswith(mailbag_path):
-                    if file.lower().endswith("." + self.format_name):
-                        fileList.append(os.path.join(root, file))
-                    elif self.companion_files:
-                        companion_files.append(os.path.join(root, file))
+        if os.path.isfile(self.path):
+            parent_dir = os.path.dirname(self.path)
+            fileList = [self.path]
+        else:
+            parent_dir = self.path
+            fileList = []
+            for root, dirs, files in os.walk(self.path):
+                for file in files:
+                    mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                    fileRoot = root + os.sep
+                    # don't count the newly-created mailbag
+                    if not fileRoot.startswith(mailbag_path):
+                        if file.lower().endswith("." + self.format_name):
+                            fileList.append(os.path.join(root, file))
+                        elif self.companion_files:
+                            companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
 
@@ -57,7 +62,12 @@ class EML(EmailAccount):
                 yield None
                 continue
 
-            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
+            rel_path = format.relativePath(self.path, filePath)
+            if len(rel_path) < 1:
+                originalFile = Path(filePath).name
+            else:
+                originalFile = Path(os.path.normpath(rel_path)).as_posix()
+            # original file is now the relative path to the MBOX from the provided path
 
             attachments = []
             errors = []
@@ -120,7 +130,7 @@ class EML(EmailAccount):
 
             # Move EML to new mailbag directory structure
             yield message
-            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+            new_path = format.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)
 
         if self.companion_files:
             # Move all files into mailbag directory structure

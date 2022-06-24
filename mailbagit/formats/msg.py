@@ -38,18 +38,24 @@ class MSG(EmailAccount):
         return account_data
 
     def messages(self):
-        fileList = []
+
         companion_files = []
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
-                fileRoot = root + os.sep
-                # don't count the newly-created mailbag
-                if not fileRoot.startswith(mailbag_path):
-                    if file.lower().endswith("." + self.format_name):
-                        fileList.append(os.path.join(root, file))
-                    elif self.companion_files:
-                        companion_files.append(os.path.join(root, file))
+        if os.path.isfile(self.path):
+            parent_dir = os.path.dirname(self.path)
+            fileList = [self.path]
+        else:
+            parent_dir = self.path
+            fileList = []
+            for root, dirs, files in os.walk(self.path):
+                for file in files:
+                    mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                    fileRoot = root + os.sep
+                    # don't count the newly-created mailbag
+                    if not fileRoot.startswith(mailbag_path):
+                        if file.lower().endswith("." + self.format_name):
+                            fileList.append(os.path.join(root, file))
+                        elif self.companion_files:
+                            companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
             # Parse email matching the input file extension
@@ -58,7 +64,14 @@ class MSG(EmailAccount):
                 yield None
                 continue
 
-            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
+            rel_path = format.relativePath(self.path, filePath)
+            if len(rel_path) < 1:
+                originalFile = Path(filePath).name
+            else:
+                originalFile = Path(os.path.normpath(rel_path)).as_posix()
+            # original file is now the relative path to the MBOX from the provided path
+
+            # originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
 
             attachments = []
             errors = []
@@ -114,15 +127,22 @@ class MSG(EmailAccount):
                         # Try to get the mime, guess it if this doesn't work
                         mime = None
                         try:
-                            mime = mailAttachment._ensureSet("_contentType", "__substg1.0_370e")
+                            mime = mailAttachment.mimetype
                         except Exception as e:
                             desc = "Error reading mime type, guessing it instead"
                             errors = common.handle_error(errors, e, desc, "warn")
                         if mime is None:
                             mime = format.guessMimeType(attachmentName)
 
-                        # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
-                        contentID = uuid.uuid4().hex
+                        contentID = None
+                        try:
+                            contentID = mailAttachment.contendId
+                        except Exception as e:
+                            desc = "Error reading ContentID, creating an ID instead"
+                            errors = common.handle_error(errors, e, desc, "warn")
+                        if contentID is None:
+                            contentID = uuid.uuid4().hex
+
                         attachment = Attachment(
                             Name=attachmentName,
                             File=mailAttachment.data,
@@ -169,7 +189,7 @@ class MSG(EmailAccount):
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
+            new_path = format.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)
             yield message
 
         if self.companion_files:

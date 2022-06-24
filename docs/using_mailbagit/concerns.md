@@ -3,7 +3,7 @@ layout: page
 title: Privacy and security concerns
 permalink: /concerns/
 parent: Using mailbagit
-nav_order: 6
+nav_order: 7
 ---
 
 # Privacy and security concerns
