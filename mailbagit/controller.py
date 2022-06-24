@@ -150,14 +150,37 @@ class Controller:
         error_csv = [self.csv_headers]
         warn_csv = [self.csv_headers]
 
+        companion_files = []
+        if os.path.isfile(self.args.path):
+            parent_dir = os.path.dirname(self.args.path)
+            fileList = [self.args.path]
+        else:
+            parent_dir = self.args.path
+            fileList = []
+            for root, dirs, files in os.walk(self.args.path):
+                for file in files:
+                    mailbag_path = os.path.join(self.args.path, self.args.mailbag_name) + os.sep
+                    fileRoot = root + os.sep
+                    # don't count the newly-created mailbag
+                    if not fileRoot.startswith(mailbag_path):
+                        if file.lower().endswith("." + mail_account.format_name):
+                            fileList.append(os.path.join(root, file))
+                        elif self.args.companion_files:
+                            companion_files.append(os.path.join(root, file))
+
         # Count total no. of messages and set start time
         mail_account.iteration_only = True
-        total_messages = len(list(mail_account.messages()))
+        total_messages = len(list(mail_account.messages(fileList)))
         mail_account.iteration_only = False
         start_time = time()
 
-        for message in mail_account.messages():
+        for message in mail_account.messages(fileList):
             # do stuff you ought to do per message here
+
+            print(message.Subject)
+
+            # Move MSG to new mailbag directory structure
+            # new_path = format.moveWithDirectoryStructure(self.args.dry_run, parent_dir, self.args.mailbag_name, mail_account.format_name, os.path.join(self.args.path, message.Original_File))
 
             # Generate mailbag_message_id
             mailbag_message_id += 1
@@ -226,6 +249,11 @@ class Controller:
                 controller.progress(
                     mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End
                 )
+
+        # if self.companion_files:
+        #    # Move all files into mailbag directory structure
+        #    for companion_file in companion_files:
+        #        new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)
 
         # End thread and server for WARC derivatives
         for d in derivatives:
@@ -296,4 +324,5 @@ class Controller:
 
         controller.progressMessage("Finished packaging mailbag.", print_End="\n")
 
-        return mail_account.messages()
+        # return mail_account.messages()
+        return mail_account
