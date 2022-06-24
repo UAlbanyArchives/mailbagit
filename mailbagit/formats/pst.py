@@ -291,12 +291,14 @@ if not skip_registry:
 
                 # Move PST to new mailbag directory structure
                 if not self.iteration_only:
-                    new_path = format.moveWithDirectoryStructure(
+                    new_path, errors = format.moveWithDirectoryStructure(
                         self.dry_run,
                         parent_dir,
                         self.mailbag_name,
                         self.format_name,
                         filePath,
+                        # Does not check path lengths for PSTs
+                        [],
                     )
 
             if self.companion_files:
