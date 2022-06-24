@@ -263,22 +263,14 @@ def main(args):
         error_msg = "Invalid path, does not exist as a file or directory."
         mailbag_parser.error((error_msg))
 
-    """
-    # handle arg errors
-    if args.input not in EmailAccount.registry.keys():
-        error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(EmailAccount.registry.keys()) + '"'
-        mailbag_parser.error((error_msg))
-
-    if isinstance(args.derivatives, str):
-        args.derivatives = args.derivatives.split(" ")
-        if not all(elem in derivative_types for elem in args.derivatives):
-            error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
-            mailbag_parser.error((error_msg))
-
     if args.input in args.derivatives:
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
         mailbag_parser.error((error_msg))
-    """
+
+    # Check for multiple pdf derivatives, liek both pdf and pdf-chrome
+    if ["pdf" in x for x in args.derivatives].count(True) > 1:
+        error_msg = "Invalid derivatives, mailbagit can only use one module to make PDF derivatives"
+        mailbag_parser.error((error_msg))
 
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"
