@@ -267,7 +267,7 @@ def main(args):
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
         mailbag_parser.error((error_msg))
 
-    # Check for multiple pdf derivatives, liek both pdf and pdf-chrome
+    # Check for multiple pdf derivatives, like both pdf and pdf-chrome
     if ["pdf" in x for x in args.derivatives].count(True) > 1:
         error_msg = "Invalid derivatives, mailbagit can only use one module to make PDF derivatives"
         mailbag_parser.error((error_msg))
