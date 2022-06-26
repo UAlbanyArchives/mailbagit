@@ -36,18 +36,25 @@ if not skip_registry:
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
-
+            self._account_data = {}
             self.path = target_account
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
             self.companion_files = args.companion_files
-            self.iteration_only = False
             log.info("Reading :", Path=self.path)
 
+        @property
         def account_data(self):
-            return account_data
+            return self._account_data
 
-        def folders(self, folder, path, originalFile):
+        @property
+        def number_of_messages(self):
+            count = 0
+            for _ in self.messages(iteration_only=True):
+                count += 1
+            return count
+
+        def folders(self, folder, path, originalFile, iteration_only=False):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is the email folder path of the message, separated by "/"
@@ -55,7 +62,7 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 for index in range(folder.number_of_sub_messages):
 
-                    if self.iteration_only:
+                    if iteration_only:
                         yield None
                         continue
                     attachments = []
@@ -231,19 +238,23 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, iteration_only=iteration_only)
             else:
-                if not self.iteration_only:
+                if not iteration_only:
                     if not folder.number_of_sub_messages:
                         # This is an email folder that does not contain any messages.
                         # Currently, we are only warning about empty folders pending the possibility of
                         # a better solution described in #117
                         desc = "Folder '" + path + "' contains no messages and will be ignored"
+                        if not 'empty_folder_paths' in self.account_info:
+                            self.account_info['empty_folder_paths'] = []
+                        self.account_info['empty_folder_paths'].append(path)
+
                         # handle_error() won't work here as-is because the errors list is added to the Message model
                         # errors = common.handle_error(errors, None, desc, "warn")
                         log.warn(desc + ".")
 
-        def messages(self):
+        def messages(self, iteration_only=False):
             companion_files = []
             if os.path.isfile(self.path):
                 parent_dir = os.path.dirname(self.path)
@@ -276,9 +287,9 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, folder.name, originalFile)
+                        yield from self.folders(folder, folder.name, originalFile, iteration_only=iteration_only)
                     else:
-                        if not self.iteration_only:
+                        if not iteration_only:
                             # This is an email folder that does not contain any messages.
                             # Currently, we are only warning about empty folders pending the possibility of
                             # a better solution described in #117
@@ -286,11 +297,12 @@ if not skip_registry:
                             # handle_error() won't work here as-is because the errors list is added to the Message model
                             # errors = common.handle_error(errors, None, desc, "warn")
                             log.warn(desc + ".")
-
+                if 'empty_folder_paths' in self.account_data:
+                    log.warn(f'Empty folder paths include: {self.account_data["empty_folder_paths"]}')
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                if not self.iteration_only:
+                if not iteration_only:
                     new_path = format.moveWithDirectoryStructure(
                         self.dry_run,
                         parent_dir,

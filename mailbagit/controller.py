@@ -151,9 +151,7 @@ class Controller:
         warn_csv = [self.csv_headers]
 
         # Count total no. of messages and set start time
-        mail_account.iteration_only = True
-        total_messages = len(list(mail_account.messages()))
-        mail_account.iteration_only = False
+        total_messages = mail_account.number_of_messages
         start_time = time()
 
         for message in mail_account.messages():
