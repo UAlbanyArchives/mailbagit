@@ -182,8 +182,12 @@ mailbagit_options.add_argument(
     "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
+    "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
+
+)
+mailbagit_options.add_argument(
     "-f",
-    "--companion_files",
+    "--companion-files",
     help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.",
     default=False,
     action="store_true",
@@ -263,22 +267,14 @@ def main(args):
         error_msg = "Invalid path, does not exist as a file or directory."
         mailbag_parser.error((error_msg))
 
-    """
-    # handle arg errors
-    if args.input not in EmailAccount.registry.keys():
-        error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(EmailAccount.registry.keys()) + '"'
-        mailbag_parser.error((error_msg))
-
-    if isinstance(args.derivatives, str):
-        args.derivatives = args.derivatives.split(" ")
-        if not all(elem in derivative_types for elem in args.derivatives):
-            error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
-            mailbag_parser.error((error_msg))
-
     if args.input in args.derivatives:
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
         mailbag_parser.error((error_msg))
-    """
+
+    # Check for multiple pdf derivatives, like both pdf and pdf-chrome
+    if ["pdf" in x for x in args.derivatives].count(True) > 1:
+        error_msg = "Invalid derivatives, mailbagit can only use one module to make PDF derivatives"
+        mailbag_parser.error((error_msg))
 
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"

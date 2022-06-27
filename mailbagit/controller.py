@@ -227,11 +227,6 @@ class Controller:
                     mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End
                 )
 
-        # End thread and server for WARC derivatives
-        for d in derivatives:
-            if "warc.WarcDerivative" in str(type(d)):
-                d.terminate()
-
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
 
