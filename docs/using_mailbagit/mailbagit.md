@@ -74,7 +74,11 @@ e.g. `-d eml pdf warc`
 > Compresses the mailbag as a ZIP, TAR, or TAR.GZ
 > e.g. `-c zip` or `-c tar.gz`
 
-* **-f, --companion_files**
+* **-l, --external-links**
+> When creating WARC derivatives, this option will parse HTML bodies for <a> link tags to external web pages.
+> These external pages will be crawled and added to WARC derivatives.
+
+* **-f, --companion-files**
 > Allows for companion metadata files to be packaged alongside email export files.
 > When this option is used, `mailbagit` will recursively include all the files in the directory provided into a mailbag.
 
