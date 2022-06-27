@@ -1,3 +1,4 @@
+import os
 import traceback
 from mailbagit.models import Error
 from structlog import get_logger
@@ -46,5 +47,22 @@ def handle_error(errors, exception, desc, level="error"):
         StackTrace=stack_trace,
     )
     errors.append(errorObj)
+
+    return errors
+
+
+def check_path_length(path, errors):
+    """
+    Call to warn if file or directory paths exceed windows path limits
+
+    Parameters:
+        path (Str): A path to check the length of
+        errors (List): List of Error objects defined in models.py
+    Returns:
+        errors (List): List of Error objects defined in models.py
+    """
+    if len(os.path.abspath(path)) > 260 and os.name == "nt":
+        desc = f"Windows path length exceeded writing to {path}"
+        errors = handle_error(errors, None, desc, "warn")
 
     return errors

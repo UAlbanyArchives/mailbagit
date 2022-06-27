@@ -48,6 +48,8 @@ class MboxDerivative(Derivative):
                 else:
                     out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip("/")))
                     filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")
+                errors = common.check_path_length(out_dir, errors)
+                errors = common.check_path_length(filename, errors)
             except Exception as e:
                 desc = "Error setting up MBOX derivative"
                 errors = common.handle_error(errors, e, desc)

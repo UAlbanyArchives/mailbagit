@@ -148,7 +148,9 @@ class WarcDerivative(Derivative):
                 errors = common.handle_error(errors, None, desc, "warn")
             else:
                 out_dir = os.path.join(self.warc_dir, message.Derivatives_Path)
-                filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc")
+                filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
+                errors = common.check_path_length(out_dir, errors)
+                errors = common.check_path_length(filename, errors)
                 log.debug("Writing WARC to " + str(filename))
 
                 # This is used for the WARC-Target-URI in the WARC derivatives
