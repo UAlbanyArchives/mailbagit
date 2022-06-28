@@ -10,6 +10,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbagit.helper.controller as controller
+import mailbagit.helper.common as common
 import mailbagit.globals as globals
 from time import time
 import uuid
@@ -243,7 +244,7 @@ class Controller:
                     f.write(warn_text)
                     f.close()
                 for d in derivatives:
-                    folder_path = format.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
+                    folder_path = common.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
                     if not self.args.dry_run:
                         if not os.path.isdir(folder_path):
                             log.debug("Writing empty folder " + str(folder_path))

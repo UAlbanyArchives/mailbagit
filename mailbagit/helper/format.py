@@ -1,7 +1,6 @@
 import os, shutil, glob
 from pathlib import Path
 import mimetypes
-import urllib.parse
 import chardet, codecs
 from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
