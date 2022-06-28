@@ -103,7 +103,7 @@ class EML(EmailAccount):
                         if messagePath == ".":
                             messagePath = ""
                         unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                        derivativesPath = format.normalizePath(unsafePath)
+                        derivativesPath = common.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)

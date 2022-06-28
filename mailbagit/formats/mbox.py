@@ -38,9 +38,9 @@ class Mbox(EmailAccount):
 
     @property
     def number_of_messages(self):
-            for _ in self.messages(iteration_only=True):
-                count += 1
-            return count
+        for _ in self.messages(iteration_only=True):
+            count += 1
+        return count
 
     def messages(self, iteration_only=False):
 
@@ -104,7 +104,7 @@ class Mbox(EmailAccount):
                         messagePath = Path(format.messagePath(mailObject)).as_posix()
                         if messagePath == ".":
                             messagePath = ""
-                        derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
+                        derivativesPath = Path(os.path.splitext(originalFile)[0], common.normalizePath(messagePath)).as_posix()
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)

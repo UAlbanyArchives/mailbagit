@@ -127,7 +127,7 @@ if not skip_registry:
                             messagePath = path
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
+                            derivativesPath = Path(os.path.splitext(originalFile)[0], common.normalizePath(messagePath)).as_posix()
                         except Exception as e:
                             desc = "Error reading message path"
                             errors = common.handle_error(errors, e, desc)
@@ -243,16 +243,10 @@ if not skip_registry:
                 if not iteration_only:
                     if not folder.number_of_sub_messages:
                         # This is an email folder that does not contain any messages.
-                        # Currently, we are only warning about empty folders pending the possibility of
-                        # a better solution described in #117
-                        desc = "Folder '" + path + "' contains no messages and will be ignored"
-                        if not 'empty_folder_paths' in self.account_info:
-                            self.account_info['empty_folder_paths'] = []
-                        self.account_info['empty_folder_paths'].append(path)
-
-                        # handle_error() won't work here as-is because the errors list is added to the Message model
-                        # errors = common.handle_error(errors, None, desc, "warn")
-                        log.warn(desc + ".")
+                        # Add it to self.account_data['empty_folder_paths']
+                        if not "empty_folder_paths" in self.account_data:
+                            self.account_data["empty_folder_paths"] = []
+                        self.account_data["empty_folder_paths"].append(os.path.splitext(originalFile)[0] + "/" + path)
 
         def messages(self, iteration_only=False):
             companion_files = []
@@ -291,14 +285,10 @@ if not skip_registry:
                     else:
                         if not iteration_only:
                             # This is an email folder that does not contain any messages.
-                            # Currently, we are only warning about empty folders pending the possibility of
-                            # a better solution described in #117
-                            desc = "Folder '" + folder.name + "' contains no messages and will be ignored"
-                            # handle_error() won't work here as-is because the errors list is added to the Message model
-                            # errors = common.handle_error(errors, None, desc, "warn")
-                            log.warn(desc + ".")
-                if 'empty_folder_paths' in self.account_data:
-                    log.warn(f'Empty folder paths include: {self.account_data["empty_folder_paths"]}')
+                            # Add it to self.account_data['empty_folder_paths']
+                            if not "empty_folder_paths" in self.account_data:
+                                self.account_data["empty_folder_paths"] = []
+                            self.account_data["empty_folder_paths"].append(os.path.splitext(originalFile)[0] + "/" + folder.name)
                 pst.close()
 
                 # Move PST to new mailbag directory structure

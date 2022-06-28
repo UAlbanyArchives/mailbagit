@@ -27,19 +27,17 @@ class WarcDerivative(Derivative):
     derivative_agent = warcio.__name__
     derivative_agent_version = metadata.version("warcio")
 
-    def __init__(self, email_account, **kwargs):
+    def __init__(self, email_account, args, mailbag_dir):
         log.debug("Setup account")
-        super()
 
-        self.args = kwargs["args"]
-        mailbag_dir = kwargs["mailbag_dir"]
-        self.warc_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
+        # Sets up self.format_subdirectory
+        super().__init__(args, mailbag_dir)
+
         self.httpd = []
         self.port = 5000
         self.tmp_file = "tmp.html"
 
         if not self.args.dry_run:
-            os.makedirs(self.warc_dir)
 
             self.server_thread = Thread(target=derivative.startServer, args=(self.args.dry_run, self.httpd, self.port))
             # Make it a daemon so it will stop after ctrl+c
@@ -73,7 +71,7 @@ class WarcDerivative(Derivative):
                 desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no WARC derivative created"
                 errors = common.handle_error(errors, None, desc, "warn")
             else:
-                out_dir = os.path.join(self.warc_dir, message.Derivatives_Path)
+                out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".warc.gz")
                 log.debug("Writing WARC to " + str(filename))
 

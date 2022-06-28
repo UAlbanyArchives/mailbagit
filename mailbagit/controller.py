@@ -128,7 +128,7 @@ class Controller:
             bag.info[self.args.input.upper() + "-Agent-Version"] = mail_account.format_agent_version
 
         # Instantiate derivatives
-        derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
+        derivatives = [d(mail_account, self.args, mailbag_dir) for d in self.derivatives_to_create]
         if not self.args.dry_run:
             # write derivatives metadata
             for d in derivatives:
@@ -206,7 +206,7 @@ class Controller:
                 # Write Warning Report
                 if len(warn_stack_trace) > 0:
                     if not os.path.isdir(warn_dir):
-                        # making error directory if error is present
+                        # making warn directory if error is present
                         os.mkdir(warn_dir)
                     warn_csv.append(self.message_to_csv(message, "warn"))
                     warn_trace_file = os.path.join(warn_dir, str(message.Mailbag_Message_ID) + ".txt")
@@ -229,6 +229,25 @@ class Controller:
         for d in derivatives:
             if "warc.WarcDerivative" in str(type(d)):
                 d.terminate()
+
+        # Write any empty email folders to derivatives subdirectories
+        if "empty_folder_paths" in mail_account.account_data:
+            if not os.path.isdir(warn_dir):
+                # making warn directory if error is present
+                os.mkdir(warn_dir)
+            for empty_folder in mail_account.account_data["empty_folder_paths"]:
+                warn_text = f'Folder "{empty_folder}" did not contain any messages or subfolders.'
+                log.warn(warn_text)
+                warn_trace_file = os.path.join(warn_dir, common.normalizePath(empty_folder).replace("/", "%2F") + ".txt")
+                with open(warn_trace_file, "w", encoding="utf-8") as f:
+                    f.write(warn_text)
+                    f.close()
+                for d in derivatives:
+                    folder_path = format.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
+                    if not self.args.dry_run:
+                        if not os.path.isdir(folder_path):
+                            log.debug("Writing empty folder " + str(folder_path))
+                            os.makedirs(folder_path)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)

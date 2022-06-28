@@ -107,7 +107,7 @@ class MSG(EmailAccount):
                     if messagePath == ".":
                         messagePath = ""
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                    derivativesPath = Path(format.normalizePath(unsafePath)).as_posix()
+                    derivativesPath = Path(common.normalizePath(unsafePath)).as_posix()
                 except Exception as e:
                     desc = "Error reading message path from headers"
                     errors = common.handle_error(errors, e, desc)

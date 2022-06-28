@@ -14,15 +14,11 @@ class TxtDerivative(Derivative):
     derivative_agent = ""
     derivative_agent_version = ""
 
-    def __init__(self, email_account, **kwargs):
+    def __init__(self, email_account, args, mailbag_dir):
         log.debug("Setup account")
-        super()
 
-        self.args = kwargs["args"]
-        mailbag_dir = kwargs["mailbag_dir"]
-        self.txt_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        if not self.args.dry_run:
-            os.makedirs(self.txt_dir)
+        # Sets up self.format_subdirectory
+        super().__init__(args, mailbag_dir)
 
     def do_task_per_account(self):
         log.debug(self.account.account_data())
@@ -32,7 +28,7 @@ class TxtDerivative(Derivative):
         errors = []
         try:
 
-            out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
+            out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
             filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
 
             if message.Text_Body is None:
