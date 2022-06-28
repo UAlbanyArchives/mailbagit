@@ -25,19 +25,27 @@ class MSG(EmailAccount):
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
-        account_data = {}
+        self._account_data = {}
 
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
-        self.iteration_only = False
+
         log.info("Reading :", Path=self.path)
 
+    @property
     def account_data(self):
-        return account_data
+        return self._account_data
 
-    def messages(self):
+    @property
+    def number_of_messages(self):
+        count = 0
+        for _ in self.messages(iteration_only=True):
+            count += 1
+        return count
+
+    def messages(self, iteration_only=False):
 
         companion_files = []
         if os.path.isfile(self.path):
@@ -60,7 +68,7 @@ class MSG(EmailAccount):
         for filePath in fileList:
             # Parse email matching the input file extension
 
-            if self.iteration_only:
+            if iteration_only:
                 yield None
                 continue
 
@@ -99,7 +107,7 @@ class MSG(EmailAccount):
                     if messagePath == ".":
                         messagePath = ""
                     unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                    derivativesPath = Path(format.normalizePath(unsafePath)).as_posix()
+                    derivativesPath = Path(common.normalizePath(unsafePath)).as_posix()
                 except Exception as e:
                     desc = "Error reading message path from headers"
                     errors = common.handle_error(errors, e, desc)

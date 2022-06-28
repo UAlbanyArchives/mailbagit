@@ -183,7 +183,6 @@ mailbagit_options.add_argument(
 )
 mailbagit_options.add_argument(
     "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
-
 )
 mailbagit_options.add_argument(
     "-f",
