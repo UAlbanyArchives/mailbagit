@@ -318,7 +318,7 @@ def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
     return fullPath, fullFilePath, file_new_path, relPath
 
 
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
+def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, errors):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
@@ -330,9 +330,11 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         input (String): email file format to be packaged into a mailbag
         emailFolder (String): Path of the email export file relative to mainPath
         file (String): Email file path
+        errors (List): List of Error objects defined in models.py
 
     Returns:
         file_new_path (Path): The path where the file was moved
+        errors (List): List of Error objects defined in models.py
     """
 
     fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
@@ -341,6 +343,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     else:
         log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
 
+    errors = common.check_path_length(file_new_path, errors)
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -356,7 +359,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
                     time.sleep(0.01)
             p = p.parent
 
-    return file_new_path
+    return file_new_path, errors
 
 
 def guessMimeType(filename):

@@ -20,7 +20,7 @@ class ExampleAccount(EmailAccount):
 
     @property
     def account_data(self):
-        return _account_data
+        return self._account_data
 
     def messages(self):
         for message in self._messages:

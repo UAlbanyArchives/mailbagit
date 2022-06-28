@@ -43,8 +43,10 @@ if not skip_registry:
 
                 out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+                errors = common.check_path_length(out_dir, errors)
                 html_name = filename + ".html"
                 pdf_name = filename + ".pdf"
+                errors = common.check_path_length(pdf_name, errors)
 
                 if message.HTML_Body is None and message.Text_Body is None:
                     log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No PDF derivative will be created.")

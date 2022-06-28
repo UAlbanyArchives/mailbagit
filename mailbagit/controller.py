@@ -226,11 +226,6 @@ class Controller:
                     mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End
                 )
 
-        # End thread and server for WARC derivatives
-        for d in derivatives:
-            if "warc.WarcDerivative" in str(type(d)):
-                d.terminate()
-
         # Write any empty email folders to derivatives subdirectories
         if "empty_folder_paths" in mail_account.account_data:
             if not os.path.isdir(warn_dir):

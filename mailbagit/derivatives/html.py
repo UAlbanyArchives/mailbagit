@@ -33,7 +33,9 @@ class HtmlDerivative(Derivative):
                 out_dir = self.format_subdirectory
             else:
                 out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
+            errors = common.check_path_length(out_dir, errors)
             filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".html")
+            errors = common.check_path_length(filename, errors)
 
             if message.HTML_Body is None and message.Text_Body is None:
                 desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no HTML derivative created"

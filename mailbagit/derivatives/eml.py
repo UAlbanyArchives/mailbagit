@@ -39,7 +39,9 @@ class EmlDerivative(Derivative):
         try:
 
             out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
-            filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+            filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".eml")
+            errors = common.check_path_length(out_dir, errors)
+            errors = common.check_path_length(filename, errors)
 
             # Build msg
             if not message.Message and not message.Headers:
@@ -61,13 +63,13 @@ class EmlDerivative(Derivative):
                         if not self.args.dry_run:
                             if not os.path.isdir(out_dir):
                                 os.makedirs(out_dir)
-                            with open(filename + ".eml", "w", encoding=out_encoding) as outfile:
+                            with open(filename, "w", encoding=out_encoding) as outfile:
                                 gen = generator.Generator(outfile)
                                 gen.flatten(msg)
                                 outfile.close()
                             fullObjectWrite = True
                     except Exception as e:
-                        derivative.deleteFile(filename + ".eml")
+                        derivative.deleteFile(filename)
                         desc = "Error writing full email object to EML, generating it from the model instead"
                         errors = common.handle_error(errors, e, desc, "warn")
                         fullObjectWrite = False
@@ -151,7 +153,7 @@ class EmlDerivative(Derivative):
                             if not self.args.dry_run:
                                 if not os.path.isdir(out_dir):
                                     os.makedirs(out_dir)
-                                with open(filename + ".eml", "w", encoding="utf-8") as outfile:
+                                with open(filename, "w", encoding="utf-8") as outfile:
                                     gen = generator.Generator(outfile)
                                     gen.flatten(msg)
                                     outfile.close()

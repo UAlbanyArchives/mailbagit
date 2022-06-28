@@ -30,6 +30,8 @@ class TxtDerivative(Derivative):
 
             out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
             filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
+            errors = common.check_path_length(out_dir, errors)
+            errors = common.check_path_length(filename, errors)
 
             if message.Text_Body is None:
                 desc = "No plain text body for " + str(message.Mailbag_Message_ID) + ", no TXT derivative created"
