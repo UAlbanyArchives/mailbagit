@@ -17,7 +17,6 @@ import mailbagit.loggerx
 import mailbagit.globals
 
 globals.init()
-log = get_logger()
 
 if importlib.util.find_spec("gooey"):
     gooeyCheck = True
@@ -284,9 +283,6 @@ def main():
             "times to create multiple mailbags."
         )
         mailbag_parser.error((error_msg))
-
-    # Okay, if you made it here, args are good!
-    log.debug("Arguments:", args=args)
 
     args.path = args.path[0]
     c = Controller(args)
