@@ -188,6 +188,7 @@ mailbagit_options.add_argument(
     action="store_true",
 )
 mailbagit_options.add_argument("--log_to_file", help="File to direct logs to", default=None, nargs="?")
+mailbagit_options.add_argument("--log_json_to_stdout", help="Format printed logs as JSON", default=False, action="store_true")
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -255,7 +256,7 @@ if gooeyCheck:
 
 def main():
     args = mailbag_parser.parse_args()
-    setup_logging(filename=args.log_to_file)
+    setup_logging( stream_json=args.log_json_to_stdout, filename=args.log_to_file)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):

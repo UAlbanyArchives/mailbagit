@@ -2,7 +2,7 @@ import logging, os, re, sys
 from copy import copy
 import structlog
 import mailbagit.globals as globals
-
+from pythonjsonlogger import jsonlogger
 
 def copy_config(config):
     """Copy relevant information from one config to another."""
@@ -26,47 +26,45 @@ canonical_levels = (
 )
 level_re = re.compile(r"|".join((r"^{}$".format(level) for level in canonical_levels)), re.I)
 
-handler = None
+stream_handler = None
+file_handler=None
 already_configured = False
 
 
-def setup_logging(config=None, level=None, stream=None, filename=None):
+def setup_logging(level=None, stream_json=False, filename=None):
     """sets up both logging and structlog."""
-    global handler, already_configured
+    global stream_handler, file_handler,  already_configured
 
     root_logger = logging.getLogger("mailbagit")
 
-    if handler:
-        root_logger.removeHandler(handler)
-
-    if stream and filename:
-        raise RuntimeError("stream and filename are mutually exclusive and cannot be combined, pick one or the other")
+    if stream_handler:
+        root_logger.removeHandler(stream_handler)
+    if file_handler:
+        root_logger.removeHandler(file_handler)
 
     # Default configuration is info -> stdout - the MAILBAG_LOG_CONFIG var can be used to override default with pre-configured values
     from_env = os.environ.get("MAILBAG_LOG_CONFIG", None)
-    default = configurations.get(from_env, configurations["DEFAULT_CONFIG"])
 
-    if not config:
-        config = copy_config(default)
-        if filename and "stream" in config["logging"].keys():
-            del config["logging"]["stream"]
-
-    level = level or config["logging"].get("level", None) or logging.INFO
+    level = level  or logging.INFO
     if isinstance(level, str) and level_re.match(level):
         level = getattr(logging, level.upper())
 
+    config = {
+        "logging": default_logging_conf(level=level),
+        "structlog": default_structlog_conf(),
+        "level": level,
+    }
+
     # Forward what's needed to put the log places
-    if stream:
-        config["logging"]["stream"] = stream
+    stream_handler = logging.StreamHandler(sys.stdout)
+    if stream_json:
+        stream_handler.setFormatter(jsonlogger.JsonFormatter())
+    root_logger.addHandler(stream_handler)
+
     if filename:
-        config["logging"]["filename"] = filename
-
-    if "filename" in config["logging"]:
-        handler = logging.FileHandler(config["logging"]["filename"], mode="a")
-    if "stream" in config["logging"]:
-        handler = logging.StreamHandler(config["logging"]["stream"])
-
-    root_logger.addHandler(handler)
+        file_handler = logging.FileHandler(filename, mode="a")
+        file_handler.setFormatter(jsonlogger.JsonFormatter())
+        root_logger.addHandler(file_handler)
     root_logger.setLevel(level)
     structlog.reset_defaults()
     structlog.configure(**config["structlog"])
@@ -101,7 +99,7 @@ def default_structlog_conf(**overrides):
             structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
             structlog.processors.TimeStamper(fmt="iso", utc=True),
-            structlog.processors.JSONRenderer(),
+            structlog.stdlib.render_to_log_kwargs
         ],
     }
     conf.update(**overrides)
@@ -110,40 +108,6 @@ def default_structlog_conf(**overrides):
 
 def default_logging_conf(**overrides):
     """Generate a default stdlib logging configuration."""
-    conf = {"level": logging.INFO, "format": "%(message)s"}
+    conf = {"level": logging.INFO}
     conf.update(**overrides)
     return conf
-
-
-# Provided example configurations for structlog.
-configurations = {}
-
-configurations["INFO_TO_STDERR"] = {"logging": default_logging_conf(stream=sys.stderr), "structlog": default_structlog_conf()}
-
-configurations["INFO_TO_STDOUT"] = {"logging": default_logging_conf(stream=sys.stdout), "structlog": default_structlog_conf()}
-
-configurations["INFO_TO_FILE"] = {
-    "logging": default_logging_conf(level=logging.INFO, filename=os.path.expanduser("~/mailbagit.log"), filemode="a"),
-    "structlog": default_structlog_conf(),
-    "level": "INFO",
-}
-
-configurations["DEBUG_TO_STDERR"] = {
-    "logging": default_logging_conf(level=logging.DEBUG, stream=sys.stderr),
-    "structlog": default_structlog_conf(),
-    "level": "DEBUG",
-}
-
-configurations["DEBUG_TO_STDOUT"] = {
-    "logging": default_logging_conf(level=logging.DEBUG, stream=sys.stdout),
-    "structlog": default_structlog_conf(),
-    "level": "DEBUG",
-}
-
-configurations["DEBUG_TO_FILE"] = {
-    "logging": default_logging_conf(level=logging.DEBUG, filename=os.path.expanduser("~/mailbag.log"), filemode="a"),
-    "structlog": default_structlog_conf(),
-    "level": "DEBUG",
-}
-
-configurations["DEFAULT_CONFIG"] = configurations["INFO_TO_STDOUT"]
