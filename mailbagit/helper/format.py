@@ -8,7 +8,7 @@ import mailbagit.helper.common as common
 import html
 import uuid
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 

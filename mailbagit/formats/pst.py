@@ -3,7 +3,7 @@ import mailbox
 from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
@@ -41,7 +41,7 @@ if not skip_registry:
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
             self.companion_files = args.companion_files
-            log.info("Reading :", Path=self.path)
+            log.info("Reading: " + self.path)
 
         @property
         def account_data(self):

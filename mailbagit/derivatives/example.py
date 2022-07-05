@@ -1,6 +1,6 @@
 # This is an example derivative, meant to show how
 # to hook up a real parser
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
@@ -15,7 +15,7 @@ class ExampleDerivative(Derivative):
     derivative_agent_version = ""
 
     def __init__(self, email_account, args, mailbag_dir):
-        log.debug("Setup account")
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
         # Sets up self.format_subdirectory
         super().__init__(args, mailbag_dir)

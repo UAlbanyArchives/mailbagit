@@ -2,7 +2,7 @@ import extract_msg
 import os
 from pathlib import Path
 from email import parser
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import email.errors
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
@@ -32,7 +32,7 @@ class MSG(EmailAccount):
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
 
-        log.info("Reading :", Path=self.path)
+        log.info("Reading: " + self.path)
 
     @property
     def account_data(self):

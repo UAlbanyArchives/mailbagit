@@ -2,7 +2,7 @@ import os
 import subprocess
 import distutils.spawn
 from mailbagit.derivative import Derivative
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import mailbagit.helper.derivative as derivative
 import mailbagit.helper.common as common
 
@@ -36,7 +36,7 @@ if not skip_registry:
         derivative_agent_version = out.decode("utf-8").strip()
 
         def __init__(self, email_account, args, mailbag_dir):
-            log.debug("Setup account")
+            log.debug(f"Setup {self.derivative_name} derivatives")
 
             # Sets up self.format_subdirectory
             super().__init__(args, mailbag_dir)

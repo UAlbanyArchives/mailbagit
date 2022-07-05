@@ -1,6 +1,6 @@
 def init():
     global log_level, style
-    log_level = "WARN"
+    log_level = "WARNING"
     style = {
         "g": ["\033[92m", "\033[0m"],  # green start and end
         "cy": ["\033[96m", "\033[0m"],

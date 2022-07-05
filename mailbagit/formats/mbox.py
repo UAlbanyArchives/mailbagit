@@ -1,7 +1,7 @@
 import email
 import mailbox
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from pathlib import Path
 import os, shutil
 import email.errors
@@ -30,7 +30,7 @@ class Mbox(EmailAccount):
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
-        log.info("Reading : ", Path=self.path)
+        log.info("Reading: " + self.path)
 
     @property
     def account_data(self):

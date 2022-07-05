@@ -6,7 +6,7 @@ import csv
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
@@ -39,9 +39,11 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     message_type = f'[{style["cy"][0]}{prefix}{style["b"][1]}]'
     # deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
     # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-    status = f"{percent}% [{current} / {total} messages] {remaining_time}s remaining"
+    status = f"{percent}% [Processed {current} of {total} messages] {remaining_time}s remaining"
 
-    print(f"\r{dt} {message_type} {status}", end=print_End)
+    # Originally printed timestamp and [Progress] first, which was eliminated for screen readers
+    #print(f"\r{dt} {message_type} {status}", end=print_End)
+    print(f"\r{status}", end=print_End)
 
 
 def progressMessage(msg, print_End="\r"):

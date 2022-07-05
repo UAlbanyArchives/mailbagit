@@ -86,10 +86,20 @@ e.g. `-d eml pdf warc`
 
 Mailbagit also accepts most [bagit-python](https://github.com/LibraryOfCongress/bagit-python) arguments. Thus, you can provide arguments like `--processes 2` or arguments to add metadata such as `--source-organization University at Albany, SUNY` 
 
-The only bag-python arguments that `mailbagit` does not support are `-log`, `-quiet`, `-validate`, `-fast`, and `-completeness_only`
+The only bag-python arguments that `mailbagit` does not support are `--quiet`, `--validate`, `--fast`, and `--completeness_only`
 
 If you would like to validate your mailbag, `mailbagit` comes with [bagit-python](https://github.com/LibraryOfCongress/bagit-python) installed. Thus, you can run:
 
 ```
 bagit.py --validate /path/to/mailbag
 ```
+
+### Logging arguments
+
+`Mailbagit` does support bagit-python's `--log` argument to log to a file. Logging also has [other documentation]({{ site.baseurl }}/logging#log-output).
+
+* **--log**
+> Path to a file to write logs to in addition to `stdout`.
+
+* **-j, --log-json**
+> Formats logs as line delimited JSON.

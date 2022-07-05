@@ -5,7 +5,7 @@ import mailbagit.helper.derivative as derivative
 import os, glob
 import mailbox
 from mailbagit.email_account import EmailAccount
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -25,7 +25,7 @@ class EmlDerivative(Derivative):
     derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, args, mailbag_dir):
-        log.debug("Setup account")
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
         # Sets up self.format_subdirectory
         super().__init__(args, mailbag_dir)
