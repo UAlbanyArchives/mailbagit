@@ -32,7 +32,7 @@ class MSG(EmailAccount):
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
 
-        log.info("Reading :", Path=self.path)
+        log.info("Reading: " + self.path)
 
     @property
     def account_data(self):

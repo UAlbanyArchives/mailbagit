@@ -41,7 +41,7 @@ if not skip_registry:
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
             self.companion_files = args.companion_files
-            log.info("Reading :", Path=self.path)
+            log.info("Reading: " + self.path)
 
         @property
         def account_data(self):

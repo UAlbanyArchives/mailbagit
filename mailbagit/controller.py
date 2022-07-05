@@ -269,7 +269,7 @@ class Controller:
                         writer.writerows(portion)
                         f.close()
 
-        controller.progressMessage("Writing CSVs...")
+        log.info("Writing CSV reports...")
         log.debug("Writing error.csv to " + str(error_dir))
         if len(error_csv) > 1:
             filename = os.path.join(error_dir, "error.csv")
@@ -284,6 +284,7 @@ class Controller:
                 writer.writerows(warn_csv)
 
         if not self.args.dry_run:
+            log.info("Saving manifests...")
             bag_size = 0
             for root, dirs, files in os.walk(os.path.join(str(mailbag_dir), "data")):
                 for file in files:
@@ -297,8 +298,7 @@ class Controller:
             bag.save(manifests=True)
 
         if self.args.compress and not self.args.dry_run:
-            controller.progressMessage("Compressing mailbag...")
-            log.info("Compressing Mailbag")
+            log.info("Compressing mailbag...")
             compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
             shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
 
@@ -307,6 +307,7 @@ class Controller:
                 # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
 
-        controller.progressMessage("Finished packaging mailbag.", print_End="\n")
+        #controller.progressMessage("", print_End="\n")
+        log.info("Finished packaging mailbag.")
 
         return mail_account.messages()

@@ -17,7 +17,6 @@ import mailbagit.loggerx
 import mailbagit.globals
 
 globals.init()
-log = get_logger()
 
 if importlib.util.find_spec("gooey"):
     gooeyCheck = True
@@ -189,6 +188,7 @@ mailbagit_options.add_argument(
     action="store_true",
 )
 mailbagit_options.add_argument("--log_to_file", help="File to direct logs to", default=None, nargs="?")
+mailbagit_options.add_argument("--log_json_to_stdout", help="Format printed logs as JSON", default=False, action="store_true")
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -258,7 +258,7 @@ if gooeyCheck:
 
 
 def main(args):
-    setup_logging(filename=args.log_to_file)
+    setup_logging( stream_json=args.log_json_to_stdout, filename=args.log_to_file)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):
@@ -286,9 +286,6 @@ def main(args):
             "times to create multiple mailbags."
         )
         mailbag_parser.error((error_msg))
-
-    # Okay, if you made it here, args are good!
-    log.debug("Arguments:", args=args)
 
     args.path = args.path[0]
     c = Controller(args)
