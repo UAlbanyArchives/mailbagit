@@ -35,15 +35,11 @@ if not skip_registry:
             raise Exception("Unable to access --version for " + derivative_agent + ": " + err.decode("utf-8"))
         derivative_agent_version = out.decode("utf-8").strip()
 
-        def __init__(self, email_account, **kwargs):
+        def __init__(self, email_account, args, mailbag_dir):
             log.debug("Setup account")
-            super()
 
-            self.args = kwargs["args"]
-            mailbag_dir = kwargs["mailbag_dir"]
-            self.pdf_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-            if not self.args.dry_run:
-                os.makedirs(self.pdf_dir)
+            # Sets up self.format_subdirectory
+            super().__init__(args, mailbag_dir)
 
         def do_task_per_account(self):
             print(self.account.account_data())
@@ -54,10 +50,12 @@ if not skip_registry:
 
             try:
 
-                out_dir = os.path.join(self.pdf_dir, message.Derivatives_Path)
+                out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+                errors = common.check_path_length(out_dir, errors)
                 html_name = filename + ".html"
                 pdf_name = filename + ".pdf"
+                errors = common.check_path_length(pdf_name, errors)
 
                 if message.HTML_Body is None and message.Text_Body is None:
                     desc = "No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ", no PDF derivative created"

@@ -1,7 +1,6 @@
 import os, shutil, glob
 from pathlib import Path
 import mimetypes
-import urllib.parse
 import chardet, codecs
 from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
@@ -289,54 +288,6 @@ def messagePath(headers):
     return messagePath
 
 
-def normalizePath(path):
-    # this is not sufficent yet
-    if os.name == "nt":
-        specials = ["<", ">", ":", '"', "/", "|", "?", "*"]
-        special_names = [
-            "CON",
-            "PRN",
-            "AUX",
-            "NUL",
-            "COM1",
-            "COM2",
-            "COM3",
-            "COM4",
-            "COM5",
-            "COM6",
-            "COM",
-            "COM8",
-            "COM9",
-            "LPT1",
-            "LPT2",
-            "LPT3",
-            "LPT4",
-            "LPT5",
-            "LPT6",
-            "LPT7",
-            "LPT8",
-            "LPT9",
-        ]
-        new_path = []
-        for name in os.path.normpath(path).split(os.sep):
-            illegal = False
-            for char in specials:
-                if char in name:
-                    illegal = True
-            if illegal:
-                new_path.append(urllib.parse.quote_plus(name))
-            else:
-                new_path.append(name)
-        out_path = Path(os.path.join(*new_path)).as_posix()
-    else:
-        out_path = path
-
-    if out_path == ".":
-        return ""
-    else:
-        return out_path
-
-
 def moveFile(dry_run, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
@@ -367,7 +318,7 @@ def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
     return fullPath, fullFilePath, file_new_path, relPath
 
 
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
+def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, errors):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
@@ -379,9 +330,11 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         input (String): email file format to be packaged into a mailbag
         emailFolder (String): Path of the email export file relative to mainPath
         file (String): Email file path
+        errors (List): List of Error objects defined in models.py
 
     Returns:
         file_new_path (Path): The path where the file was moved
+        errors (List): List of Error objects defined in models.py
     """
 
     fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
@@ -390,6 +343,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     else:
         log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
 
+    errors = common.check_path_length(file_new_path, errors)
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -405,7 +359,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
                     time.sleep(0.01)
             p = p.parent
 
-    return file_new_path
+    return file_new_path, errors
 
 
 def guessMimeType(filename):

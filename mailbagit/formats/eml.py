@@ -10,6 +10,7 @@ from mailbagit.models import Email, Attachment
 import email
 import os
 import platform
+from itertools import chain
 
 log = get_logger()
 
@@ -24,40 +25,54 @@ class EML(EmailAccount):
     def __init__(self, target_account, args, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
-        account_data = {}
+        self._account_data = {}
 
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
-        self.iteration_only = False
+
         log.info("Reading : ", Path=self.path)
 
+    @property
     def account_data(self):
-        return account_data
+        return self._account_data
+
+    @property
+    def number_of_messages(self):
+        if os.path.isfile(self.path):
+            return 1
+        count = 0
+        for _ in chain((files for _, _, files in os.walk(self.path))):
+            count += 1
+        return count
 
     def messages(self):
-
-        fileList = []
         companion_files = []
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
-                fileRoot = root + os.sep
-                # don't count the newly-created mailbag
-                if not fileRoot.startswith(mailbag_path):
-                    if file.lower().endswith("." + self.format_name):
-                        fileList.append(os.path.join(root, file))
-                    elif self.companion_files:
-                        companion_files.append(os.path.join(root, file))
+        if os.path.isfile(self.path):
+            parent_dir = os.path.dirname(self.path)
+            fileList = [self.path]
+        else:
+            parent_dir = self.path
+            fileList = []
+            for root, dirs, files in os.walk(self.path):
+                for file in files:
+                    mailbag_path = os.path.join(self.path, self.mailbag_name) + os.sep
+                    fileRoot = root + os.sep
+                    # don't count the newly-created mailbag
+                    if not fileRoot.startswith(mailbag_path):
+                        if file.lower().endswith("." + self.format_name):
+                            fileList.append(os.path.join(root, file))
+                        elif self.companion_files:
+                            companion_files.append(os.path.join(root, file))
 
         for filePath in fileList:
-
-            if self.iteration_only:
-                yield None
-                continue
-
-            originalFile = Path(format.relativePath(self.path, filePath)).as_posix()
+            rel_path = format.relativePath(self.path, filePath)
+            if len(rel_path) < 1:
+                originalFile = Path(filePath).name
+            else:
+                originalFile = Path(os.path.normpath(rel_path)).as_posix()
+            # original file is now the relative path to the MBOX from the provided path
 
             attachments = []
             errors = []
@@ -88,7 +103,7 @@ class EML(EmailAccount):
                         if messagePath == ".":
                             messagePath = ""
                         unsafePath = os.path.join(os.path.dirname(originalFile), messagePath)
-                        derivativesPath = format.normalizePath(unsafePath)
+                        derivativesPath = common.normalizePath(unsafePath)
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
@@ -119,8 +134,12 @@ class EML(EmailAccount):
                 message = Email(Errors=errors)
 
             # Move EML to new mailbag directory structure
+            new_path, errors = format.moveWithDirectoryStructure(
+                self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath, errors
+            )
+            message.Errors.extend(errors)
+
             yield message
-            new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, filePath)
 
         if self.companion_files:
             # Move all files into mailbag directory structure

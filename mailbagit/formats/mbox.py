@@ -23,21 +23,27 @@ class Mbox(EmailAccount):
     format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
-        log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
-        account_data = {}
+        self._account_data = {}
 
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
-        self.iteration_only = False
         log.info("Reading : ", Path=self.path)
 
+    @property
     def account_data(self):
-        return account_data
+        return self._account_data
 
-    def messages(self):
+    @property
+    def number_of_messages(self):
+        count = 0
+        for _ in self.messages(iteration_only=True):
+            count += 1
+        return count
+
+    def messages(self, iteration_only=False):
 
         companion_files = []
         if os.path.isfile(self.path):
@@ -68,7 +74,7 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
 
-                if self.iteration_only:
+                if iteration_only:
                     yield None
                     continue
 
@@ -99,7 +105,7 @@ class Mbox(EmailAccount):
                         messagePath = Path(format.messagePath(mailObject)).as_posix()
                         if messagePath == ".":
                             messagePath = ""
-                        derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
+                        derivativesPath = Path(os.path.splitext(originalFile)[0], common.normalizePath(messagePath)).as_posix()
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
@@ -135,8 +141,11 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            if not self.iteration_only:
-                new_path = format.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)
+            if not iteration_only:
+                # Does not check path lengths for MBOXs because `errors` was already returned to the controller
+                new_path, errors = format.moveWithDirectoryStructure(
+                    self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath, errors
+                )
 
         if self.companion_files:
             # Move all files into mailbag directory structure
