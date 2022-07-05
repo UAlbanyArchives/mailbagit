@@ -57,7 +57,7 @@ metadata_fields = []
 # This is necessary as mailbagit does not support --validate, --fast, or --completeness-only
 # Checksum args also do not action="store_true" so they don't display as checkboxes with Gooey
 # Excluding log and quiet for not since we're not handling these yet
-exclude_args = ["directory", "help", "validate", "fast", "completeness_only", "log", "quiet"]
+exclude_args = ["directory", "help", "validate", "fast", "completeness_only", "quiet"]
 for arg_group in bagit_parser._action_groups:
     # print(arg_group.__dict__["title"].title())
     group = mailbag_parser.add_argument_group(arg_group.__dict__["title"].title())
@@ -126,6 +126,9 @@ for arg_group in bagit_parser._action_groups:
                         dest=action.dest,
                         nargs=action.nargs,
                     )
+    # append json stdout option to optional args from bagit parser
+    if arg_group.__dict__["title"].lower() == "optional arguments":
+        group.add_argument("--log_json_to_stdout", help="Format printed logs as JSON", default=False, action="store_true")
 
 
 input_types = list(key for key in EmailAccount.registry.keys() if key != "example")
@@ -187,8 +190,7 @@ mailbagit_options.add_argument(
     default=False,
     action="store_true",
 )
-mailbagit_options.add_argument("--log_to_file", help="File to direct logs to", default=None, nargs="?")
-mailbagit_options.add_argument("--log_json_to_stdout", help="Format printed logs as JSON", default=False, action="store_true")
+
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -258,7 +260,7 @@ if gooeyCheck:
 
 
 def main(args):
-    setup_logging( stream_json=args.log_json_to_stdout, filename=args.log_to_file)
+    setup_logging(stream_json=args.log_json_to_stdout, filename=args.log)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):

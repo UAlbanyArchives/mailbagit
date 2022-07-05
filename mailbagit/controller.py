@@ -153,6 +153,7 @@ class Controller:
 
         # Count total no. of messages and set start time
         total_messages = mail_account.number_of_messages
+        log.info(f"Found {total_messages} messages.")
         start_time = time()
 
         for message in mail_account.messages():
