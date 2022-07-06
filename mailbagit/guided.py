@@ -157,7 +157,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
         This is removed since the usability costs of another option outweights the limited expected use
         if logFile == False:
             if yes_no("Mailbagit will log to the console (stdout). Would you like it to log in JSON?"):
-                input_args.append("--log_json_to_stdout")
+                input_args.append("--log_json")
         """
 
         # Custom CSS?

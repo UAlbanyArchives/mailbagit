@@ -128,7 +128,7 @@ for arg_group in bagit_parser._action_groups:
                     )
     # append json stdout option to optional args from bagit parser
     if arg_group.__dict__["title"].lower() == "optional arguments":
-        group.add_argument("--log_json_to_stdout", help="Format printed logs as JSON", default=False, action="store_true")
+        group.add_argument("-j", "--log-json", help="Format logs as JSON", default=False, action="store_true")
 
 
 input_types = list(key for key in EmailAccount.registry.keys() if key != "example")
@@ -260,7 +260,7 @@ if gooeyCheck:
 
 
 def main(args):
-    setup_logging(stream_json=args.log_json_to_stdout, filename=args.log)
+    setup_logging(stream_json=args.log_json, filename=args.log)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):

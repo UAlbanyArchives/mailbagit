@@ -42,10 +42,10 @@ def setup_logging(level=None, stream_json=False, filename=None):
     if file_handler:
         root_logger.removeHandler(file_handler)
 
-    # Default configuration is info -> stdout - the MAILBAG_LOG_CONFIG var can be used to override default with pre-configured values
-    from_env = os.environ.get("MAILBAG_LOG_CONFIG", None)
+    # Default configuration is info -> stdout - the MAILBAGIT_LOG_LEVEL var can be used to override default with pre-configured values
+    from_env = os.environ.get("MAILBAGIT_LOG_LEVEL", None)
 
-    level = level  or logging.INFO
+    level = from_env or logging.INFO
     if isinstance(level, str) and level_re.match(level):
         level = getattr(logging, level.upper())
 
@@ -54,16 +54,23 @@ def setup_logging(level=None, stream_json=False, filename=None):
         "structlog": default_structlog_conf(),
         "level": level,
     }
+    formatter = logging.Formatter(
+    '%(levelname)s: %(message)s')
 
     # Forward what's needed to put the log places
     stream_handler = logging.StreamHandler(sys.stdout)
     if stream_json:
         stream_handler.setFormatter(jsonlogger.JsonFormatter())
+    else:
+        stream_handler.setFormatter(formatter)
     root_logger.addHandler(stream_handler)
 
     if filename:
         file_handler = logging.FileHandler(filename, mode="a")
-        file_handler.setFormatter(jsonlogger.JsonFormatter())
+        if stream_json:
+            file_handler.setFormatter(jsonlogger.JsonFormatter())
+        else:
+            file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
     root_logger.setLevel(level)
     structlog.reset_defaults()

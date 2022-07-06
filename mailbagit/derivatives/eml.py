@@ -25,7 +25,7 @@ class EmlDerivative(Derivative):
     derivative_agent_version = platform.python_version()
 
     def __init__(self, email_account, args, mailbag_dir):
-        log.debug("Setup account")
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
         # Sets up self.format_subdirectory
         super().__init__(args, mailbag_dir)
