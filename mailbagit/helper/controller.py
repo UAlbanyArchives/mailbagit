@@ -87,16 +87,16 @@ def writeAttachmentsToDisk(dry_run, attachments_dir, message):
             # Need to handle filename conflicts with attachments.csv
             # The format parsers raise a warning about this
             if attachment.Name.lower() == "attachments.csv":
-                writtenName = str(i) + os.path.splitext(attachment.Name)[1]
+                writtenName = attachment.WrittenName + os.path.splitext(attachment.Name)[1]
                 desc = ""
                 errors = common.handle_error(errors, None, desc, "warn")
             else:
-                writtenName = attachment.Name
+                writtenName = attachment.WrittenName
             attachment_row = [attachment.Name, writtenName, attachment.MimeType, attachment.Content_ID]
         else:
             # If there is no filename available, just use and integer
             # The format parsers raise an error about this
-            writtenName = str(i)
+            writtenName = attachment.WrittenName
             attachment_row = ["", writtenName, attachment.MimeType, attachment.Content_ID]
         attachment_data.append(attachment_row)
 

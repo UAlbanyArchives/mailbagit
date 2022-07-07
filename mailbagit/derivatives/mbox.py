@@ -138,7 +138,7 @@ class MboxDerivative(Derivative):
                                     content_disposition = "attachment"
                                     part.add_header("Content-ID", attachment.Content_ID)
 
-                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.WrittenName)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to MBOX derivative"

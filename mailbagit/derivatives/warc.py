@@ -239,17 +239,17 @@ class WarcDerivative(Derivative):
 
                         # Write attachments
                         try:
-                            for attachment in message.Attachments:
+                            for i, attachment in enumerate(message.Attachments):
                                 headers_list = [
                                     ("Content-Type", attachment.MimeType),
                                     ("Content-ID", attachment.Content_ID),
-                                    ("Filename", attachment.Name),
+                                    ("Filename", attachment.WrittenName),
                                     ("Content-Length", str(len(attachment.File))),
                                     ("Date", datetime_to_http_date(datetime.now())),
                                 ]
                                 http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                                 record = writer.create_warc_record(
-                                    f"{warc_uri}/{quote_plus(attachment.Name)}",
+                                    f"{warc_uri}/{quote_plus(attachment.WrittenName)}",
                                     "response",
                                     payload=BytesIO(attachment.File),
                                     length=len(attachment.File),

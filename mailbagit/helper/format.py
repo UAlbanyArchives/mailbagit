@@ -153,6 +153,7 @@ def parse_part(part, bodies, attachments, errors):
         errors = common.handle_error(errors, e, desc)
 
     # Extract attachments
+    attachmentCount = 0
     if part.get_content_maintype() == "multipart":
         pass
     elif content_disposition is None and content_id is None:
@@ -184,14 +185,21 @@ def parse_part(part, bodies, attachments, errors):
                     if attachmentName.lower() == "attachments.csv":
                         desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
                         errors = common.handle_error(errors, None, desc, "warn")
+                        attachmentWrittenName = str(attachmentCount) + os.path.splitext(attachmentName)[1]
+                    else:
+                        attachmentWrittenName = common.normalizePath(attachmentName)
+                else:
+                    attachmentWrittenName = str(attachmentCount)
 
                 attachment = Attachment(
                     Name=attachmentName,
+                    WrittenName=attachmentWrittenName,
                     File=attachmentFile,
                     MimeType=content_type,
                     Content_ID=content_id,
                 )
                 attachments.append(attachment)
+                attachmentCount += 1
         except Exception as e:
             desc = "Error parsing attachments"
             errors = common.handle_error(errors, e, desc)

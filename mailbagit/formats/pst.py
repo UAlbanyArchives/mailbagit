@@ -102,9 +102,12 @@ if not skip_registry:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
                                             encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
-
-                            if messageObj.html_body:
-                                html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
+                            # messageObj.html_body sometimes fails. This seems to often be the case for email in "Deleted Items"
+                            try:
+                                if messageObj.html_body:
+                                    html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
+                            except:
+                                pass
                             if messageObj.plain_text_body:
                                 encodings[len(encodings.keys()) + 1] = {
                                     "name": "utf-8",
@@ -134,10 +137,11 @@ if not skip_registry:
 
                         try:
                             total_attachment_size_bytes = 0
-                            for attachmentObj in messageObj.attachments:
+                            for i, attachmentObj in enumerate(messageObj.attachments):
                                 total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
                                 attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
 
+                                attachmentName = None
                                 try:
                                     # attachmentName = attachmentObj.get_name()
                                     # Entries found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
@@ -178,12 +182,17 @@ if not skip_registry:
                                                 + " will be renamed to avoid filename conflict with mailbag spec"
                                             )
                                             errors = common.handle_error(errors, None, desc, "warn")
+                                            attachmentWrittenName = str(i) + os.path.splitext(attachmentName)[1]
+                                        else:
+                                            attachmentWrittenName = common.normalizePath(attachmentName)
+                                    else:
+                                        attachmentWrittenName = str(i)
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
                                         mime = format.guessMimeType(attachmentName)
 
-                                    # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                                    # MSGs & PSTs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
                                     contentID = uuid.uuid4().hex
 
                                 except Exception as e:
@@ -195,6 +204,7 @@ if not skip_registry:
 
                                 attachment = Attachment(
                                     Name=attachmentName,
+                                    WrittenName=attachmentWrittenName,
                                     File=attachment_content,
                                     MimeType=mime,
                                     Content_ID=contentID,
