@@ -3,7 +3,7 @@ layout: page
 title: Lossiness in Derivatives
 permalink: /lossiness/
 parent: Using mailbagit
-nav_order: 6
+nav_order: 7
 ---
 
 # Lossiness in Derivatives

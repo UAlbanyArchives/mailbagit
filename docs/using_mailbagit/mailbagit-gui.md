@@ -12,13 +12,16 @@ Mailbagit includes a very basic graphical user interface (GUI)
 
 If `mailbagit` is [installed]({{ site.baseurl }}/python/) you should be able to run the GUI by entering the `mailbagit-gui` command. The mailbagit GUI is currently not supported while running in a docker container.
 
+[Download and install mailbagit]({{ site.baseurl }}/install).
+[Download a sample MBOX file]({{ site.baseurl }}/data/account.mbox) for training and testing.
+
 ## Accessibility
 
 The mailbagit GUI currently has severe accessibility limitations. Most notably, when using a screen reader with `mailbagit-gui` the tab key does not change the focus to the input fields. Once you click into the scrollable window, the tab key does work. The multi-option derivatives field is also not accessible using a keyboard and requires clicking with a mouse.
 
-This is due to [accessibility issues](https://github.com/chriskiehl/Gooey/issues/747) with underlying dependencies wxPython and wxWidgets, and unfortunately, we don't have he capacity to do much about it.
+This is due to [accessibility issues](https://github.com/chriskiehl/Gooey/issues/747) with underlying dependencies wxPython and wxWidgets, and unfortunately, we don't have the capacity to do much about it.
 
-Instead, we plan to implement a "guided" command line option, which we hope may provide accessible access to users without command line experience.
+Instead, we suggest using the ["guided" command line option]({{ site.baseurl }}/mailbagit-guided/), which should provide accessible access and may be easier for users without command line experience.
 
 ## Mailbagit GUI on Windows 
 

@@ -3,12 +3,10 @@ layout: page
 title: Configuring Logging
 permalink: /logging/
 parent: Using mailbagit
-nav_order: 4
+nav_order: 5
 ---
 
 # Configuring Logging
-
-## Log Levels
 
 * The level of logs displayed by `mailbagit` is based on an environment variable `MAILBAGIT_LOG_LEVEL`.
 
@@ -37,36 +35,14 @@ $env:MAILBAGIT_LOG_LEVEL
 On Windows, you can also [set environment variables by searching "edit environment variable"](https://www.onmsft.com/how-to/how-to-set-an-environment-variable-in-windows-10).
 
 
-## Log Output
 
-By default, `mailbagit` streams human-readable logs to `stdout`. You may also use the `--log` argument to also send the logs to a file:
-
-```
-mailbagit path/to/account.mbox -i mbox -d pdf warc -m test_mailbag --log path/to/file.log
-```
-
-For more structured logging, you may also use `-j` or `--log-json` to format the logs as [line delimined JSON](https://jsonlines.org/):
+### Example of the logger initiation and usage in `Python`:
 
 ```
-mailbagit path/to/account.pst -i pst -d warc eml -m test_mailbag --log-json
-
-> {"message": "Reading: .\\path\\account.pst", "logger": "mailbagit", "level": "info", "timestamp": "2022-07-06T00:47:38.295203Z"}
-> {"message": "Found 331 messages.", "logger": "mailbagit", "level": "info", "timestamp": "2022-07-06T00:47:39.429532Z"}
-> {"message": "Writing CSV reports...", "logger": "mailbagit", "level": "info", "timestamp": "2022-07-06T00:47:50.568199Z"}
-> {"message": "Finished packaging mailbag.", "logger": "mailbagit", "level": "info", "timestamp": "2022-07-06T00:47:50.568199Z"}
-```
-
-
-## Example of the logger initiation and usage as a library:
-
-```
-from mailbagit.loggerx import get_logger
-
-logging.setup_logging(filename='my_cool_logfile.log')
-log = get_logger()
-
-
-# do stuff
-logger.info("my_event_name", property1="a property", anything={"json": "serializable"}))
-# do more stuff
+from structlog import get_logger
+import mailbagit.loggerx
+loggerx.configure()
+log = get_logger()	
+log.error("Error message here")
+log.info("Information message here")
 ```
