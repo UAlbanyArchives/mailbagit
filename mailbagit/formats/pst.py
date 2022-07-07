@@ -1,10 +1,9 @@
 import os
-import mailbox
+import email
 from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
 from mailbagit.loggerx import get_logger
-from email import parser
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
@@ -71,8 +70,15 @@ if not skip_registry:
                         messageObj = folder.get_sub_message(index)
 
                         try:
-                            headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
+                            headerParser = email.parser.HeaderParser()
+                            if messageObj.transport_headers:
+                                headers = headerParser.parsestr(messageObj.transport_headers)
+                            else:
+                                # often returns none for deleted and sent items in OSTs
+                                desc = "Unable to read headers. An empty headers object will be created."
+                                errors = common.handle_error(errors, None, desc)
+                                # just make an empty object
+                                headers = headerParser.parsestr("headers: not found")
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = common.handle_error(errors, e, desc)
@@ -184,13 +190,18 @@ if not skip_registry:
                                             errors = common.handle_error(errors, None, desc, "warn")
                                             attachmentWrittenName = str(i) + os.path.splitext(attachmentName)[1]
                                         else:
-                                            attachmentWrittenName = common.normalizePath(attachmentName)
+                                            attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
                                     else:
                                         attachmentWrittenName = str(i)
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
-                                        mime = format.guessMimeType(attachmentName)
+                                        if attachmentName:
+                                            mime = format.guessMimeType(attachmentName)
+                                        else:
+                                            desc = "Mimetype not found. Setting it to 'application/octet-stream'"
+                                            errors = common.handle_error(errors, None, desc, "warn")
+                                            mime = "application/octet-stream"
 
                                     # MSGs & PSTs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
                                     contentID = uuid.uuid4().hex
@@ -215,18 +226,26 @@ if not skip_registry:
                             desc = "Error parsing attachments"
                             errors = common.handle_error(errors, e, desc)
 
+                        decoded_Message_ID, errors = format.parse_header(headers["Message-ID"], errors)
+                        decoded_Date, errors = format.parse_header(headers["Date"], errors)
+                        decoded_From, errors = format.parse_header(headers["From"], errors)
+                        decoded_To, errors = format.parse_header(headers["To"], errors)
+                        decoded_Cc, errors = format.parse_header(headers["Cc"], errors)
+                        decoded_Bcc, errors = format.parse_header(headers["Bcc"], errors)
+                        decoded_Subject, errors = format.parse_header(headers["Subject"], errors)
+
                         message = Email(
                             Errors=errors,
-                            Message_ID=format.parse_header(headers["Message-ID"]),
+                            Message_ID=decoded_Message_ID,
                             Original_File=originalFile,
                             Message_Path=messagePath,
                             Derivatives_Path=derivativesPath,
-                            Date=format.parse_header(headers["Date"]),
-                            From=format.parse_header(headers["From"]),
-                            To=format.parse_header(headers["To"]),
-                            Cc=format.parse_header(headers["Cc"]),
-                            Bcc=format.parse_header(headers["Bcc"]),
-                            Subject=format.parse_header(headers["Subject"]),
+                            Date=decoded_Date,
+                            From=decoded_From,
+                            To=decoded_To,
+                            Cc=decoded_Cc,
+                            Bcc=decoded_Bcc,
+                            Subject=decoded_Subject,
                             Content_Type=headers.get_content_type(),
                             Headers=headers,
                             HTML_Body=html_body,

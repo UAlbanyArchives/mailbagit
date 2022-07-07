@@ -153,7 +153,7 @@ class WarcDerivative(Derivative):
                 try:
                     headers = {}
                     for key in message.Headers:
-                        headers[key] = format.parse_header(message.Headers[key])
+                        headers[key], errors = format.parse_header(message.Headers[key], errors)
                     headers_json = json.dumps(headers, indent=4, sort_keys=True).encode("utf-8")
                 except Exception as e:
                     desc = "Error formatting headers as UTF-8 JSON"

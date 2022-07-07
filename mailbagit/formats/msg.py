@@ -133,7 +133,7 @@ class MSG(EmailAccount):
                                 errors = common.handle_error(errors, None, desc, "warn")
                                 attachmentWrittenName = str(i) + os.path.splitext(attachmentName)[1]
                             else:
-                                attachmentWrittenName = common.normalizePath(attachmentName)
+                                attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
                         else:
                             attachmentWrittenName = str(i)
 
@@ -145,7 +145,12 @@ class MSG(EmailAccount):
                             desc = "Error reading mime type, guessing it instead"
                             errors = common.handle_error(errors, e, desc, "warn")
                         if mime is None:
-                            mime = format.guessMimeType(attachmentName)
+                            if attachmentName:
+                                mime = format.guessMimeType(attachmentName)
+                            else:
+                                desc = "Mimetype not found. Setting it to 'application/octet-stream'"
+                                errors = common.handle_error(errors, None, desc, "warn")
+                                mime = "application/octet-stream"
 
                         contentID = None
                         try:

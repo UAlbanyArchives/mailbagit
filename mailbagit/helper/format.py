@@ -187,7 +187,7 @@ def parse_part(part, bodies, attachments, errors):
                         errors = common.handle_error(errors, None, desc, "warn")
                         attachmentWrittenName = str(attachmentCount) + os.path.splitext(attachmentName)[1]
                     else:
-                        attachmentWrittenName = common.normalizePath(attachmentName)
+                        attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
                 else:
                     attachmentWrittenName = str(attachmentCount)
 
@@ -207,7 +207,7 @@ def parse_part(part, bodies, attachments, errors):
     return bodies, attachments, errors
 
 
-def decode_header_part(header):
+def decode_header_part(header, errors):
     """
     Used for to decode strings according to RFC 1342.
     If the string is not encoded, just return it.
@@ -217,8 +217,10 @@ def decode_header_part(header):
 
     Parameters:
         header (email.header.Header or string or None):
+        errors (List): List of Error objects defined in models.py
     Returns:
         header_string (str): A as-best-as-we-can-do decoded string
+        errors (List): List of Error objects defined in models.py
     """
     # headerObj, encoding = decode_header(header)[0]
     header_string = []
@@ -247,10 +249,10 @@ def decode_header_part(header):
                 # Dunno what to do here so just hopefully safely decode it?
                 header_string.append(headerObj.decode(errors="replace"))
 
-    return "".join(header_string)
+    return "".join(header_string), errors
 
 
-def parse_header(header):
+def parse_header(header, errors):
     """
     Used to handle headers that have RFC 1342 encoding.
     Sometimes the whole header is encoded, while
@@ -260,8 +262,10 @@ def parse_header(header):
 
     Parameters:
         header (email.header.Header or string or None):
+        errors (List): List of Error objects defined in models.py
     Returns:
         header_string (str or None): A as-best-as-we-can-do decoded string
+        errors (List): List of Error objects defined in models.py
     """
     if header is None:
         header_string = None
@@ -269,12 +273,14 @@ def parse_header(header):
         if isinstance(header, str):
             header_list = []
             for header_part in header.split(" "):
-                header_list.append(decode_header_part(header_part))
+                decoded_part, errors = decode_header_part(header_part, errors)
+                header_list.append(decoded_part)
             header_string = " ".join(header_list)
         else:
-            header_string = html.unescape(decode_header_part(header))
+            decoded_part, errors = decode_header_part(header, errors)
+            header_string = html.unescape(decoded_part)
 
-    return header_string
+    return header_string, errors
 
 
 def messagePath(headers):

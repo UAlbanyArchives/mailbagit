@@ -122,7 +122,7 @@ class EmlDerivative(Derivative):
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
                                     mimeType = "application/octet-stream"
-                                    desc = "Mime type not found for attachment, set as " + mimeType
+                                    desc = "Mime type not found for attachment. For EML, set as " + mimeType
                                     errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
