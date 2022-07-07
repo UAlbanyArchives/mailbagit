@@ -108,13 +108,13 @@ class EML(EmailAccount):
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
-                    decoded_Message_ID, errors = format.parse_header(headers["message-id"], errors)
-                    decoded_Date, errors = format.parse_header(headers["date"], errors)
-                    decoded_From, errors = format.parse_header(headers["from"], errors)
-                    decoded_To, errors = format.parse_header(headers["to"], errors)
-                    decoded_Cc, errors = format.parse_header(headers["cc"], errors)
-                    decoded_Bcc, errors = format.parse_header(headers["bcc"], errors)
-                    decoded_Subject, errors = format.parse_header(headers["subject"], errors)
+                    decoded_Message_ID, errors = format.parse_header(msg["message-id"], errors)
+                    decoded_Date, errors = format.parse_header(msg["date"], errors)
+                    decoded_From, errors = format.parse_header(msg["from"], errors)
+                    decoded_To, errors = format.parse_header(msg["to"], errors)
+                    decoded_Cc, errors = format.parse_header(msg["cc"], errors)
+                    decoded_Bcc, errors = format.parse_header(msg["bcc"], errors)
+                    decoded_Subject, errors = format.parse_header(msg["subject"], errors)
 
                     message = Email(
                         Errors=errors,

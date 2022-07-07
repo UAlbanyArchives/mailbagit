@@ -110,13 +110,13 @@ class Mbox(EmailAccount):
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
-                    decoded_Message_ID, errors = format.parse_header(headers["Message-ID"], errors)
-                    decoded_Date, errors = format.parse_header(headers["Date"], errors)
-                    decoded_From, errors = format.parse_header(headers["From"], errors)
-                    decoded_To, errors = format.parse_header(headers["To"], errors)
-                    decoded_Cc, errors = format.parse_header(headers["Cc"], errors)
-                    decoded_Bcc, errors = format.parse_header(headers["Bcc"], errors)
-                    decoded_Subject, errors = format.parse_header(headers["Subject"], errors)
+                    decoded_Message_ID, errors = format.parse_header(mail["Message-ID"], errors)
+                    decoded_Date, errors = format.parse_header(mail["Date"], errors)
+                    decoded_From, errors = format.parse_header(mail["From"], errors)
+                    decoded_To, errors = format.parse_header(mail["To"], errors)
+                    decoded_Cc, errors = format.parse_header(mail["Cc"], errors)
+                    decoded_Bcc, errors = format.parse_header(mail["Bcc"], errors)
+                    decoded_Subject, errors = format.parse_header(mail["Subject"], errors)
 
                     message = Email(
                         Errors=errors,
