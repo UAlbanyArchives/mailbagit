@@ -110,18 +110,26 @@ class Mbox(EmailAccount):
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
+                    decoded_Message_ID, errors = format.parse_header(mail["Message-ID"], errors)
+                    decoded_Date, errors = format.parse_header(mail["Date"], errors)
+                    decoded_From, errors = format.parse_header(mail["From"], errors)
+                    decoded_To, errors = format.parse_header(mail["To"], errors)
+                    decoded_Cc, errors = format.parse_header(mail["Cc"], errors)
+                    decoded_Bcc, errors = format.parse_header(mail["Bcc"], errors)
+                    decoded_Subject, errors = format.parse_header(mail["Subject"], errors)
+
                     message = Email(
                         Errors=errors,
-                        Message_ID=format.parse_header(mail["Message-ID"]),
+                        Message_ID=decoded_Message_ID,
                         Original_File=originalFile,
                         Message_Path=messagePath,
                         Derivatives_Path=derivativesPath,
-                        Date=format.parse_header(mail["Date"]),
-                        From=format.parse_header(mail["From"]),
-                        To=format.parse_header(mail["To"]),
-                        Cc=format.parse_header(mail["Cc"]),
-                        Bcc=format.parse_header(mail["Bcc"]),
-                        Subject=format.parse_header(mail["Subject"]),
+                        Date=decoded_Date,
+                        From=decoded_From,
+                        To=decoded_To,
+                        Cc=decoded_Cc,
+                        Bcc=decoded_Bcc,
+                        Subject=decoded_Subject,
                         Content_Type=mailObject.get_content_type(),
                         Headers=mail,
                         HTML_Body=bodies["html_body"],

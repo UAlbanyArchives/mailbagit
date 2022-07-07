@@ -113,7 +113,7 @@ class MSG(EmailAccount):
                     errors = common.handle_error(errors, e, desc)
 
                 try:
-                    for mailAttachment in mail.attachments:
+                    for i, mailAttachment in enumerate(mail.attachments):
                         if mailAttachment.getFilename():
                             attachmentName = mailAttachment.getFilename()
                         elif mailAttachment.longFilename:
@@ -131,6 +131,11 @@ class MSG(EmailAccount):
                             if attachmentName.lower() == "attachments.csv":
                                 desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
                                 errors = common.handle_error(errors, None, desc, "warn")
+                                attachmentWrittenName = str(i) + os.path.splitext(attachmentName)[1]
+                            else:
+                                attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
+                        else:
+                            attachmentWrittenName = str(i)
 
                         # Try to get the mime, guess it if this doesn't work
                         mime = None
@@ -140,7 +145,12 @@ class MSG(EmailAccount):
                             desc = "Error reading mime type, guessing it instead"
                             errors = common.handle_error(errors, e, desc, "warn")
                         if mime is None:
-                            mime = format.guessMimeType(attachmentName)
+                            if attachmentName:
+                                mime = format.guessMimeType(attachmentName)
+                            else:
+                                desc = "Mimetype not found. Setting it to 'application/octet-stream'"
+                                errors = common.handle_error(errors, None, desc, "warn")
+                                mime = "application/octet-stream"
 
                         contentID = None
                         try:
@@ -153,6 +163,7 @@ class MSG(EmailAccount):
 
                         attachment = Attachment(
                             Name=attachmentName,
+                            WrittenName=attachmentWrittenName,
                             File=mailAttachment.data,
                             MimeType=mime,
                             Content_ID=contentID,

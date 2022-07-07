@@ -153,7 +153,7 @@ class WarcDerivative(Derivative):
                 try:
                     headers = {}
                     for key in message.Headers:
-                        headers[key] = format.parse_header(message.Headers[key])
+                        headers[key], errors = format.parse_header(message.Headers[key], errors)
                     headers_json = json.dumps(headers, indent=4, sort_keys=True).encode("utf-8")
                 except Exception as e:
                     desc = "Error formatting headers as UTF-8 JSON"
@@ -239,17 +239,17 @@ class WarcDerivative(Derivative):
 
                         # Write attachments
                         try:
-                            for attachment in message.Attachments:
+                            for i, attachment in enumerate(message.Attachments):
                                 headers_list = [
                                     ("Content-Type", attachment.MimeType),
                                     ("Content-ID", attachment.Content_ID),
-                                    ("Filename", attachment.Name),
+                                    ("Filename", attachment.WrittenName),
                                     ("Content-Length", str(len(attachment.File))),
                                     ("Date", datetime_to_http_date(datetime.now())),
                                 ]
                                 http_headers = StatusAndHeaders("200 OK", headers_list, protocol="HTTP/1.0")
                                 record = writer.create_warc_record(
-                                    f"{warc_uri}/{quote_plus(attachment.Name)}",
+                                    f"{warc_uri}/{quote_plus(attachment.WrittenName)}",
                                     "response",
                                     payload=BytesIO(attachment.File),
                                     length=len(attachment.File),

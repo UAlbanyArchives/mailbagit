@@ -122,7 +122,7 @@ class EmlDerivative(Derivative):
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
                                     mimeType = "application/octet-stream"
-                                    desc = "Mime type not found for attachment, set as " + mimeType
+                                    desc = "Mime type not found for attachment. For EML, set as " + mimeType
                                     errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
@@ -141,7 +141,7 @@ class EmlDerivative(Derivative):
                                     content_disposition = "attachment"
                                     part.add_header("Content-ID", attachment.Content_ID)
 
-                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.WrittenName)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to EML derivative"

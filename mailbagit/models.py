@@ -5,6 +5,7 @@ import os, pickle
 
 class Attachment(models.Base):
     Name = fields.StringField()
+    WrittenName = fields.StringField()
     File = fields.EmbeddedField(bytes)
     MimeType = fields.StringField()
     Content_ID = fields.StringField()

@@ -120,7 +120,7 @@ class MboxDerivative(Derivative):
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
                                     mimeType = "text/plain"
-                                    log.warn("Mime type not found for the attachment. Set as " + mimeType + ".")
+                                    log.warn("Mime type not found for the attachment. For MBOX, set as " + mimeType + ".")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)
@@ -138,7 +138,7 @@ class MboxDerivative(Derivative):
                                     content_disposition = "attachment"
                                     part.add_header("Content-ID", attachment.Content_ID)
 
-                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.WrittenName)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to MBOX derivative"
