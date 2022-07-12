@@ -25,6 +25,7 @@ docker push ualbanyarchives/mailbagit:dev
 ```
 pyinstaller --onefile mailbagit.py
 pyinstaller --onefile mailbagit-gui.py
+pyinstaller --onefile mailbagit-guided.py
 ```
 
 ## Build and push to pypi
