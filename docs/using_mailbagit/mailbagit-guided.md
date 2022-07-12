@@ -13,6 +13,8 @@ If you are not familiar with the traditional [command-line interface]({{ site.ba
 * [Download and install mailbagit]({{ site.baseurl }}/install).
 * [Download a sample MBOX file]({{ site.baseurl }}/data/account.mbox) for training and testing.
 
+![Screenshot of running the mailbagit-guided interface running on Windows.]({{ site.baseurl }}/img/mailbagit-guided.png)
+
 To use this interface, once mailbagit is [installed]({{ site.baseurl }}/install), you can enter the `mailbagit-guided` command in Terminal on macOS or Linux, or CMD.exe or Powershell on Windows.
 
 If you are using the [Windows executables]({{ site.baseurl }}/exe), you can just double-click on the `mailbagit-guided.exe` file.
@@ -115,9 +117,13 @@ The command line will walk users through a series of prompts to process the emai
 
 13. After finishing these prompts, it will commence with parsing the emails and creating derivatives. It will show progress for every 1% of messages processed.
 
-        100.0% [331 of 331 messages] 0.0s remaining
-        Finished packaging mailbag
-        Mailbag finished packaging at /path/to/mailbag. Press any key to finish.
+        INFO: Reading: .\path\to\account.mbox
+        INFO: Found 331 messages.
+        39.0% [Processed 129 of 331 messages] 7.45s remaining
+        100.0% [Processed 331 of 331 messages] 0.0s remaining
+        INFO: Writing CSV reports...
+        INFO: Finished packaging mailbag.
+        Mailbag finished packaging at .\path\to\mailbag. Press any key to finish.
 
 Pressing a key closes the window, so be sure not the path to the mailbag first. Your mailbag is now complete!
 
