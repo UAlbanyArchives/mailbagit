@@ -94,3 +94,10 @@ bagit.py --validate /path/to/mailbag
 
 ## What `mailbagit` creates
 
+`mailbagit` creates a "mailbag" according to the [Mailbag Specification]({{ site.baseurl }}/spec). The mailbag will be named using the provided `mailbag_name` and will be a folder, unless compression was used. In this folder, you will find a payload folder called “data” which contains the original export formats, as well as attachments, and and derivatives you selected.
+
+Mailbags also contain one or more `mailbag.csv` files which list all messages that were packaged. The first column is “Error” where any  errors in the packaging are reported. If the message was parsed and generated derivatives successfully, this field will be blank. The Mailbag-Message-ID is a sequential ID number that is unique within a mailbag. This ID is used to name all the derivative files in the mailbag. `mailbag.csv` files also document the number of attachments and contain common email headers such as [Message-ID](https://en.wikipedia.org/wiki/Message-ID), To, From, CC, and Subject.
+
+As valid "bags," according to the [Bagit specification](https://tools.ietf.org/html/rfc8493), mailbags also contain manifests containing checksums for all files within the bag. These checksums are useful to establish fixity or show that the files have not changed over time.
+
+* `mailbagit` also generates detailed [error reports]({{ site.baseurl }}/errors) 

@@ -47,7 +47,7 @@ The command line will walk users through a series of prompts to process the emai
 
 6. **Would you like more options? If no, we will package the mailbag. (yes, y, no, n):**
 
-    Enter yes to answer questions 7-12. No will skip these options.
+    Enter yes to answer questions 7-12. No will skip these options and proceed to step 8.
 
 7. **Would you like to include companion files (such as metadata files) that are present in the provided directory?**
 
@@ -113,6 +113,12 @@ The command line will walk users through a series of prompts to process the emai
 
     You can keep entering fields, and enter `done` when you are finished.
 
-**Mailbag complete. Press any key to continue.**
+13. After finishing these prompts, it will commence with parsing the emails and creating derivatives. It will show progress for every 1% of messages processed.
 
-Your mailbag is now complete!
+        100.0% [331 of 331 messages] 0.0s remaining
+        Finished packaging mailbag
+        Mailbag finished packaging at /path/to/mailbag. Press any key to finish.
+
+Pressing a key closes the window, so be sure not the path to the mailbag first. Your mailbag is now complete!
+
+* [What `mailbagit` creates]({{ site.baseurl }}/mailbagit#what-mailbagit-creates)
