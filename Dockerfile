@@ -3,7 +3,7 @@ MAINTAINER Gregory Wiedeman gwiedeman@albany.edu
 
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
-    MAILBAG_LOG_LEVEL=debug\
+    MAILBAGIT_LOG_LEVEL=debug\
     IN_CONTAINER=true
 
 RUN mkdir /mailbagit
