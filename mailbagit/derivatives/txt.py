@@ -1,7 +1,7 @@
 # Makes txt file derivatives just containing message bodies
 import os
 import mailbagit.helper.common as common
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
@@ -14,15 +14,11 @@ class TxtDerivative(Derivative):
     derivative_agent = ""
     derivative_agent_version = ""
 
-    def __init__(self, email_account, **kwargs):
-        log.debug("Setup account")
-        super()
+    def __init__(self, email_account, args, mailbag_dir):
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
-        self.args = kwargs["args"]
-        mailbag_dir = kwargs["mailbag_dir"]
-        self.txt_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        if not self.args.dry_run:
-            os.makedirs(self.txt_dir)
+        # Sets up self.format_subdirectory
+        super().__init__(args, mailbag_dir)
 
     def do_task_per_account(self):
         log.debug(self.account.account_data())
@@ -32,8 +28,10 @@ class TxtDerivative(Derivative):
         errors = []
         try:
 
-            out_dir = os.path.join(self.txt_dir, message.Derivatives_Path)
+            out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
             filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".txt")
+            errors = common.check_path_length(out_dir, errors)
+            errors = common.check_path_length(filename, errors)
 
             if message.Text_Body is None:
                 desc = "No plain text body for " + str(message.Mailbag_Message_ID) + ", no TXT derivative created"

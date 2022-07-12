@@ -1,4 +1,4 @@
-from os import listdir
+from os import listdir, makedirs
 from os.path import basename, dirname, exists, isfile, join
 from importlib.machinery import SourceFileLoader
 import sys
@@ -31,12 +31,15 @@ class Derivative(ABC):
         __class__.registry[cls.derivative_name] = cls
 
     @abstractmethod
-    def __init__(self, email_account, **kwargs):
+    def __init__(self, args, mailbag_dir):
         """Set up email account for use in processing methods.
 
         If not taking any other steps, the implementation of this can simple be `super()`
         """
-        self.account = email_account
+        self.args = args
+        self.format_subdirectory = join(mailbag_dir, "data", self.derivative_format)
+        if not args.dry_run:
+            makedirs(self.format_subdirectory)
 
     @abstractmethod
     def do_task_per_account(self):

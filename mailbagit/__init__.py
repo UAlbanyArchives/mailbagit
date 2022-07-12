@@ -1,23 +1,22 @@
 # __init__.py
 
 # Version of the mailbagit package
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 import os
 from pathlib import Path
 from bagit import _make_parser, Bag, BagHeaderAction, DEFAULT_CHECKSUMS
 import importlib
-from structlog import get_logger
-from argparse import ArgumentParser
+from mailbagit.loggerx import setup_logging, get_logger
+from argparse import ArgumentParser, FileType
 from mailbagit.email_account import EmailAccount, import_formats
 from mailbagit.derivative import Derivative, import_derivatives
 from mailbagit.controller import Controller
+from mailbagit.guided import prompts
 import mailbagit.loggerx
 import mailbagit.globals
 
 globals.init()
-loggerx.configure()
-log = get_logger()
 
 if importlib.util.find_spec("gooey"):
     gooeyCheck = True
@@ -40,9 +39,6 @@ for plugin_type, dirs in plugin_dirs.items():
 import_formats(plugin_dirs["formats"])
 import_derivatives(plugin_dirs["derivatives"])
 
-log.debug("EmailAccount:", Registry=EmailAccount.registry)
-log.debug("Derivative:", Registry=Derivative.registry)
-
 bagit_parser = _make_parser()
 if gooeyCheck:
     mailbag_parser = GooeyParser(description="Mailbagit")
@@ -53,18 +49,24 @@ mailbagit_args = mailbag_parser.add_argument_group("Mailbagit arguments")
 mailbagit_options = mailbag_parser.add_argument_group("Mailbagit options")
 mailbagit_metadata = mailbag_parser.add_argument_group("Optional Mailbag Metadata")
 
+# Get possible hashes and metadata fields from bagit_parser for guided input
+hashes = []
+metadata_fields = []
+
 # Load relevant args from bagit_parser to mailbag_parser
 # This is necessary as mailbagit does not support --validate, --fast, or --completeness-only
 # Checksum args also do not action="store_true" so they don't display as checkboxes with Gooey
 # Excluding log and quiet for not since we're not handling these yet
-exclude_args = ["directory", "help", "validate", "fast", "completeness_only", "log", "quiet"]
+exclude_args = ["directory", "help", "validate", "fast", "completeness_only", "quiet"]
 for arg_group in bagit_parser._action_groups:
     # print(arg_group.__dict__["title"].title())
     group = mailbag_parser.add_argument_group(arg_group.__dict__["title"].title())
     group.description = arg_group.__dict__["description"]
     for i, action in enumerate(arg_group._actions):
         if action.container == arg_group and not action.dest in exclude_args:
-            # print ("\t" + action.dest)
+            # Get possible hashes from bagit_parser for guided input
+            if action.dest == "checksums":
+                hashes.append(action.option_strings[0][2:])
             if action.nargs == 0:
                 # checksum options
                 if gooeyCheck:
@@ -90,16 +92,19 @@ for arg_group in bagit_parser._action_groups:
                     )
             else:
                 if arg_group.__dict__["title"].lower() == "optional bag metadata":
-                    group.add_argument(
-                        action.option_strings[0],
-                        required=action.required,
-                        default=action.default,
-                        help=action.help,
-                        type=str,
-                        dest=action.dest,
-                        action=BagHeaderAction,
-                        nargs=action.nargs,
-                    )
+                    # bag_size is automatically set and cannot be overridden
+                    if action.dest != "bag_size":
+                        metadata_fields.append(action.dest.replace("_", "-"))
+                        group.add_argument(
+                            action.option_strings[0],
+                            required=action.required,
+                            default=action.default,
+                            help=action.help,
+                            type=str,
+                            dest=action.dest.replace("_", "-"),
+                            action=BagHeaderAction,
+                            nargs=action.nargs,
+                        )
                 elif action.dest.lower() == "processes":
                     group.add_argument(
                         action.option_strings[0],
@@ -121,6 +126,9 @@ for arg_group in bagit_parser._action_groups:
                         dest=action.dest,
                         nargs=action.nargs,
                     )
+    # append json stdout option to optional args from bagit parser
+    if arg_group.__dict__["title"].lower() == "optional arguments":
+        group.add_argument("-j", "--log-json", help="Format logs as JSON", default=False, action="store_true")
 
 
 input_types = list(key for key in EmailAccount.registry.keys() if key != "example")
@@ -140,6 +148,7 @@ mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A direc
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
 )
+
 if gooeyCheck:
     mailbagit_args.add_argument(
         "-d",
@@ -169,15 +178,19 @@ mailbagit_options.add_argument(
     "-c", "--compress", help="Compress the mailbag as ZIP, TAR, or TAR.GZ.", nargs=None, choices=["tar", "zip", "tar.gz"]
 )
 mailbagit_options.add_argument(
-    "-r", "--dry_run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+    "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+)
+mailbagit_options.add_argument(
+    "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
     "-f",
-    "--companion_files",
+    "--companion-files",
     help="Will copy all files in the path provided to mailbagit in to a mailbag regardless of extention.",
     default=False,
     action="store_true",
 )
+
 # Yet-to-be-implemented:
 """
 mailbagit_options.add_argument("--imap_host", help="the host for creating a mailbag from an IMAP connection", nargs=None)
@@ -206,21 +219,35 @@ mailbagit_options.add_argument("-n", "--no-headers", help="will not include emai
 
 # Optional user-supplied mailbag metadata
 mailbagit_metadata.add_argument(
-    "--capture-date", help="Timestamp denoting when the email included in a mailbag was originally captured.", nargs=None
+    "--capture-date",
+    help="Timestamp denoting when the email included in a mailbag was originally captured.",
 )
 mailbagit_metadata.add_argument(
-    "--capture-agent", help="A string field describing the agent used to capture the email included in a mailbag.", nargs=None
+    "--capture-agent",
+    help="A string field describing the agent used to capture the email included in a mailbag.",
 )
 mailbagit_metadata.add_argument(
     "--capture-agent-version",
     help="A string field describing the version of the agent used to capture the email included in a mailbag.",
-    nargs=None,
 )
+# Prepend user-supplied mailbag metadata fields to guided input options
+metadata_fields.insert(0, "capture-agent-version")
+metadata_fields.insert(0, "capture-agent")
+metadata_fields.insert(0, "capture-date")
 
 
 def cli():
     """hook for CLI-only mailbagit invocation"""
-    main()
+    args = mailbag_parser.parse_args()
+    main(args)
+
+
+def guided():
+    """hook for Guided CLI mailbagit invocation"""
+    prompts(input_types, derivative_types, hashes, metadata_fields)
+    args = mailbag_parser.parse_args()
+    main(args)
+    input(f"Mailbag finished packaging at { args.path }. Press any key to finish.")
 
 
 if gooeyCheck:
@@ -228,33 +255,26 @@ if gooeyCheck:
     @Gooey(richtext_controls=True)
     def gui():
         """hook for GUI mailbagit invocation"""
-        main()
+        args = mailbag_parser.parse_args()
+        main(args)
 
 
-def main():
-    args = mailbag_parser.parse_args()
+def main(args):
+    setup_logging(stream_json=args.log_json, filename=args.log)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):
         error_msg = "Invalid path, does not exist as a file or directory."
         mailbag_parser.error((error_msg))
 
-    """
-    # handle arg errors
-    if args.input not in EmailAccount.registry.keys():
-        error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(EmailAccount.registry.keys()) + '"'
-        mailbag_parser.error((error_msg))
-
-    if isinstance(args.derivatives, str):
-        args.derivatives = args.derivatives.split(" ")
-        if not all(elem in derivative_types for elem in args.derivatives):
-            error_msg = 'Invalid derivatives, choose from: "' + '", "'.join(derivative_types) + '"'
-            mailbag_parser.error((error_msg))
-
     if args.input in args.derivatives:
         error_msg = "Invalid derivatives, mailbagit does not support the source format as a derivative."
         mailbag_parser.error((error_msg))
-    """
+
+    # Check for multiple pdf derivatives, like both pdf and pdf-chrome
+    if ["pdf" in x for x in args.derivatives].count(True) > 1:
+        error_msg = "Invalid derivatives, mailbagit can only use one module to make PDF derivatives"
+        mailbag_parser.error((error_msg))
 
     if args.processes < 1:
         error_msg = "processes must be valid integer > 0"
@@ -268,9 +288,6 @@ def main():
             "times to create multiple mailbags."
         )
         mailbag_parser.error((error_msg))
-
-    # Okay, if you made it here, args are good!
-    log.debug("Arguments:", args=args)
 
     args.path = args.path[0]
     c = Controller(args)

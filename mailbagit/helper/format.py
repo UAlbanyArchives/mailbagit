@@ -1,7 +1,6 @@
 import os, shutil, glob
 from pathlib import Path
 import mimetypes
-import urllib.parse
 import chardet, codecs
 from email.header import Header, decode_header, make_header
 from mailbagit.models import Attachment
@@ -9,7 +8,7 @@ import mailbagit.helper.common as common
 import html
 import uuid
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
@@ -154,6 +153,7 @@ def parse_part(part, bodies, attachments, errors):
         errors = common.handle_error(errors, e, desc)
 
     # Extract attachments
+    attachmentCount = 0
     if part.get_content_maintype() == "multipart":
         pass
     elif content_disposition is None and content_id is None:
@@ -185,14 +185,21 @@ def parse_part(part, bodies, attachments, errors):
                     if attachmentName.lower() == "attachments.csv":
                         desc = "attachment " + attachmentName + " will be renamed to avoid filename conflict with mailbag spec"
                         errors = common.handle_error(errors, None, desc, "warn")
+                        attachmentWrittenName = str(attachmentCount) + os.path.splitext(attachmentName)[1]
+                    else:
+                        attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
+                else:
+                    attachmentWrittenName = str(attachmentCount)
 
                 attachment = Attachment(
                     Name=attachmentName,
+                    WrittenName=attachmentWrittenName,
                     File=attachmentFile,
                     MimeType=content_type,
                     Content_ID=content_id,
                 )
                 attachments.append(attachment)
+                attachmentCount += 1
         except Exception as e:
             desc = "Error parsing attachments"
             errors = common.handle_error(errors, e, desc)
@@ -200,7 +207,7 @@ def parse_part(part, bodies, attachments, errors):
     return bodies, attachments, errors
 
 
-def decode_header_part(header):
+def decode_header_part(header, errors):
     """
     Used for to decode strings according to RFC 1342.
     If the string is not encoded, just return it.
@@ -210,8 +217,10 @@ def decode_header_part(header):
 
     Parameters:
         header (email.header.Header or string or None):
+        errors (List): List of Error objects defined in models.py
     Returns:
         header_string (str): A as-best-as-we-can-do decoded string
+        errors (List): List of Error objects defined in models.py
     """
     # headerObj, encoding = decode_header(header)[0]
     header_string = []
@@ -240,10 +249,10 @@ def decode_header_part(header):
                 # Dunno what to do here so just hopefully safely decode it?
                 header_string.append(headerObj.decode(errors="replace"))
 
-    return "".join(header_string)
+    return "".join(header_string), errors
 
 
-def parse_header(header):
+def parse_header(header, errors):
     """
     Used to handle headers that have RFC 1342 encoding.
     Sometimes the whole header is encoded, while
@@ -253,8 +262,10 @@ def parse_header(header):
 
     Parameters:
         header (email.header.Header or string or None):
+        errors (List): List of Error objects defined in models.py
     Returns:
         header_string (str or None): A as-best-as-we-can-do decoded string
+        errors (List): List of Error objects defined in models.py
     """
     if header is None:
         header_string = None
@@ -262,12 +273,14 @@ def parse_header(header):
         if isinstance(header, str):
             header_list = []
             for header_part in header.split(" "):
-                header_list.append(decode_header_part(header_part))
+                decoded_part, errors = decode_header_part(header_part, errors)
+                header_list.append(decoded_part)
             header_string = " ".join(header_list)
         else:
-            header_string = html.unescape(decode_header_part(header))
+            decoded_part, errors = decode_header_part(header, errors)
+            header_string = html.unescape(decoded_part)
 
-    return header_string
+    return header_string, errors
 
 
 def messagePath(headers):
@@ -287,54 +300,6 @@ def messagePath(headers):
     else:
         messagePath = ""
     return messagePath
-
-
-def normalizePath(path):
-    # this is not sufficent yet
-    if os.name == "nt":
-        specials = ["<", ">", ":", '"', "/", "|", "?", "*"]
-        special_names = [
-            "CON",
-            "PRN",
-            "AUX",
-            "NUL",
-            "COM1",
-            "COM2",
-            "COM3",
-            "COM4",
-            "COM5",
-            "COM6",
-            "COM",
-            "COM8",
-            "COM9",
-            "LPT1",
-            "LPT2",
-            "LPT3",
-            "LPT4",
-            "LPT5",
-            "LPT6",
-            "LPT7",
-            "LPT8",
-            "LPT9",
-        ]
-        new_path = []
-        for name in os.path.normpath(path).split(os.sep):
-            illegal = False
-            for char in specials:
-                if char in name:
-                    illegal = True
-            if illegal:
-                new_path.append(urllib.parse.quote_plus(name))
-            else:
-                new_path.append(name)
-        out_path = Path(os.path.join(*new_path)).as_posix()
-    else:
-        out_path = path
-
-    if out_path == ".":
-        return ""
-    else:
-        return out_path
 
 
 def moveFile(dry_run, oldPath, newPath):
@@ -367,7 +332,7 @@ def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
     return fullPath, fullFilePath, file_new_path, relPath
 
 
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
+def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, errors):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
@@ -379,9 +344,11 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
         input (String): email file format to be packaged into a mailbag
         emailFolder (String): Path of the email export file relative to mainPath
         file (String): Email file path
+        errors (List): List of Error objects defined in models.py
 
     Returns:
         file_new_path (Path): The path where the file was moved
+        errors (List): List of Error objects defined in models.py
     """
 
     fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
@@ -390,6 +357,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
     else:
         log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
 
+    errors = common.check_path_length(file_new_path, errors)
     if not dry_run:
         moveFile(dry_run, fullFilePath, file_new_path)
         # clean up old directory structure
@@ -405,7 +373,7 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file):
                     time.sleep(0.01)
             p = p.parent
 
-    return file_new_path
+    return file_new_path, errors
 
 
 def guessMimeType(filename):

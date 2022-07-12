@@ -3,7 +3,7 @@ layout: page
 title: Configuring Logging
 permalink: /logging/
 parent: Using mailbagit
-nav_order: 3
+nav_order: 5
 ---
 
 # Configuring Logging

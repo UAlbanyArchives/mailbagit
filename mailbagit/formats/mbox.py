@@ -1,7 +1,7 @@
 import email
 import mailbox
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from pathlib import Path
 import os, shutil
 import email.errors
@@ -23,21 +23,27 @@ class Mbox(EmailAccount):
     format_agent_version = platform.python_version()
 
     def __init__(self, target_account, args, **kwargs):
-        log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
-        account_data = {}
+        self._account_data = {}
 
         self.path = target_account
         self.dry_run = args.dry_run
         self.mailbag_name = args.mailbag_name
         self.companion_files = args.companion_files
-        self.iteration_only = False
-        log.info("Reading : ", Path=self.path)
+        log.info("Reading: " + self.path)
 
+    @property
     def account_data(self):
-        return account_data
+        return self._account_data
 
-    def messages(self):
+    @property
+    def number_of_messages(self):
+        count = 0
+        for _ in self.messages(iteration_only=True):
+            count += 1
+        return count
+
+    def messages(self, iteration_only=False):
 
         companion_files = []
         if os.path.isfile(self.path):
@@ -68,7 +74,7 @@ class Mbox(EmailAccount):
             data = mailbox.mbox(filePath)
             for mail in data.itervalues():
 
-                if self.iteration_only:
+                if iteration_only:
                     yield None
                     continue
 
@@ -99,23 +105,31 @@ class Mbox(EmailAccount):
                         messagePath = Path(format.messagePath(mailObject)).as_posix()
                         if messagePath == ".":
                             messagePath = ""
-                        derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
+                        derivativesPath = Path(os.path.splitext(originalFile)[0], common.normalizePath(messagePath)).as_posix()
                     except Exception as e:
                         desc = "Error reading message path from headers"
                         errors = common.handle_error(errors, e, desc)
 
+                    decoded_Message_ID, errors = format.parse_header(mail["Message-ID"], errors)
+                    decoded_Date, errors = format.parse_header(mail["Date"], errors)
+                    decoded_From, errors = format.parse_header(mail["From"], errors)
+                    decoded_To, errors = format.parse_header(mail["To"], errors)
+                    decoded_Cc, errors = format.parse_header(mail["Cc"], errors)
+                    decoded_Bcc, errors = format.parse_header(mail["Bcc"], errors)
+                    decoded_Subject, errors = format.parse_header(mail["Subject"], errors)
+
                     message = Email(
                         Errors=errors,
-                        Message_ID=format.parse_header(mail["Message-ID"]),
+                        Message_ID=decoded_Message_ID,
                         Original_File=originalFile,
                         Message_Path=messagePath,
                         Derivatives_Path=derivativesPath,
-                        Date=format.parse_header(mail["Date"]),
-                        From=format.parse_header(mail["From"]),
-                        To=format.parse_header(mail["To"]),
-                        Cc=format.parse_header(mail["Cc"]),
-                        Bcc=format.parse_header(mail["Bcc"]),
-                        Subject=format.parse_header(mail["Subject"]),
+                        Date=decoded_Date,
+                        From=decoded_From,
+                        To=decoded_To,
+                        Cc=decoded_Cc,
+                        Bcc=decoded_Bcc,
+                        Subject=decoded_Subject,
                         Content_Type=mailObject.get_content_type(),
                         Headers=mail,
                         HTML_Body=bodies["html_body"],
@@ -135,8 +149,11 @@ class Mbox(EmailAccount):
             # Make sure the MBOX file is closed
             data.close()
             # Move MBOX to new mailbag directory structure
-            if not self.iteration_only:
-                new_path = format.moveWithDirectoryStructure(self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath)
+            if not iteration_only:
+                # Does not check path lengths for MBOXs because `errors` was already returned to the controller
+                new_path, errors = format.moveWithDirectoryStructure(
+                    self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath, errors
+                )
 
         if self.companion_files:
             # Move all files into mailbag directory structure

@@ -9,11 +9,11 @@ nav_order: 1
 # Using the `mailbagit` command line utility
 
 
-When `mailbagit` in [installed]({{ site.baseurl }}/install), it makes the `mailbagit` command available in you command line. You should be able to run `mailbagit -h` in Terminal on macOS or Linux, or CMD.exe or Powershell on Windows.
+When `mailbagit` is installed, it makes the `mailbagit` command available in you command line. `mailbagit -h` can run in Terminal on macOS or Linux, or CMD.exe or Powershell on Windows. [Download and install mailbagit]({{ site.baseurl }}/install).
 
 ![Screenshot of running the mailbagit command in Windows Powershell.]({{ site.baseurl }}/img/mailbagit-demo1.png)
 
-You can download a [sample MBOX file]({{ site.baseurl }}/data/account.mbox) for testing.
+[Download a sample MBOX file]({{ site.baseurl }}/data/account.mbox) for training and testing.
 
 ## Examples
 
@@ -33,6 +33,8 @@ mailbagit path/to/directory -i eml -d pdf-chrome warc -mailbag-name fundraising_
 > Packages all the EML files found in `path/to/directory` and any subfolders into a mailbag named "fundraising_emails" with PDF and WARC derivatives with the PDF derivatives using headless Chrome. `mailbagit` will use the both the directory structure of the EMLs as well as any `X-Folder` headers to arrange derivatives.
 
 > This examples also uses the `-r` (dry-run) flag, which will parse all EML files, but will not move, change, or package them into a mailbag. If there are any parsing errors, this will write an error report to the  `fundraising_emails_errors` directory.
+
+💡 `mailbagit` can also package the .ost file that the Microsoft Outlook desktop client uses to store email locally. OSTs are just treated as PSTs. If you use Outlook, you might be able to find your local OST file at `C:\Users\[username]\AppData\Local\Microsoft\Outlook`.
 
 ## Arguments
 
@@ -89,3 +91,13 @@ If you would like to validate your mailbag, `mailbagit` comes with [bagit-python
 ```
 bagit.py --validate /path/to/mailbag
 ```
+
+## What `mailbagit` creates
+
+`mailbagit` creates a "mailbag" according to the [Mailbag Specification]({{ site.baseurl }}/spec). The mailbag will be named using the provided `mailbag_name` and will be a folder, unless compression was used. In this folder, you will find a payload folder called “data” which contains the original export formats, as well as attachments, and any derivatives you selected.
+
+Mailbags also contain one or more `mailbag.csv` files which list all messages that were packaged. The first column is “Error” where any  errors in the packaging are reported. If the message was parsed and generated derivatives successfully, this field will be blank. The Mailbag-Message-ID is a sequential ID number that is unique within a mailbag. This ID is used to name all the derivative files in the mailbag. `mailbag.csv` files also document the number of attachments and contain common email headers such as [Message-ID](https://en.wikipedia.org/wiki/Message-ID), To, From, CC, and Subject.
+
+As valid "bags," according to the [Bagit specification](https://tools.ietf.org/html/rfc8493), mailbags also contain manifests containing checksums for all files within the bag. These checksums are useful to establish fixity or show that the files have not changed over time.
+
+* `mailbagit` also generates detailed [error reports]({{ site.baseurl }}/errors) 

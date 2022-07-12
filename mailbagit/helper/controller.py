@@ -6,7 +6,7 @@ import csv
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
 
@@ -39,9 +39,11 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     message_type = f'[{style["cy"][0]}{prefix}{style["b"][1]}]'
     # deco_prefix = f'{style["b"][0]}{prefix}{style["b"][1]}'
     # statusBar = f'|{bar}| {percent}% [{current}MB out of {total}MB] {suffix}'
-    status = f"{percent}% [{current} / {total} messages] {remaining_time}s remaining"
+    status = f"{percent}% [Processed {current} of {total} messages] {remaining_time}s remaining"
 
-    print(f"\r{dt} {message_type} {status}", end=print_End)
+    # Originally printed timestamp and [Progress] first, which was eliminated for screen readers
+    #print(f"\r{dt} {message_type} {status}", end=print_End)
+    print(f"\r{status}", end=print_End)
 
 
 def progressMessage(msg, print_End="\r"):
@@ -85,16 +87,16 @@ def writeAttachmentsToDisk(dry_run, attachments_dir, message):
             # Need to handle filename conflicts with attachments.csv
             # The format parsers raise a warning about this
             if attachment.Name.lower() == "attachments.csv":
-                writtenName = str(i) + os.path.splitext(attachment.Name)[1]
+                writtenName = attachment.WrittenName + os.path.splitext(attachment.Name)[1]
                 desc = ""
                 errors = common.handle_error(errors, None, desc, "warn")
             else:
-                writtenName = attachment.Name
+                writtenName = attachment.WrittenName
             attachment_row = [attachment.Name, writtenName, attachment.MimeType, attachment.Content_ID]
         else:
             # If there is no filename available, just use and integer
             # The format parsers raise an error about this
-            writtenName = str(i)
+            writtenName = attachment.WrittenName
             attachment_row = ["", writtenName, attachment.MimeType, attachment.Content_ID]
         attachment_data.append(attachment_row)
 

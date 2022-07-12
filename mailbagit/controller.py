@@ -1,7 +1,7 @@
 import argparse
 import bagit
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import csv
 import mailbagit
 from mailbagit.email_account import EmailAccount
@@ -10,6 +10,7 @@ from dataclasses import dataclass, asdict, field, InitVar
 from pathlib import Path
 import os, shutil, glob
 import mailbagit.helper.controller as controller
+import mailbagit.helper.common as common
 import mailbagit.globals as globals
 from time import time
 import uuid
@@ -110,12 +111,14 @@ class Controller:
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir, self.args.bag_info, processes=self.args.processes, checksums=self.args.checksums)
             bag.info["Bag-Type"] = "Mailbag"
-            bag.info["Mailbag-Specification-Version"] = "0.3"
+            bag.info["Mailbag-Specification-Version"] = "1.0"
             bag.info["Mailbag-Source"] = self.args.input.lower()
             bag.info["Original-Included"] = "True"
-            bag.info["External-Identifier"] = uuid.uuid4()
             bag.info["Mailbag-Agent"] = mailbagit.__name__
             bag.info["Mailbag-Agent-Version"] = mailbagit.__version__
+            # Make sure now custom external-idenifier is in args
+            if not "external-identifier" in set(key.lower() for key in self.args.bag_info.keys()):
+                bag.info["External-Identifier"] = uuid.uuid4()
             # user-supplied mailbag metadata
             user_metadata = ["Capture-Date", "Capture-Agent", "Capture-Agent-Version"]
             for user_field in user_metadata:
@@ -126,7 +129,7 @@ class Controller:
             bag.info[self.args.input.upper() + "-Agent-Version"] = mail_account.format_agent_version
 
         # Instantiate derivatives
-        derivatives = [d(mail_account, args=self.args, mailbag_dir=mailbag_dir) for d in self.derivatives_to_create]
+        derivatives = [d(mail_account, self.args, mailbag_dir) for d in self.derivatives_to_create]
         if not self.args.dry_run:
             # write derivatives metadata
             for d in derivatives:
@@ -149,9 +152,8 @@ class Controller:
         warn_csv = [self.csv_headers]
 
         # Count total no. of messages and set start time
-        mail_account.iteration_only = True
-        total_messages = len(list(mail_account.messages()))
-        mail_account.iteration_only = False
+        total_messages = mail_account.number_of_messages
+        log.info(f"Found {total_messages} messages.")
         start_time = time()
 
         for message in mail_account.messages():
@@ -206,7 +208,7 @@ class Controller:
                 # Write Warning Report
                 if len(warn_stack_trace) > 0:
                     if not os.path.isdir(warn_dir):
-                        # making error directory if error is present
+                        # making warn directory if error is present
                         os.mkdir(warn_dir)
                     warn_csv.append(self.message_to_csv(message, "warn"))
                     warn_trace_file = os.path.join(warn_dir, str(message.Mailbag_Message_ID) + ".txt")
@@ -225,10 +227,24 @@ class Controller:
                     mailbag_message_id, total_messages, start_time, prefix="Progress ", suffix="Complete", print_End=print_End
                 )
 
-        # End thread and server for WARC derivatives
-        for d in derivatives:
-            if "warc.WarcDerivative" in str(type(d)):
-                d.terminate()
+        # Write any empty email folders to derivatives subdirectories
+        if "empty_folder_paths" in mail_account.account_data:
+            if not os.path.isdir(warn_dir):
+                # making warn directory if error is present
+                os.mkdir(warn_dir)
+            for empty_folder in mail_account.account_data["empty_folder_paths"]:
+                warn_text = f'Folder "{empty_folder}" did not contain any messages or subfolders.'
+                log.warn(warn_text)
+                warn_trace_file = os.path.join(warn_dir, common.normalizePath(empty_folder).replace("/", "%2F") + ".txt")
+                with open(warn_trace_file, "w", encoding="utf-8") as f:
+                    f.write(warn_text)
+                    f.close()
+                for d in derivatives:
+                    folder_path = common.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
+                    if not self.args.dry_run:
+                        if not os.path.isdir(folder_path):
+                            log.debug("Writing empty folder " + str(folder_path))
+                            os.makedirs(folder_path)
 
         # append any remaining csv portions < 100000
         csv_data.append(csv_portion)
@@ -254,7 +270,7 @@ class Controller:
                         writer.writerows(portion)
                         f.close()
 
-        controller.progressMessage("Writing CSVs...")
+        log.info("Writing CSV reports...")
         log.debug("Writing error.csv to " + str(error_dir))
         if len(error_csv) > 1:
             filename = os.path.join(error_dir, "error.csv")
@@ -269,6 +285,7 @@ class Controller:
                 writer.writerows(warn_csv)
 
         if not self.args.dry_run:
+            log.info("Saving manifests...")
             bag_size = 0
             for root, dirs, files in os.walk(os.path.join(str(mailbag_dir), "data")):
                 for file in files:
@@ -282,8 +299,7 @@ class Controller:
             bag.save(manifests=True)
 
         if self.args.compress and not self.args.dry_run:
-            controller.progressMessage("Compressing mailbag...")
-            log.info("Compressing Mailbag")
+            log.info("Compressing mailbag...")
             compressionFormats = {"tar": "tar", "zip": "zip", "tar.gz": "gztar"}
             shutil.make_archive(mailbag_dir, compressionFormats[self.args.compress], mailbag_dir)
 
@@ -292,6 +308,7 @@ class Controller:
                 # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
 
-        controller.progressMessage("Finished packaging mailbag.", print_End="\n")
+        #controller.progressMessage("", print_End="\n")
+        log.info("Finished packaging mailbag.")
 
         return mail_account.messages()

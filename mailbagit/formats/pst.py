@@ -1,10 +1,9 @@
 import os
-import mailbox
+import email
 from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
-from structlog import get_logger
-from email import parser
+from mailbagit.loggerx import get_logger
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
@@ -36,18 +35,25 @@ if not skip_registry:
         def __init__(self, target_account, args, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
-
+            self._account_data = {}
             self.path = target_account
             self.dry_run = args.dry_run
             self.mailbag_name = args.mailbag_name
             self.companion_files = args.companion_files
-            self.iteration_only = False
-            log.info("Reading :", Path=self.path)
+            log.info("Reading: " + self.path)
 
+        @property
         def account_data(self):
-            return account_data
+            return self._account_data
 
-        def folders(self, folder, path, originalFile):
+        @property
+        def number_of_messages(self):
+            count = 0
+            for _ in self.messages(iteration_only=True):
+                count += 1
+            return count
+
+        def folders(self, folder, path, originalFile, iteration_only=False):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is the email folder path of the message, separated by "/"
@@ -55,7 +61,7 @@ if not skip_registry:
                 log.debug("Reading folder: " + folder.name)
                 for index in range(folder.number_of_sub_messages):
 
-                    if self.iteration_only:
+                    if iteration_only:
                         yield None
                         continue
                     attachments = []
@@ -64,8 +70,15 @@ if not skip_registry:
                         messageObj = folder.get_sub_message(index)
 
                         try:
-                            headerParser = parser.HeaderParser()
-                            headers = headerParser.parsestr(messageObj.transport_headers)
+                            headerParser = email.parser.HeaderParser()
+                            if messageObj.transport_headers:
+                                headers = headerParser.parsestr(messageObj.transport_headers)
+                            else:
+                                # often returns none for deleted and sent items in OSTs
+                                desc = "Unable to read headers. An empty headers object will be created."
+                                errors = common.handle_error(errors, None, desc)
+                                # just make an empty object
+                                headers = headerParser.parsestr("headers: not found")
                         except Exception as e:
                             desc = "Error parsing message body"
                             errors = common.handle_error(errors, e, desc)
@@ -95,9 +108,12 @@ if not skip_registry:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
                                             encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
-
-                            if messageObj.html_body:
-                                html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
+                            # messageObj.html_body sometimes fails. This seems to often be the case for email in "Deleted Items"
+                            try:
+                                if messageObj.html_body:
+                                    html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
+                            except:
+                                pass
                             if messageObj.plain_text_body:
                                 encodings[len(encodings.keys()) + 1] = {
                                     "name": "utf-8",
@@ -120,17 +136,18 @@ if not skip_registry:
                             messagePath = path
                             if len(messagePath) > 0:
                                 messagePath = Path(messagePath).as_posix()
-                            derivativesPath = Path(os.path.splitext(originalFile)[0], format.normalizePath(messagePath)).as_posix()
+                            derivativesPath = Path(os.path.splitext(originalFile)[0], common.normalizePath(messagePath)).as_posix()
                         except Exception as e:
                             desc = "Error reading message path"
                             errors = common.handle_error(errors, e, desc)
 
                         try:
                             total_attachment_size_bytes = 0
-                            for attachmentObj in messageObj.attachments:
+                            for i, attachmentObj in enumerate(messageObj.attachments):
                                 total_attachment_size_bytes = total_attachment_size_bytes + attachmentObj.get_size()
                                 attachment_content = attachmentObj.read_buffer(attachmentObj.get_size())
 
+                                attachmentName = None
                                 try:
                                     # attachmentName = attachmentObj.get_name()
                                     # Entries found here: https://github.com/libyal/libpff/blob/main/libpff/libpff_mapi.h#L333-L335
@@ -171,12 +188,22 @@ if not skip_registry:
                                                 + " will be renamed to avoid filename conflict with mailbag spec"
                                             )
                                             errors = common.handle_error(errors, None, desc, "warn")
+                                            attachmentWrittenName = str(i) + os.path.splitext(attachmentName)[1]
+                                        else:
+                                            attachmentWrittenName = common.normalizePath(attachmentName.replace("/", "%2F"))
+                                    else:
+                                        attachmentWrittenName = str(i)
 
                                     # Guess the mime if we can't find it
                                     if mime is None:
-                                        mime = format.guessMimeType(attachmentName)
+                                        if attachmentName:
+                                            mime = format.guessMimeType(attachmentName)
+                                        else:
+                                            desc = "Mimetype not found. Setting it to 'application/octet-stream'"
+                                            errors = common.handle_error(errors, None, desc, "warn")
+                                            mime = "application/octet-stream"
 
-                                    # MSGs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
+                                    # MSGs & PSTs don't seem to have a reliable content ID so we make one since emails may have multiple attachments with the same filename
                                     contentID = uuid.uuid4().hex
 
                                 except Exception as e:
@@ -188,6 +215,7 @@ if not skip_registry:
 
                                 attachment = Attachment(
                                     Name=attachmentName,
+                                    WrittenName=attachmentWrittenName,
                                     File=attachment_content,
                                     MimeType=mime,
                                     Content_ID=contentID,
@@ -198,18 +226,26 @@ if not skip_registry:
                             desc = "Error parsing attachments"
                             errors = common.handle_error(errors, e, desc)
 
+                        decoded_Message_ID, errors = format.parse_header(headers["Message-ID"], errors)
+                        decoded_Date, errors = format.parse_header(headers["Date"], errors)
+                        decoded_From, errors = format.parse_header(headers["From"], errors)
+                        decoded_To, errors = format.parse_header(headers["To"], errors)
+                        decoded_Cc, errors = format.parse_header(headers["Cc"], errors)
+                        decoded_Bcc, errors = format.parse_header(headers["Bcc"], errors)
+                        decoded_Subject, errors = format.parse_header(headers["Subject"], errors)
+
                         message = Email(
                             Errors=errors,
-                            Message_ID=format.parse_header(headers["Message-ID"]),
+                            Message_ID=decoded_Message_ID,
                             Original_File=originalFile,
                             Message_Path=messagePath,
                             Derivatives_Path=derivativesPath,
-                            Date=format.parse_header(headers["Date"]),
-                            From=format.parse_header(headers["From"]),
-                            To=format.parse_header(headers["To"]),
-                            Cc=format.parse_header(headers["Cc"]),
-                            Bcc=format.parse_header(headers["Bcc"]),
-                            Subject=format.parse_header(headers["Subject"]),
+                            Date=decoded_Date,
+                            From=decoded_From,
+                            To=decoded_To,
+                            Cc=decoded_Cc,
+                            Bcc=decoded_Bcc,
+                            Subject=decoded_Subject,
                             Content_Type=headers.get_content_type(),
                             Headers=headers,
                             HTML_Body=html_body,
@@ -231,19 +267,17 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile)
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, iteration_only=iteration_only)
             else:
-                if not self.iteration_only:
+                if not iteration_only:
                     if not folder.number_of_sub_messages:
                         # This is an email folder that does not contain any messages.
-                        # Currently, we are only warning about empty folders pending the possibility of
-                        # a better solution described in #117
-                        desc = "Folder '" + path + "' contains no messages and will be ignored"
-                        # handle_error() won't work here as-is because the errors list is added to the Message model
-                        # errors = common.handle_error(errors, None, desc, "warn")
-                        log.warn(desc + ".")
+                        # Add it to self.account_data['empty_folder_paths']
+                        if not "empty_folder_paths" in self.account_data:
+                            self.account_data["empty_folder_paths"] = []
+                        self.account_data["empty_folder_paths"].append(os.path.splitext(originalFile)[0] + "/" + path)
 
-        def messages(self):
+        def messages(self, iteration_only=False):
             companion_files = []
             if os.path.isfile(self.path):
                 parent_dir = os.path.dirname(self.path)
@@ -276,27 +310,26 @@ if not skip_registry:
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, folder.name, originalFile)
+                        yield from self.folders(folder, folder.name, originalFile, iteration_only=iteration_only)
                     else:
-                        if not self.iteration_only:
+                        if not iteration_only:
                             # This is an email folder that does not contain any messages.
-                            # Currently, we are only warning about empty folders pending the possibility of
-                            # a better solution described in #117
-                            desc = "Folder '" + folder.name + "' contains no messages and will be ignored"
-                            # handle_error() won't work here as-is because the errors list is added to the Message model
-                            # errors = common.handle_error(errors, None, desc, "warn")
-                            log.warn(desc + ".")
-
+                            # Add it to self.account_data['empty_folder_paths']
+                            if not "empty_folder_paths" in self.account_data:
+                                self.account_data["empty_folder_paths"] = []
+                            self.account_data["empty_folder_paths"].append(os.path.splitext(originalFile)[0] + "/" + folder.name)
                 pst.close()
 
                 # Move PST to new mailbag directory structure
-                if not self.iteration_only:
-                    new_path = format.moveWithDirectoryStructure(
+                if not iteration_only:
+                    new_path, errors = format.moveWithDirectoryStructure(
                         self.dry_run,
                         parent_dir,
                         self.mailbag_name,
                         self.format_name,
                         filePath,
+                        # Does not check path lengths for PSTs
+                        [],
                     )
 
             if self.companion_files:

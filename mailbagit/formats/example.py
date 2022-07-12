@@ -15,12 +15,13 @@ class ExampleAccount(EmailAccount):
     def __init__(self, target_account, args, **kwargs):
         print("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
-        account_data = {}
-        messages = []
+        self._account_data = {}
+        self._messages
 
+    @property
     def account_data(self):
-        return account_data
+        return self._account_data
 
     def messages(self):
-        for message in messages:
+        for message in self._messages:
             yield Email(**message)

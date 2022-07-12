@@ -2,7 +2,7 @@ import os
 import subprocess
 import distutils.spawn
 from mailbagit.derivative import Derivative
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import mailbagit.helper.derivative as derivative
 import mailbagit.helper.common as common
 
@@ -27,15 +27,11 @@ if not skip_registry:
         derivative_agent = "chrome"
         derivative_agent_version = "unknown"
 
-        def __init__(self, email_account, **kwargs):
-            log.debug("Setup account")
-            super()
+        def __init__(self, email_account, args, mailbag_dir):
+            log.debug(f"Setup {self.derivative_name} derivatives")
 
-            self.args = kwargs["args"]
-            mailbag_dir = kwargs["mailbag_dir"]
-            self.pdf_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-            if not self.args.dry_run:
-                os.makedirs(self.pdf_dir)
+            # Sets up self.format_subdirectory
+            super().__init__(args, mailbag_dir)
 
         def do_task_per_account(self):
             print(self.account.account_data())
@@ -45,10 +41,12 @@ if not skip_registry:
             errors = []
             try:
 
-                out_dir = os.path.join(self.pdf_dir, message.Derivatives_Path)
+                out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
                 filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+                errors = common.check_path_length(out_dir, errors)
                 html_name = filename + ".html"
                 pdf_name = filename + ".pdf"
+                errors = common.check_path_length(pdf_name, errors)
 
                 if message.HTML_Body is None and message.Text_Body is None:
                     log.warn("No HTML or plain text body for " + str(message.Mailbag_Message_ID) + ". No PDF derivative will be created.")

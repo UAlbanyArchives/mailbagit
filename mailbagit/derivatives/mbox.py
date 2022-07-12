@@ -1,4 +1,4 @@
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 import mailbox
 import os
 import mailbagit.helper.common as common
@@ -20,15 +20,11 @@ class MboxDerivative(Derivative):
     derivative_agent = mailbox.__name__
     derivative_agent_version = platform.python_version()
 
-    def __init__(self, email_account, **kwargs):
-        log.debug("Setup account")
-        super()
+    def __init__(self, email_account, args, mailbag_dir):
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
-        self.args = kwargs["args"]
-        mailbag_dir = kwargs["mailbag_dir"]
-        self.mbox_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        if not self.args.dry_run:
-            os.makedirs(self.mbox_dir)
+        # Sets up self.format_subdirectory
+        super().__init__(args, mailbag_dir)
 
     def do_task_per_account(self):
         log.debug(self.account.account_data())
@@ -40,14 +36,16 @@ class MboxDerivative(Derivative):
 
             try:
                 if len(message.Derivatives_Path) < 1:
-                    out_dir = self.mbox_dir
+                    out_dir = self.format_subdirectory
                     filename = os.path.join(out_dir, self.args.mailbag_name + ".mbox")
                 elif len(message.Derivatives_Path.strip("/").split("/")) == 1:
-                    out_dir = self.mbox_dir
+                    out_dir = self.format_subdirectory
                     filename = os.path.join(out_dir, message.Derivatives_Path.strip("/") + ".mbox")
                 else:
-                    out_dir = os.path.join(self.mbox_dir, os.path.dirname(message.Derivatives_Path.strip("/")))
+                    out_dir = os.path.join(self.format_subdirectory, os.path.dirname(message.Derivatives_Path.strip("/")))
                     filename = os.path.join(out_dir, os.path.basename(message.Derivatives_Path.strip(os.sep)) + ".mbox")
+                errors = common.check_path_length(out_dir, errors)
+                errors = common.check_path_length(filename, errors)
             except Exception as e:
                 desc = "Error setting up MBOX derivative"
                 errors = common.handle_error(errors, e, desc)
@@ -122,7 +120,7 @@ class MboxDerivative(Derivative):
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
                                     mimeType = "text/plain"
-                                    log.warn("Mime type not found for the attachment. Set as " + mimeType + ".")
+                                    log.warn("Mime type not found for the attachment. For MBOX, set as " + mimeType + ".")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
                                 part.set_payload(attachment.File)
@@ -140,7 +138,7 @@ class MboxDerivative(Derivative):
                                     content_disposition = "attachment"
                                     part.add_header("Content-ID", attachment.Content_ID)
 
-                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.WrittenName)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to MBOX derivative"

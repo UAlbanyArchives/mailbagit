@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mailbagit",
-    version="0.3.0",
+    version="0.4.0",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
     description="A tool for preserving email with multiple masters.",
@@ -19,20 +19,23 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    entry_points={"console_scripts": ["mailbagit=mailbagit:cli", "mailbagit-gui=mailbagit:gui"]},
+    entry_points={"console_scripts": ["mailbagit=mailbagit:cli", "mailbagit-gui=mailbagit:gui", "mailbagit-guided=mailbagit:guided"]},
     install_requires=[
         "bagit>=1.8.1,<2",
         "beautifulsoup4>=4.11.1,<5",
         "black>=22.1.0,<23",
         "jsonmodels>=2.2,<=2.5.0",
-        "extract_msg>=0.30.10,<1",
+        "extract_msg>=0.35.3,<1",
         "structlog>=21.1.0,<22",
+        "python-json-logger>=2.0.2,<3"
         "pyparsing>=2.1.0,<3",
         "pytest>=7.0.1,<8",
         "python-dotenv>0.19.0,<=0.19.1",
         "chardet>=4.0.0,<5",
         "warcio>=1.7.4,<2",
         "requests >=2.27.1,<3",
+        "cssutils >=2.4.2,<3",
+        "python-json-logger >=2.0.2,<3",
         # for black
         "typed-ast>=1.5.3,<2",
     ],

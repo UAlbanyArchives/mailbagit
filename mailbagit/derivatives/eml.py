@@ -5,7 +5,7 @@ import mailbagit.helper.derivative as derivative
 import os, glob
 import mailbox
 from mailbagit.email_account import EmailAccount
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -24,15 +24,11 @@ class EmlDerivative(Derivative):
     derivative_agent = "email"
     derivative_agent_version = platform.python_version()
 
-    def __init__(self, email_account, **kwargs):
-        log.debug("Setup account")
-        super()
+    def __init__(self, email_account, args, mailbag_dir):
+        log.debug(f"Setup {self.derivative_name} derivatives")
 
-        self.args = kwargs["args"]
-        mailbag_dir = kwargs["mailbag_dir"]
-        self.eml_dir = os.path.join(mailbag_dir, "data", self.derivative_format)
-        if not self.args.dry_run:
-            os.makedirs(self.eml_dir)
+        # Sets up self.format_subdirectory
+        super().__init__(args, mailbag_dir)
 
     def do_task_per_account(self):
         print(self.account.account_data())
@@ -42,8 +38,10 @@ class EmlDerivative(Derivative):
         errors = []
         try:
 
-            out_dir = os.path.join(self.eml_dir, message.Derivatives_Path)
-            filename = os.path.join(out_dir, str(message.Mailbag_Message_ID))
+            out_dir = os.path.join(self.format_subdirectory, message.Derivatives_Path)
+            filename = os.path.join(out_dir, str(message.Mailbag_Message_ID) + ".eml")
+            errors = common.check_path_length(out_dir, errors)
+            errors = common.check_path_length(filename, errors)
 
             # Build msg
             if not message.Message and not message.Headers:
@@ -65,13 +63,13 @@ class EmlDerivative(Derivative):
                         if not self.args.dry_run:
                             if not os.path.isdir(out_dir):
                                 os.makedirs(out_dir)
-                            with open(filename + ".eml", "w", encoding=out_encoding) as outfile:
+                            with open(filename, "w", encoding=out_encoding) as outfile:
                                 gen = generator.Generator(outfile)
                                 gen.flatten(msg)
                                 outfile.close()
                             fullObjectWrite = True
                     except Exception as e:
-                        derivative.deleteFile(filename + ".eml")
+                        derivative.deleteFile(filename)
                         desc = "Error writing full email object to EML, generating it from the model instead"
                         errors = common.handle_error(errors, e, desc, "warn")
                         fullObjectWrite = False
@@ -124,7 +122,7 @@ class EmlDerivative(Derivative):
                                 mimeType = attachment.MimeType
                                 if mimeType is None:
                                     mimeType = "application/octet-stream"
-                                    desc = "Mime type not found for attachment, set as " + mimeType
+                                    desc = "Mime type not found for attachment. For EML, set as " + mimeType
                                     errors = common.handle_error(errors, None, desc, "error")
                                 mimeType = mimeType.split("/")
                                 part = MIMEBase(mimeType[0], mimeType[1])
@@ -143,7 +141,7 @@ class EmlDerivative(Derivative):
                                     content_disposition = "attachment"
                                     part.add_header("Content-ID", attachment.Content_ID)
 
-                                part.add_header("Content-Disposition", content_disposition, filename=attachment.Name)
+                                part.add_header("Content-Disposition", content_disposition, filename=attachment.WrittenName)
                                 msg.attach(part)
                         except Exception as e:
                             desc = "Error writing attachment(s) to EML derivative"
@@ -155,7 +153,7 @@ class EmlDerivative(Derivative):
                             if not self.args.dry_run:
                                 if not os.path.isdir(out_dir):
                                     os.makedirs(out_dir)
-                                with open(filename + ".eml", "w", encoding="utf-8") as outfile:
+                                with open(filename, "w", encoding="utf-8") as outfile:
                                     gen = generator.Generator(outfile)
                                     gen.flatten(msg)
                                     outfile.close()

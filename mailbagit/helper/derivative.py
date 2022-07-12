@@ -6,29 +6,9 @@ from bs4 import BeautifulSoup, Doctype
 import http.server
 import socketserver
 
-from structlog import get_logger
+from mailbagit.loggerx import get_logger
 
 log = get_logger()
-
-
-def startServer(dry_run, httpdShared, port=5000):
-    class QuietHandler(http.server.SimpleHTTPRequestHandler):
-        def log_message(self, format, *args):
-            pass
-
-    log.debug("Starting Server")
-    if not dry_run:
-        Handler = http.server.SimpleHTTPRequestHandler
-        with socketserver.TCPServer(("127.0.0.1", port), QuietHandler) as httpd:
-            httpdShared.append(httpd)
-            httpd.serve_forever()
-
-
-def stopServer(dry_run, httpd):
-    log.debug("Stopping Server")
-    if not dry_run:
-        httpd.shutdown()
-        httpd.server_close()
 
 
 def deleteFile(filePath):

@@ -120,18 +120,18 @@ python3 -m pip install pipenv
 
 * For non-Windows users
 
-`pip install mailbagit[pst]`
+`pip install 'mailbagit[pst]'`
 </script></section><section  data-markdown><script type="text/template">
 ## Working with PSTs on Windows
 
-* Visual Studio Installer
+* [Visual Studio Installer](https://visualstudio.microsoft.com/downloads/)
 	* Community edition works
 * Need "Desktop development with C++"
 * And "VS 2019 C++ x64/x86 build tools"
 </script></section><section  data-markdown><script type="text/template">
 ## `mailbagit` command
 
-`mailbagit -h`
+`mailbagit -v`
 </script></section><section  data-markdown><script type="text/template">
 ## Installing the GUI
 
@@ -155,7 +155,7 @@ gui()
 </script></section><section  data-markdown><script type="text/template">
 ## Running Windows Executables
 
-* Download them from the [v0.2.1 release on Github](https://github.com/UAlbanyArchives/mailbagit/releases/tag/v0.2.1)
+* Download them from the [v0.3.0 release on Github](https://github.com/UAlbanyArchives/mailbagit/releases/tag/v0.3.0)
 * [Unblock executables from Defender SmartScreen](https://archives.albany.edu/mailbag/exe/#unblocking-mailbagitexe-and-mailbagit-guiexe)
 </script></section><section  data-markdown><script type="text/template">
 ## PDF dependancies
@@ -188,6 +188,7 @@ docker run -it ualbanyarchives/mailbagit:latest
 </script></section><section  data-markdown><script type="text/template">
 ## Options
 
+* -v --version
 * -r --dry-run
 * --css path/to/styles.css
 * -c --compress zip
@@ -273,12 +274,13 @@ mailbagit msgs -i msg -d eml html txt -m test2
 ## Mailbagit error reports
 
 * external to mailbag
+* `mymailbag_errors` and `mymailbag_warnings`
 * created on -r --dry-run
 	* more errors will show without dry-run
 	* errors from subprocesses
 		* wkhtmltopdf
 		* chrome
-* errors.csv
+* `errors.csv` and `warnings.csv`
 * .txt file for each message with error and full stack trace
 </script></section><section  data-markdown><script type="text/template">
 ## What's in a mailbag?
@@ -304,6 +306,7 @@ MSG-Agent-Version: 0.30.12
 Mailbag-Agent: mailbagit
 Mailbag-Agent-Version: 0.2.1
 Mailbag-Source: msg
+Mailbag-Specification-Version: 0.3
 Original-Included: True
 PDF-Agent: wkhtmltopdf
 PDF-Agent-Version: wkhtmltopdf 0.12.6 (with patched qt)
@@ -434,7 +437,7 @@ mailbagit Inbox/ -i eml -d html warc -m test6
 </script></section><section  data-markdown><script type="text/template">
 ### Retrospective if time
 
-[Jamboard](https://jamboard.google.com/d/1Fc64zlP4rouDzNTt8WvgXdLfc0mBPdCNvHcihyCq0bQ/viewer)
+[Jamboard](https://jamboard.google.com/d/1fbI30bezI7Ngj4mq7bXWq49cRYb5ibO5I-K8vo22L1U/viewer)
 </script></section><section  data-markdown><script type="text/template">
 ### Bonus: A big PST
 

@@ -2,7 +2,7 @@ from os import listdir
 from os.path import basename, dirname, exists, isfile, join
 from importlib.machinery import SourceFileLoader
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 
 
 class EmailAccount(ABC):
@@ -32,13 +32,20 @@ class EmailAccount(ABC):
 
     @abstractmethod
     def __init__(self, target_account, args, **kwargs):
-        """Implement a method that finds and sets up an account so that `account_data` and `messages` can
-        be called on it."""
+        """Implement a method that finds and sets up an account.  The following methods and properties should be present:
+        - `account_data` (property)
+        - `number_of_messages` (property)
+        - `messages` (method)_and `messages`"""
         pass
 
-    @abstractmethod
+    @abstractproperty
     def account_data(self):
-        """Return a dict containing any data about the account as a whole that's relevant to mailbagit processing."""
+        """property giving access to  a dict containing any data about the account as a whole that's relevant to mailbagit processing.  Suggest locating value at  self._account_data"""
+        pass
+
+    @abstractproperty
+    def number_of_messages(self):
+        """property that returns the number of messages in an email account"""
         pass
 
     @abstractmethod
