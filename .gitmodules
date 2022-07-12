@@ -1,0 +1,3 @@
+[submodule "docs/mailbag-specification"]
+	path = docs/mailbag-specification
+	url = git@github.com:UAlbanyArchives/mailbag-specification.git
