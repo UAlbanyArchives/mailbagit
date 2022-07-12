@@ -91,3 +91,6 @@ If you would like to validate your mailbag, `mailbagit` comes with [bagit-python
 ```
 bagit.py --validate /path/to/mailbag
 ```
+
+## What `mailbagit` creates
+

@@ -247,7 +247,7 @@ def guided():
     prompts(input_types, derivative_types, hashes, metadata_fields)
     args = mailbag_parser.parse_args()
     main(args)
-    input("Mailbag complete. Press any key to continue.")
+    input(f"Mailbag finished packaging at { args.path }. Press any key to continue.")
 
 
 if gooeyCheck:

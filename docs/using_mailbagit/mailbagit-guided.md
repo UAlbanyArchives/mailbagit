@@ -41,7 +41,7 @@ The command line will walk users through a series of prompts to process the emai
 
     This will be the folder or .zip file name for the mailbag.
 
-5. **Would you like to try a dry run? (yes, y, no, n):**
+5. **Would you like to try a dry run? This is a test run that will report errors but not alter your files. (yes, y, no, n):**
 
     A dry run means that it will attempt to parse the email and begins to generate derivatives, but does not actually save them or do anything to the input data. A dry run does create error and warnings reports. The dry run may take less time to process and can be useful to identify any problems or issues before actually creating a mailbag.
 
