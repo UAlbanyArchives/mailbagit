@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Call for Contributors
+title: Call for Contributors (closed)
 permalink: /contributors/
 nav_order: 9
 ---
 
-# Call for Contributors
+# Call for Contributors (closed)
 
 The Mailbag project team is seeking community members interested in contributing to the `mailbagit` tool. This is open to those with Python experience looking to address [known issues](https://github.com/UAlbanyArchives/mailbag/issues) or review existing code, as well as non-coders interested in improving documentation.
 
