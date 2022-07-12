@@ -2,7 +2,7 @@
 
 1. Test develop
 2. Bump version in `setup.py` and `mailbagit/__init__.py`
-3. Update [Spec compliance version](https://github.com/UAlbanyArchives/mailbagit/blob/develop/mailbagit/controller.py#L113) if neccessary.
+3. Update [Spec compliance version](https://github.com/UAlbanyArchives/mailbagit/blob/develop/mailbagit/controller.py#L114) if neccessary.
 4. Build and push dev Docker image
 5. PR and merge to main
 6. Build and test Windows executables
