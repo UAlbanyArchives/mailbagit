@@ -25,7 +25,7 @@ setuptools.setup(
         "beautifulsoup4>=4.11.1,<5",
         "black>=22.1.0,<23",
         "jsonmodels>=2.2,<=2.5.0",
-        "extract_msg>=0.34.1,<1",
+        "extract_msg>=0.34.1,<0.35.0",
         "structlog>=21.1.0,<22",
         "python-json-logger>=2.0.2,<3"
         "pyparsing>=2.1.0,<3",

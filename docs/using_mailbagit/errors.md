@@ -3,7 +3,7 @@ layout: page
 title: Error and warning reports
 permalink: /errors/
 parent: Using mailbagit
-nav_order: 3
+nav_order: 4
 ---
 
 # Error and warning reports

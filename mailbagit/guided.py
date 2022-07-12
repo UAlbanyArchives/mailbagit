@@ -121,11 +121,11 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
     input_args.extend(derivatives_formats)
 
     # dry run?
-    if yes_no("Would you like to try a dry run?"):
+    if yes_no("Would you like to try a dry run? This is a test run that will report errors but not alter your files."):
         input_args.append("-r")
 
     # more options?
-    if yes_no("Would you like more options?"):
+    if yes_no("Would you like more options? If no, we will package the mailbag."):
 
         # Include companion files?
         if os.path.isdir(path):
@@ -180,7 +180,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
         if yes_no("Mailbagit uses sha256 and sha512 by default. Would you like to customize the checksums used?"):
             custom_hashes = ["invalid"]  # Needs to start invalid because the loop ends when the values are valid.
             while not all(item in hashes for item in custom_hashes):
-                hashes_input = input("Enter the derivatives formats to create separated by spaces (" + ", ".join(hashes) + "): ")
+                hashes_input = input("Enter the checksum algorithms to use separated by spaces (" + ", ".join(hashes) + "): ")
                 allow_exit(hashes_input)
                 custom_hashes = hashes_input.split(" ")
                 if not all(item in hashes for item in custom_hashes):
