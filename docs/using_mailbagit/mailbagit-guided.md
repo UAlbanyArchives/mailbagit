@@ -8,7 +8,7 @@ nav_order: 3
 
 # mailbagit "guided" interface
 
-If you are not familiar with the traditonal [command-line interface]({{ site.baseurl }}/mailbagit), you can try the `mailbagit-guided` interface. This still uses the command line, but asks you detailed questions and runs `mailbagit` based on your responses.
+If you are not familiar with the traditional [command-line interface]({{ site.baseurl }}/mailbagit), you can try the `mailbagit-guided` interface. This still uses the command line, but asks you detailed questions and runs `mailbagit` based on your responses.
 
 * [Download and install mailbagit]({{ site.baseurl }}/install).
 * [Download a sample MBOX file]({{ site.baseurl }}/data/account.mbox) for training and testing.
@@ -35,7 +35,7 @@ The command line will walk users through a series of prompts to process the emai
 
 3. **Enter the derivatives formats to create separated by spaces ([eml](https://www.loc.gov/preservation/digital/formats/fdd/fdd000388.shtml), [html](https://www.loc.gov/preservation/digital/formats/fdd/fdd000475.shtml), [mbox](https://www.loc.gov/preservation/digital/formats/fdd/fdd000383.shtml), pdf-chrome, [pdf](https://www.loc.gov/preservation/digital/formats/fdd/fdd000030.shtml), txt, [warc](https://www.loc.gov/preservation/digital/formats/fdd/fdd000236.shtml)):**
 
-    These are the derivative formats that `mailbagit`will create an include in the mailbag. `pdf-chrome` creates a PDF just like `pdf`, but uses a different dependancy too. `chrome --headless` instead of `wkhtmltopdf`. PDF options will not display unless [PDF dependancies are installed]({{ site.baseurl }}/pdf).
+    These are the derivative formats that `mailbagit`will create an include in the mailbag. `pdf-chrome` creates a PDF just like `pdf`, but uses a different dependency too. `chrome --headless` instead of `wkhtmltopdf`. PDF options will not display unless [PDF dependencies are installed]({{ site.baseurl }}/pdf).
 
 4. **Enter a name for the mailbag:**
 
