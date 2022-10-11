@@ -1,7 +1,7 @@
 # __init__.py
 
 # Version of the mailbagit package
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 import os
 from pathlib import Path
@@ -260,7 +260,10 @@ if gooeyCheck:
 
 
 def main(args):
-    setup_logging(stream_json=args.log_json, filename=args.log)
+    if hasattr(args, 'log_json'):
+        setup_logging(stream_json=args.log_json, filename=args.log)
+    else:
+        setup_logging(filename=args.log)
     args.input = args.input.lower()
 
     if not os.path.exists(args.path[0]):
