@@ -31,7 +31,7 @@ def yes_no(query):
         input_string = input(query + " (" + ", ".join(input_options) + "): ")
         allow_exit(input_string)
         if not input_string.lower().strip() in input_options:
-            print (f"Invalid input. Must be one of: {', '.join(input_options)}")
+            print(f"Invalid input. Must be one of: {', '.join(input_options)}")
         elif input_string.lower().strip() == "y" or input_string.lower().strip() == "yes":
             yes = True
     if yes:
@@ -56,7 +56,7 @@ def in_options(query, options):
         input_string = input(f"{query} ({', '.join(options)}): ")
         allow_exit(input_string)
         if not input_string.lower() in options:
-            print (f"Invalid input. Must be one of: {', '.join(options)}")
+            print(f"Invalid input. Must be one of: {', '.join(options)}")
     return input_string
 
 
@@ -88,11 +88,11 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
             if path.lower().endswith("." + input_format.lower()):
                 pathValid = True
             else:
-                print (f"File {path} is not a {input_format.upper()} file.")
+                print(f"File {path} is not a {input_format.upper()} file.")
         elif os.path.isdir(path):
             pathValid = True
         else:
-            print ("Must be a valid path to a file or directory.")
+            print("Must be a valid path to a file or directory.")
 
     # What derivatives to create?
     # Don't allow same derivatives as input format
@@ -104,17 +104,17 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
         allow_exit(derivatives_input)
         derivatives_formats = derivatives_input.split(" ")
         if not all(item in derivative_types for item in derivatives_formats):
-            print (f"Invalid format(s). Must be included in: {', '.join(derivative_types)}.")
+            print(f"Invalid format(s). Must be included in: {', '.join(derivative_types)}.")
 
     # mailbag name
     mailbag_name = ""
     while len(mailbag_name) < 1 or os.path.isdir(os.path.join(path, mailbag_name)):
-        mailbag_name = input("Enter a name for the mailbag: ")
+        mailbag_name = input("Enter a name or output path for the mailbag: ")
         allow_exit(mailbag_name)
         if len(mailbag_name) < 1:
-            print ("Invalid path")
+            print("Invalid path")
         elif os.path.isdir(os.path.join(path, mailbag_name)):
-            print ("A directory already exists at " + os.path.join(path, mailbag_name))
+            print("A directory already exists at " + os.path.join(path, mailbag_name))
 
     # Basic setup basic args
     input_args = [sys.argv[0], path, "-i", input_format, "-m", mailbag_name, "-d"]
@@ -123,6 +123,10 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
     # dry run?
     if yes_no("Would you like to try a dry run? This is a test run that will report errors but not alter your files."):
         input_args.append("-r")
+    else:
+        # keep?
+        if yes_no("Would you like to copy the source email mailbag instead of moving it?"):
+            input_args.append("-k")
 
     # more options?
     if yes_no("Would you like more options? If no, we will package the mailbag."):
@@ -150,7 +154,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
                 logValid = True
                 logFile = True
             else:
-                print (f"{log} is not a valid path to a log file.")
+                print(f"{log} is not a valid path to a log file.")
 
         # JSON to stdout?
         """
@@ -174,7 +178,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
                     input_args.extend(["--css", css])
                     cssValid = True
                 else:
-                    print (f"{css} is not a path to a valid CSS file.")
+                    print(f"{css} is not a path to a valid CSS file.")
 
         # Customize checksums?
         if yes_no("Mailbagit uses sha256 and sha512 by default. Would you like to customize the checksums used?"):
@@ -184,7 +188,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
                 allow_exit(hashes_input)
                 custom_hashes = hashes_input.split(" ")
                 if not all(item in hashes for item in custom_hashes):
-                    print (f"Invalid checksums(s). Must be included in: ({', '.join(hashes)}).")
+                    print(f"Invalid checksums(s). Must be included in: ({', '.join(hashes)}).")
             for custom_hash in custom_hashes:
                 input_args.append("--" + custom_hash)
 
@@ -200,11 +204,11 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
                 if metadata_input.lower().strip() == "done":
                     metadata_done = True
                 elif len(metadata_input) < 1 or not ":" in metadata_input:
-                    print (f'Invalid input. Must be a field and value separated by a colon. e.g. "capture-agent: Microsoft Outlook"')
+                    print(f'Invalid input. Must be a field and value separated by a colon. e.g. "capture-agent: Microsoft Outlook"')
                 else:
                     custom_key, custom_value = metadata_input.split(":", 1)
                     if not custom_key in metadata_fields:
-                        print (f"Invalid field \"{custom_key}\". Must be included in: ({', '.join(metadata_fields)}).")
+                        print(f"Invalid field \"{custom_key}\". Must be included in: ({', '.join(metadata_fields)}).")
                     else:
                         print(f'--> Adding "{custom_key.strip()}: {custom_value.strip()}" to bag-info.txt.')
                         custom_metadata[custom_key.strip()] = custom_value.strip()
