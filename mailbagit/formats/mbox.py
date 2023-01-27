@@ -22,13 +22,16 @@ class Mbox(EmailAccount):
     format_agent = mailbox.__name__
     format_agent_version = platform.python_version()
 
-    def __init__(self, target_account, args, **kwargs):
+    def __init__(self, args, parent_dir, mailbag_dir, mailbag_name, **kwargs):
         # code goes here to set up mailbox and pull out any relevant account_data
         self._account_data = {}
 
-        self.path = target_account
+        self.path = args.path
         self.dry_run = args.dry_run
-        self.mailbag_name = args.mailbag_name
+        self.keep = args.keep
+        self.mailbag_name = mailbag_name
+        self.mailbag_dir = mailbag_dir
+        self.parent_dir = parent_dir
         self.companion_files = args.companion_files
         log.info("Reading: " + self.path)
 
@@ -47,10 +50,8 @@ class Mbox(EmailAccount):
 
         companion_files = []
         if os.path.isfile(self.path):
-            parent_dir = os.path.dirname(self.path)
             fileList = [self.path]
         else:
-            parent_dir = self.path
             fileList = []
             for root, dirs, files in os.walk(self.path):
                 for file in files:
@@ -152,10 +153,12 @@ class Mbox(EmailAccount):
             if not iteration_only:
                 # Does not check path lengths for MBOXs because `errors` was already returned to the controller
                 new_path, errors = format.moveWithDirectoryStructure(
-                    self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath, errors
+                    self.dry_run, self.keep, self.parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
                 )
 
         if self.companion_files:
             # Move all files into mailbag directory structure
             for companion_file in companion_files:
-                new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)
+                new_path = format.moveWithDirectoryStructure(
+                    self.dry_run, self.keep, self.mailbag_dir, self.parent_dir, self.mailbag_name, self.format_name, companion_file
+                )

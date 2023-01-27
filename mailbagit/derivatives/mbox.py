@@ -37,7 +37,7 @@ class MboxDerivative(Derivative):
             try:
                 if len(message.Derivatives_Path) < 1:
                     out_dir = self.format_subdirectory
-                    filename = os.path.join(out_dir, self.args.mailbag_name + ".mbox")
+                    filename = os.path.join(out_dir, os.path.basename(self.args.mailbag) + ".mbox")
                 elif len(message.Derivatives_Path.strip("/").split("/")) == 1:
                     out_dir = self.format_subdirectory
                     filename = os.path.join(out_dir, message.Derivatives_Path.strip("/") + ".mbox")

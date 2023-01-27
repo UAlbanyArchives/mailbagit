@@ -302,47 +302,53 @@ def messagePath(headers):
     return messagePath
 
 
-def moveFile(dry_run, oldPath, newPath):
+def moveFile(dry_run, keep, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
         log.debug("from: " + str(oldPath))
         log.debug("to: " + str(newPath))
-        shutil.move(oldPath, newPath)
+        if keep:
+            shutil.copy2(oldPath, newPath)
+        else:
+            shutil.move(oldPath, newPath)
     except IOError as e:
         log.error("Unable to move file. %s" % e)
 
 
-def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
+def getFileBeforeAfterPath(parent_dir, mailbag_dir, mailbag_name, input, file):
     """
     Creates file paths for input mail files and new paths
 
     Parameters:
-        mainPath (String) :
+        parent_dir (String) :
+        mailbag_dir (String) :
         mailbag_name (String) :
         input (String) :
         file (String) :
     """
-    fullPath = Path(mainPath).resolve()
+    fullPath = Path(parent_dir).resolve()
     fullFilePath = Path(file).resolve()
     relPath = fullFilePath.relative_to(fullPath).parents[0]
     filename = fullFilePath.name
-    folder_new = os.path.join(fullPath, mailbag_name, "data", input)
+    folder_new = os.path.join(mailbag_dir, "data", input)
     file_new_path = os.path.join(folder_new, relPath, filename)
 
     return fullPath, fullFilePath, file_new_path, relPath
 
 
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, errors):
+def moveWithDirectoryStructure(dry_run, keep, parent_dir, mailbag_dir, mailbag_name, input, file, errors):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
 
     Parameters:
-        dry_run (Boolean):
-        mainPath (String): Parent or provided directory path
+        dry_run (Boolean): option to perform a test creation of a mailbag
+        keep (Boolean): option to preserve source data
+        parent_dir (String): Parent directory of where the mailbag will be written
+        mailbag_dir (String): Path to the mailbag
         mailbag_name (String): Mailbag name
         input (String): email file format to be packaged into a mailbag
-        emailFolder (String): Path of the email export file relative to mainPath
+        emailFolder (String): Path of the email export file relative to the input directory
         file (String): Email file path
         errors (List): List of Error objects defined in models.py
 
@@ -350,16 +356,19 @@ def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, err
         file_new_path (Path): The path where the file was moved
         errors (List): List of Error objects defined in models.py
     """
-
-    fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
-    if file.lower().endswith("." + input.lower()):
-        log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+    fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(parent_dir, mailbag_dir, mailbag_name, input, file)
+    if keep:
+        verb = "Copying"
     else:
-        log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+        verb = "Moving"
+    if file.lower().endswith("." + input.lower()):
+        log.debug(f"{verb}: {str(fullFilePath)} to: {str(file_new_path)} SubFolder: {str(relPath)}")
+    else:
+        log.debug(f"{verb} companion file: {str(fullFilePath)} to: {str(file_new_path)} SubFolder: {str(relPath)}")
 
     errors = common.check_path_length(file_new_path, errors)
     if not dry_run:
-        moveFile(dry_run, fullFilePath, file_new_path)
+        moveFile(dry_run, keep, fullFilePath, file_new_path)
         # clean up old directory structure
         p = fullFilePath.parents[0]
         while p != p.root and p != fullPath:
