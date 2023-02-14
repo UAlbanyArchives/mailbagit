@@ -144,7 +144,13 @@ mailbagit_args.add_argument(
 
 
 # add mailbagit-specific required args here
-mailbagit_args.add_argument("-m", "--mailbag_name", required=True, help="A directory name for the mailbag root directory.", nargs=None)
+mailbagit_args.add_argument(
+    "-m",
+    "--mailbag",
+    required=True,
+    help="A new directory for the mailbag, such as '/path/to/my_mailbag', or just 'my_mailbag' to use the same location as the source email.",
+    nargs=None,
+)
 mailbagit_args.add_argument(
     "-i", "--input", required=True, help=f"The email export format to be packaged.", choices=input_types, type=str.lower, nargs=None
 )
@@ -179,6 +185,9 @@ mailbagit_options.add_argument(
 )
 mailbagit_options.add_argument(
     "-r", "--dry-run", help="A dry run performs a trial run with no changes made.", default=False, action="store_true"
+)
+mailbagit_options.add_argument(
+    "-k", "--keep", help="Leaves source email as-is and makes a copy into a mailbag.", default=False, action="store_true"
 )
 mailbagit_options.add_argument(
     "-l", "--external-links", help="Crawl and add external <a> links to WARC derivatives", default=False, action="store_true"
@@ -260,7 +269,7 @@ if gooeyCheck:
 
 
 def main(args):
-    if hasattr(args, 'log_json'):
+    if hasattr(args, "log_json"):
         setup_logging(stream_json=args.log_json, filename=args.log)
     else:
         setup_logging(filename=args.log)
@@ -268,6 +277,13 @@ def main(args):
 
     if not os.path.exists(args.path[0]):
         error_msg = "Invalid path, does not exist as a file or directory."
+        mailbag_parser.error((error_msg))
+
+    if os.path.isdir(args.mailbag):
+        error_msg = "Invalid mailbag. Directory must not already exist."
+        mailbag_parser.error((error_msg))
+    elif os.path.isfile(args.mailbag):
+        error_msg = "Invalid mailbag. Must be a new directory that does not already exist."
         mailbag_parser.error((error_msg))
 
     if args.input in args.derivatives:

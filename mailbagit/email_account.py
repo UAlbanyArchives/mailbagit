@@ -31,7 +31,7 @@ class EmailAccount(ABC):
         __class__.registry[cls.format_name] = cls
 
     @abstractmethod
-    def __init__(self, target_account, args, **kwargs):
+    def __init__(self, args, mailbag_dir, mailbag_name, **kwargs):
         """Implement a method that finds and sets up an account.  The following methods and properties should be present:
         - `account_data` (property)
         - `number_of_messages` (property)
