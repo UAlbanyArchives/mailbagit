@@ -245,7 +245,7 @@ class Controller:
                     f.write(warn_text)
                     f.close()
                 for d in derivatives:
-                    folder_path = common.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
+                    folder_path = os.path.join(d.format_subdirectory, common.normalizePath(empty_folder))
                     if not self.args.dry_run:
                         if not os.path.isdir(folder_path):
                             log.debug("Writing empty folder " + str(folder_path))
