@@ -10,12 +10,31 @@ import os
 # This is a mock object representing the args returned from argparse/Gooey
 @pytest.fixture
 def cli_args():
-    return Namespace(dry_run=True, mailbag_name="New_Mailbag", companion_files=False)
+    return Namespace(dry_run=True, path=os.path.join("data"), mailbag="New_Mailbag", keep=False, companion_files=False)
+
+
+def setup_paths(cli_args):
+
+    # Create folder mailbag folder before writing mailbag.csv
+    if os.path.isfile(cli_args.path):
+        source_parent_dir = os.path.dirname(cli_args.path)
+    else:
+        source_parent_dir = cli_args.path
+    # if mailbag_name arg is absolute path, create the mailbag there, if not, create the mailbag in the source directory
+    if os.path.isabs(cli_args.mailbag):
+        mailbag_dir = cli_args.mailbag
+    else:
+        mailbag_dir = os.path.join(source_parent_dir, cli_args.mailbag)
+    mailbag_name = os.path.basename(cli_args.mailbag)
+
+    return source_parent_dir, mailbag_dir, mailbag_name
 
 
 def test_Mbox(cli_args):
     testfile = "sample1.mbox"
-    data = EmailAccount.registry["mbox"](os.path.join("data"), cli_args).messages()
+
+    source_parent_dir, mailbag_dir, mailbag_name = setup_paths(cli_args)
+    data = EmailAccount.registry["mbox"](cli_args, source_parent_dir, mailbag_dir, mailbag_name).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
     for i, message in enumerate(data):
@@ -50,7 +69,9 @@ def test_Mbox(cli_args):
 
 def test_MSG(cli_args):
     testfile = "Digitization Archiving Solutions.msg"
-    data = EmailAccount.registry["msg"](os.path.join("data"), cli_args).messages()
+
+    source_parent_dir, mailbag_dir, mailbag_name = setup_paths(cli_args)
+    data = EmailAccount.registry["msg"](cli_args, source_parent_dir, mailbag_dir, mailbag_name).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
     for i, message in enumerate(data):
@@ -84,9 +105,10 @@ def test_MSG(cli_args):
 
 
 def test_EML(cli_args):
-
     testfile = "2016-06-23_144430_6e449c77fe.eml"
-    data = EmailAccount.registry["eml"](os.path.join("data"), cli_args).messages()
+
+    source_parent_dir, mailbag_dir, mailbag_name = setup_paths(cli_args)
+    data = EmailAccount.registry["eml"](cli_args, source_parent_dir, mailbag_dir, mailbag_name).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
     for i, message in enumerate(data):
@@ -124,7 +146,9 @@ def test_PST(cli_args):
         raise pytest.skip("PST not installed, cannot test")
 
     testfile = "outlook2019_MSO_16.0.10377.20023_64-bit.pst"
-    data = EmailAccount.registry["pst"](os.path.join("data"), cli_args).messages()
+
+    source_parent_dir, mailbag_dir, mailbag_name = setup_paths(cli_args)
+    data = EmailAccount.registry["pst"](cli_args, source_parent_dir, mailbag_dir, mailbag_name).messages()
     dump_dir = os.path.join("data", os.path.splitext(testfile)[1][1:] + "-" + os.path.splitext(testfile)[0])
 
     for i, message in enumerate(data):

@@ -28,13 +28,18 @@ mailbagit path/to/messages -i msg --derivatives eml pdf warc --mailbag_name my_m
 MBOX to PDF and plain text
 
 ```
-mailbagit path/to/inbox.mbox -i mbox -d txt pdf-chrome -m my_mailbag -r
+mailbagit path/to/mbox_dir -i mbox -d txt pdf-chrome -m my_mailbag -r
 ```
 
 PST to PDF, MBOX, EML, and WARC
 
 ```
 mailbagit path/to/export.pst -i pst -d mbox eml pdf warc -m my_mailbag
+```
+EML to PDF and WARC in another directory
+
+```
+mailbagit path/to/messages -i eml -d pdf warc -m /path/to/my_mailbag
 ```
 
 See the [documentation](https://archives.albany.edu/mailbag/use/) for more details on:
@@ -53,9 +58,8 @@ The arguments listed below can be entered in the command line when using `mailba
 * **path**:
 > A path to email to be packaged into a mailbag. This can be a single file or a directory containing a number of email exports.
 
-* **-m --mailbag-name**: 
-> This will be used as the directory name for the mailbag, or the filename if compression is used.
-> Must be a valid directory or file name.
+* **-m --mailbag**: 
+> A new directory for the mailbag, such as `/path/to/my_mailbag`, or just `my_mailbag` to use the same location as the source email. Must be a valid directory or file name and must not already exist.
 
 * **-i --input**:  
 > File format to use  as input for a mailbag.

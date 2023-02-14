@@ -45,9 +45,8 @@ The arguments listed below can be entered in the command line when using `mailba
 * **path**:
 > A path to email to be packaged into a mailbag. This can be a single file or a directory containing a number of email exports.
 
-* **-m --mailbag-name**: 
-> This will be used as the directory name for the mailbag, or the filename if compression is used.
-> Must be a valid directory or file name.
+* **-m --mailbag**: 
+> A new directory for the mailbag, such as `/path/to/my_mailbag`, or just `my_mailbag` to use the same location as the source email. Must be a valid directory or file name and must not already exist.
 
 * **-i --input**:  
 > File format to use  as input for a mailbag.
