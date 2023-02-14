@@ -28,7 +28,7 @@ setuptools.setup(
         "extract_msg>=0.34.3,<1",
         "structlog>=21.1.0,<22",
         "packaging>=21.0,<21.3",
-        "python-json-logger>=2.0.2,<3"
+        "python-json-logger>=2.0.2,<3",
         "pyparsing>=2.1.0,<3",
         "pytest>=7.0.1,<8",
         "python-dotenv>0.19.0,<=0.19.1",

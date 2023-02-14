@@ -93,21 +93,26 @@ class Controller:
 
     def generate_mailbag(self):
 
-        mail_account: EmailAccount = self.format(self.args.path, self.args)
-
         # Create folder mailbag folder before writing mailbag.csv
         if os.path.isfile(self.args.path):
-            parent_dir = os.path.dirname(self.args.path)
+            source_parent_dir = os.path.dirname(self.args.path)
         else:
-            parent_dir = self.args.path
-        mailbag_dir = os.path.join(parent_dir, self.args.mailbag_name)
+            source_parent_dir = self.args.path
+        # if mailbag_name arg is absolute path, create the mailbag there, if not, create the mailbag in the source directory
+        if os.path.isabs(self.args.mailbag):
+            mailbag_dir = self.args.mailbag
+        else:
+            mailbag_dir = os.path.join(source_parent_dir, self.args.mailbag)
+        mailbag_name = os.path.basename(self.args.mailbag)
         attachments_dir = os.path.join(str(mailbag_dir), "data", "attachments")
-        error_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_errors")
-        warn_dir = os.path.join(parent_dir, str(self.args.mailbag_name) + "_warnings")
+        error_dir = os.path.join(os.path.dirname(mailbag_dir), str(mailbag_name) + "_errors")
+        warn_dir = os.path.join(os.path.dirname(mailbag_dir), str(mailbag_name) + "_warnings")
+
+        mail_account: EmailAccount = self.format(self.args, source_parent_dir, mailbag_dir, mailbag_name)
 
         log.debug("Creating mailbag at " + str(mailbag_dir))
         if not self.args.dry_run:
-            os.mkdir(mailbag_dir)
+            os.makedirs(mailbag_dir)
             # Creating a bagit-python style bag
             bag = bagit.make_bag(mailbag_dir, self.args.bag_info, processes=self.args.processes, checksums=self.args.checksums)
             bag.info["Bag-Type"] = "Mailbag"
@@ -240,7 +245,7 @@ class Controller:
                     f.write(warn_text)
                     f.close()
                 for d in derivatives:
-                    folder_path = common.normalizePath(os.path.join(d.format_subdirectory, empty_folder))
+                    folder_path = os.path.join(d.format_subdirectory, common.normalizePath(empty_folder))
                     if not self.args.dry_run:
                         if not os.path.isdir(folder_path):
                             log.debug("Writing empty folder " + str(folder_path))
@@ -308,7 +313,7 @@ class Controller:
                 # Deleting the mailbag if compressed files are present
                 shutil.rmtree(mailbag_dir)
 
-        #controller.progressMessage("", print_End="\n")
+        # controller.progressMessage("", print_End="\n")
         log.info("Finished packaging mailbag.")
 
         return mail_account.messages()

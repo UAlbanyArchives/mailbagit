@@ -45,9 +45,8 @@ The arguments listed below can be entered in the command line when using `mailba
 * **path**:
 > A path to email to be packaged into a mailbag. This can be a single file or a directory containing a number of email exports.
 
-* **-m --mailbag-name**: 
-> This will be used as the directory name for the mailbag, or the filename if compression is used.
-> Must be a valid directory or file name.
+* **-m --mailbag**: 
+> A new directory for the mailbag, such as `/path/to/my_mailbag`, or just `my_mailbag` to use the same location as the source email. Must be a valid directory or file name and must not already exist.
 
 * **-i --input**:  
 > File format to use  as input for a mailbag.
@@ -62,11 +61,14 @@ e.g. `-d eml pdf warc`
 
 ### Mailbagit Optional  Arguments
 
+* **-v --version**
+> Reports the version number and exits.
+
 * **-r --dry-run**
 > Performs a test run that will not alter any files other than writing an error report. When this flag is used, `mailbagit` parses all the email it is provide and formats derivatives as much as it can without writing anything to disk. If there are any error or warnings, this will create an error report with an `errors.csv` listing all issues as well as a full stack trace in a `.txt` file.
 
-* **-v --version**
-> Reports the version number and exits.
+* **-k --keep**
+> Keeps the source files as-is and copies instead of moving them into a mailbag.
 
 * **--css**
 > Path to a CSS file to override the included CSS when creating PDF or HTML derivatives

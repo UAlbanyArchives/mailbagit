@@ -22,14 +22,17 @@ class MSG(EmailAccount):
     format_agent = extract_msg.__name__
     format_agent_version = extract_msg.__version__
 
-    def __init__(self, target_account, args, **kwargs):
+    def __init__(self, args, source_parent_dir, mailbag_dir, mailbag_name, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         self._account_data = {}
 
-        self.path = target_account
+        self.path = args.path
         self.dry_run = args.dry_run
-        self.mailbag_name = args.mailbag_name
+        self.keep = args.keep
+        self.mailbag_name = mailbag_name
+        self.mailbag_dir = mailbag_dir
+        self.source_parent_dir = source_parent_dir
         self.companion_files = args.companion_files
 
         log.info("Reading: " + self.path)
@@ -49,10 +52,8 @@ class MSG(EmailAccount):
 
         companion_files = []
         if os.path.isfile(self.path):
-            parent_dir = os.path.dirname(self.path)
             fileList = [self.path]
         else:
-            parent_dir = self.path
             fileList = []
             for root, dirs, files in os.walk(self.path):
                 for file in files:
@@ -176,7 +177,7 @@ class MSG(EmailAccount):
 
                 message = Email(
                     Errors=errors,
-                    Message_ID=mail.messageId.strip(),
+                    Message_ID=mail.messageId,
                     Original_File=originalFile,
                     Message_Path=messagePath,
                     Derivatives_Path=derivativesPath,
@@ -209,7 +210,7 @@ class MSG(EmailAccount):
 
             # Move MSG to new mailbag directory structure
             new_path, errors = format.moveWithDirectoryStructure(
-                self.dry_run, parent_dir, self.mailbag_name, self.format_name, filePath, errors
+                self.dry_run, self.keep, self.source_parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
             )
             message.Errors.extend(errors)
 
@@ -217,5 +218,15 @@ class MSG(EmailAccount):
 
         if self.companion_files:
             # Move all files into mailbag directory structure
+            log.debug("Moving compantion files...")
             for companion_file in companion_files:
-                new_path = format.moveWithDirectoryStructure(self.dry_run, self.path, self.mailbag_name, self.format_name, companion_file)
+                new_path = format.moveWithDirectoryStructure(
+                    self.dry_run,
+                    self.keep,
+                    self.source_parent_dir,
+                    self.mailbag_dir,
+                    self.mailbag_name,
+                    self.format_name,
+                    companion_file,
+                    [],
+                )

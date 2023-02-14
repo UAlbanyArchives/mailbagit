@@ -302,67 +302,89 @@ def messagePath(headers):
     return messagePath
 
 
-def moveFile(dry_run, oldPath, newPath):
+def moveFile(dry_run, keep, oldPath, newPath):
     os.makedirs(os.path.dirname(newPath), exist_ok=True)
     try:
         log.debug("from: " + str(oldPath))
         log.debug("to: " + str(newPath))
-        shutil.move(oldPath, newPath)
+        if keep:
+            shutil.copy2(oldPath, newPath)
+        else:
+            shutil.move(oldPath, newPath)
     except IOError as e:
         log.error("Unable to move file. %s" % e)
 
 
-def getFileBeforeAfterPath(mainPath, mailbag_name, input, file):
+def getFileBeforeAfterPath(source_parent_dir, mailbag_dir, mailbag_name, input, file):
     """
-    Creates file paths for input mail files and new paths
+    Creates file paths for input mail files and new paths. This is really for moving hierarchies of
+    EML or MSG files, as the we need to recreate the directory structure relative to source_parent_dir
+    in the mailbag. However, this is called for moving (copy with --keep) all source files into the
+    mailbag, including single PST or MBOX files and companion files, which also may have relative
+    subdirectories that need to be recreated.
 
     Parameters:
-        mainPath (String) :
-        mailbag_name (String) :
-        input (String) :
-        file (String) :
+        source_parent_dir (String): Parent directory of the source files
+        mailbag_dir (String): Path where the mailbag will be written
+        mailbag_name (String): Mailbag name
+        input (String): Email file format to be packaged into a mailbag
+        file (String): Email file path
+
+    Returns:
+        full_source_parent_path (Path): Absolute path for source_parent_dir
+        full_file_path (Path): Absolute path for file that is being moved
+        file_new_path (str): Output path where the file will be moved
+        relative_path (Path): Path for file relative to source directory. Used for logging/debugging.
     """
-    fullPath = Path(mainPath).resolve()
-    fullFilePath = Path(file).resolve()
-    relPath = fullFilePath.relative_to(fullPath).parents[0]
-    filename = fullFilePath.name
-    folder_new = os.path.join(fullPath, mailbag_name, "data", input)
-    file_new_path = os.path.join(folder_new, relPath, filename)
+    full_source_parent_path = Path(source_parent_dir).resolve()
+    full_file_path = Path(file).resolve()
 
-    return fullPath, fullFilePath, file_new_path, relPath
+    relative_path = full_file_path.relative_to(full_source_parent_path).parents[0]
+    filename = full_file_path.name
+
+    folder_new = os.path.join(mailbag_dir, "data", input)
+    file_new_path = os.path.join(folder_new, relative_path, filename)
+
+    return full_source_parent_path, full_file_path, file_new_path, relative_path
 
 
-def moveWithDirectoryStructure(dry_run, mainPath, mailbag_name, input, file, errors):
+def moveWithDirectoryStructure(dry_run, keep, source_parent_dir, mailbag_dir, mailbag_name, input, file, errors):
     """
     Create new mailbag directory structure while maintaining the input data's directory structure.
     Uses for both email files matching the input file extension and companion files if that option is selected
 
     Parameters:
-        dry_run (Boolean):
-        mainPath (String): Parent or provided directory path
+        dry_run (Boolean): option to perform a test creation of a mailbag
+        keep (Boolean): option to preserve source data
+        source_parent_dir (String): Parent directory of the source files
+        mailbag_dir (String): Path where the mailbag will be written
         mailbag_name (String): Mailbag name
-        input (String): email file format to be packaged into a mailbag
-        emailFolder (String): Path of the email export file relative to mainPath
+        input (String): Email file format to be packaged into a mailbag
         file (String): Email file path
-        errors (List): List of Error objects defined in models.py
+        errors (List): List of Error objects for the message defined in models.py. moveWithDirectoryStructure is also called for moving companion files which do not have error objects since they are not messages. In that case errors should be an empty list ([]).
 
     Returns:
         file_new_path (Path): The path where the file was moved
         errors (List): List of Error objects defined in models.py
     """
-
-    fullPath, fullFilePath, file_new_path, relPath = getFileBeforeAfterPath(mainPath, mailbag_name, input, file)
-    if file.lower().endswith("." + input.lower()):
-        log.debug("Moving: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+    full_source_parent_path, full_file_path, file_new_path, relative_path = getFileBeforeAfterPath(
+        source_parent_dir, mailbag_dir, mailbag_name, input, file
+    )
+    if keep:
+        verb = "Copying"
     else:
-        log.debug("Moving companion file: " + str(fullFilePath) + " to: " + str(file_new_path) + " SubFolder: " + str(relPath))
+        verb = "Moving"
+    if file.lower().endswith("." + input.lower()):
+        log.debug(f"{verb}: {str(full_file_path)} to: {str(file_new_path)} SubFolder: {str(relative_path)}")
+    else:
+        log.debug(f"{verb} companion file: {str(full_file_path)} to: {str(file_new_path)} SubFolder: {str(relative_path)}")
 
     errors = common.check_path_length(file_new_path, errors)
     if not dry_run:
-        moveFile(dry_run, fullFilePath, file_new_path)
+        moveFile(dry_run, keep, full_file_path, file_new_path)
         # clean up old directory structure
-        p = fullFilePath.parents[0]
-        while p != p.root and p != fullPath:
+        p = full_file_path.parents[0]
+        while p != p.root and p != full_source_parent_path:
             if not os.listdir(p):
                 log.debug("Cleaning: " + str(p))
                 os.rmdir(p)
