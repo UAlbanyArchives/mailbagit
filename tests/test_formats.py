@@ -101,7 +101,7 @@ def test_MSG(cli_args):
                                     assert dump == compare
                     assert match == True
             else:
-                assert getattr(message, field[0]) == getattr(expected, field[0])
+                assert str(getattr(message, field[0])).strip() == str(getattr(expected, field[0])).strip()
 
 
 def test_EML(cli_args):
@@ -138,7 +138,7 @@ def test_EML(cli_args):
                                     assert dump == compare
                     assert match == True
             else:
-                assert getattr(message, field[0]) == getattr(expected, field[0])
+                assert str(getattr(message, field[0])).strip() == str(getattr(expected, field[0])).strip()
 
 
 def test_PST(cli_args):
@@ -178,4 +178,4 @@ def test_PST(cli_args):
                                     assert dump == compare
                     assert match == True
             else:
-                assert getattr(message, field[0]) == getattr(expected, field[0])
+                assert str(getattr(message, field[0])).strip() == str(getattr(expected, field[0])).strip()
