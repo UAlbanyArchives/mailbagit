@@ -22,7 +22,7 @@ class MSG(EmailAccount):
     format_agent = extract_msg.__name__
     format_agent_version = extract_msg.__version__
 
-    def __init__(self, args, parent_dir, mailbag_dir, mailbag_name, **kwargs):
+    def __init__(self, args, source_parent_dir, mailbag_dir, mailbag_name, **kwargs):
         log.debug("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         self._account_data = {}
@@ -32,7 +32,7 @@ class MSG(EmailAccount):
         self.keep = args.keep
         self.mailbag_name = mailbag_name
         self.mailbag_dir = mailbag_dir
-        self.parent_dir = parent_dir
+        self.source_parent_dir = source_parent_dir
         self.companion_files = args.companion_files
 
         log.info("Reading: " + self.path)
@@ -210,7 +210,7 @@ class MSG(EmailAccount):
 
             # Move MSG to new mailbag directory structure
             new_path, errors = format.moveWithDirectoryStructure(
-                self.dry_run, self.keep, self.parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
+                self.dry_run, self.keep, self.source_parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
             )
             message.Errors.extend(errors)
 
@@ -218,7 +218,15 @@ class MSG(EmailAccount):
 
         if self.companion_files:
             # Move all files into mailbag directory structure
+            log.debug("Moving compantion files...")
             for companion_file in companion_files:
                 new_path = format.moveWithDirectoryStructure(
-                    self.dry_run, self.keep, self.parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, companion_file
+                    self.dry_run,
+                    self.keep,
+                    self.source_parent_dir,
+                    self.mailbag_dir,
+                    self.mailbag_name,
+                    self.format_name,
+                    companion_file,
+                    [],
                 )

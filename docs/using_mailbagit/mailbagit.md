@@ -62,11 +62,14 @@ e.g. `-d eml pdf warc`
 
 ### Mailbagit Optional  Arguments
 
+* **-v --version**
+> Reports the version number and exits.
+
 * **-r --dry-run**
 > Performs a test run that will not alter any files other than writing an error report. When this flag is used, `mailbagit` parses all the email it is provide and formats derivatives as much as it can without writing anything to disk. If there are any error or warnings, this will create an error report with an `errors.csv` listing all issues as well as a full stack trace in a `.txt` file.
 
-* **-v --version**
-> Reports the version number and exits.
+* **-k --keep**
+> Keeps the source files as-is and copies instead of moving them into a mailbag.
 
 * **--css**
 > Path to a CSS file to override the included CSS when creating PDF or HTML derivatives

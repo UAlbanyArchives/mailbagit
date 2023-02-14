@@ -125,7 +125,7 @@ def prompts(input_types, derivative_types, hashes, metadata_fields):
         input_args.append("-r")
     else:
         # keep?
-        if yes_no("Would you like to copy the source email mailbag instead of moving it?"):
+        if yes_no("Would you like to keep the source file(s) as-is and copy them into the mailbag instead of moving them?"):
             input_args.append("-k")
 
     # more options?

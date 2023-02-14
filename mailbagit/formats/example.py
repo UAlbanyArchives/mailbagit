@@ -12,7 +12,7 @@ class ExampleAccount(EmailAccount):
     format_agent = ""
     format_agent_version = ""
 
-    def __init__(self, args, parent_dir, mailbag_name, **kwargs):
+    def __init__(self, args, source_parent_dir, mailbag_name, **kwargs):
         print("Parsity parse")
         # code goes here to set up mailbox and pull out any relevant account_data
         self._account_data = {}

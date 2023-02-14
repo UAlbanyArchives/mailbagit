@@ -32,7 +32,7 @@ if not skip_registry:
         format_agent = pypff.__name__
         format_agent_version = metadata.version("libpff-python")
 
-        def __init__(self, args, parent_dir, mailbag_dir, mailbag_name, **kwargs):
+        def __init__(self, args, source_parent_dir, mailbag_dir, mailbag_name, **kwargs):
             log.debug("Parsity parse")
             # code goes here to set up mailbox and pull out any relevant account_data
             self._account_data = {}
@@ -41,7 +41,7 @@ if not skip_registry:
             self.keep = args.keep
             self.mailbag_name = mailbag_name
             self.mailbag_dir = mailbag_dir
-            self.parent_dir = parent_dir
+            self.source_parent_dir = source_parent_dir
             self.companion_files = args.companion_files
             log.info("Reading: " + self.path)
 
@@ -56,7 +56,7 @@ if not skip_registry:
                 count += 1
             return count
 
-        def folders(self, folder, path, originalFile, iteration_only=False):
+        def folders(self, folder, path, originalFile, errors, iteration_only=False):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is the email folder path of the message, separated by "/"
@@ -68,7 +68,6 @@ if not skip_registry:
                         yield None
                         continue
                     attachments = []
-                    errors = []
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -270,7 +269,7 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, iteration_only=iteration_only)
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, errors, iteration_only=iteration_only)
             else:
                 if not iteration_only:
                     if not folder.number_of_sub_messages:
@@ -308,10 +307,11 @@ if not skip_registry:
                 pst = pypff.file()
                 pst.open(filePath)
                 root = pst.get_root_folder()
+                errors = []
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, folder.name, originalFile, iteration_only=iteration_only)
+                        yield from self.folders(folder, folder.name, originalFile, errors, iteration_only=iteration_only)
                     else:
                         if not iteration_only:
                             # This is an email folder that does not contain any messages.
@@ -326,18 +326,26 @@ if not skip_registry:
                     new_path, errors = format.moveWithDirectoryStructure(
                         self.dry_run,
                         self.keep,
-                        self.parent_dir,
+                        self.source_parent_dir,
                         self.mailbag_dir,
                         self.mailbag_name,
                         self.format_name,
                         filePath,
                         # Does not check path lengths for PSTs
-                        [],
+                        errors,
                     )
 
             if self.companion_files:
                 # Move all files into mailbag directory structure
+                log.debug("Moving compantion files...")
                 for companion_file in companion_files:
                     new_path = format.moveWithDirectoryStructure(
-                        self.dry_run, self.keep, self.parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, companion_file
+                        self.dry_run,
+                        self.keep,
+                        self.source_parent_dir,
+                        self.mailbag_dir,
+                        self.mailbag_name,
+                        self.format_name,
+                        companion_file,
+                        [],
                     )
