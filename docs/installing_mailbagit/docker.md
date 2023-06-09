@@ -22,11 +22,20 @@ To run the image as a Docker container, run:
 docker run -it ualbanyarchives/mailbagit:latest
 ```
 
-You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem.
+You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem with docker-compose or a bind mount.
 
-## Run with access to your filesystem.
+## Run with docker-compose.
 
-You can use a bind mount to give the container and `mailbagit` access to the files you want to process.
+You can use the provided docker compose file, which will give the image access to your current directory.
+
+```
+wget https://archives.albany.edu/mailbag/docker-compose.yml
+docker compose run mailbag
+```
+
+## Run with bind mount.
+
+You can also use a bind mount to give the container and `mailbagit` access to the files you want to process.
 
 Mailbagit will have access to the directory listed in the `source=` argument, which will be accessible in the container using the `/data` path.
 
