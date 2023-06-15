@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM python:3.11.2-slim-buster
 MAINTAINER Gregory Wiedeman gwiedeman@albany.edu
 
 ENV TZ=America/New_York \
