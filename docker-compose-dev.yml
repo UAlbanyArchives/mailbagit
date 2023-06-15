@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+  mailbagit:
+    image: ualbanyarchives/mailbagit:dev
+    volumes:
+      - '../sampleData:/data'
+      - '.:/mailbagit'
+    tty: true
+    stdin_open: true
+    restart: always
+    working_dir: /mailbagit
+    entrypoint: /bin/bash

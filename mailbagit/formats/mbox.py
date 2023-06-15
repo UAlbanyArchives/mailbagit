@@ -59,7 +59,8 @@ class Mbox(EmailAccount):
                     fileRoot = root + os.sep
                     # don't count the newly-created mailbag
                     if not fileRoot.startswith(mailbag_path):
-                        if file.lower().endswith("." + self.format_name):
+                        # Mac Mail export file is "mbox" without an extension, so this checks that
+                        if file.lower().endswith("." + self.format_name) or file.lower().strip() == "mbox":
                             fileList.append(os.path.join(root, file))
                         elif self.companion_files:
                             companion_files.append(os.path.join(root, file))
