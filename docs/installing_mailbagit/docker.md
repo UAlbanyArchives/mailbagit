@@ -35,7 +35,7 @@ docker compose run mailbag
 
 ## Run with bind mount.
 
-You can also use a bind mount to give the container and `mailbagit` access to the files you want to process.
+You can also use a bind mount to give the container and `mailbagit` access to another directory.
 
 Mailbagit will have access to the directory listed in the `source=` argument, which will be accessible in the container using the `/data` path.
 
@@ -79,11 +79,12 @@ Remember to stop the container when you're done!
 
 ## Development Docker image
 
-There is also a development image available:
+There is also a development image available. This contains an consistent environment for mailbagit, but allows you to work directly with local code. Mounts a directory with test email data at `../sampleData` to `/data`.
 
 ```
 docker pull ualbanyarchives/mailbagit:dev
-docker run -it ualbanyarchives/mailbagit:dev
+docker compose -f docker-compose-dev.yml run mailbagit
+pip install -e .[pst]
 ```
 
 ### Other helpful docker commands
