@@ -30,7 +30,7 @@ You can use the provided docker compose file, which will give the image access t
 
 ```
 wget https://archives.albany.edu/mailbag/docker-compose.yml
-docker compose run mailbag
+docker compose run mailbagit
 ```
 
 ## Run with bind mount.
