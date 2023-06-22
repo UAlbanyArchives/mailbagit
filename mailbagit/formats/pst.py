@@ -3,6 +3,7 @@ import email
 from pathlib import Path
 import chardet
 from extract_msg.constants import CODE_PAGES
+from RTFDE.deencapsulate import DeEncapsulator
 from mailbagit.loggerx import get_logger
 from mailbagit.email_account import EmailAccount
 from mailbagit.models import Email, Attachment
@@ -114,6 +115,18 @@ if not skip_registry:
                             try:
                                 if messageObj.html_body:
                                     html_body, html_encoding, errors = format.safely_decode("HTML", messageObj.html_body, encodings, errors)
+                                elif messageObj.rtf_body:
+                                    # Try to pull the HTML out of the RTF body
+                                    # HT to extract_msg for this https://github.com/TeamMsgExtractor/msg-extractor/blob/3cffc2e0d82a0301cfaca2b05c5ef35bfc96a8cb/extract_msg/message_base.py#L958
+                                    rtf_body = messageObj.rtf_body
+                                    # I dunno why this needs a len of 125 ¯\_(ツ)_/¯
+                                    while rtf_body and rtf_body[-1] != 125:
+                                        rtf_body = rtf_body[:-1]
+                                    # decode it before using DeEncapsulator
+                                    rtf_string, html_encoding, errors = format.safely_decode("HTML", rtf_body, encodings, errors)
+                                    deencapsulated_body = DeEncapsulator(rtf_string)
+                                    deencapsulated_body.deencapsulate()
+                                    html_body = deencapsulated_body.html
                             except:
                                 pass
                             if messageObj.plain_text_body:
