@@ -70,7 +70,7 @@ def safely_decode(body_type, binary_text, encodings, errors):
                 text = binary_text.decode(valid_encoding)
                 used = encodings[priority]["name"]
                 success = True
-                continue
+                break
             except Exception as e:
                 errorObj = e
                 failed.append(encodings[priority]["name"])
