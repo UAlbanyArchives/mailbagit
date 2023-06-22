@@ -1,1 +1,1 @@
-utf-8
+windows-1252
