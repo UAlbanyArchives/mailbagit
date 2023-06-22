@@ -146,8 +146,15 @@ class WarcDerivative(Derivative):
                 errors = common.check_path_length(filename, errors)
                 log.debug("Writing WARC to " + str(filename))
 
-                # This is used for the WARC-Target-URI in the WARC derivatives
-                warc_uri = f"http://mailbag/{str(message.Mailbag_Message_ID)}"
+                # Try to use Message_ID for WARC-Target-URI if present, otherwise
+                if message.Message_ID is None or len(message.Message_ID) < 1:
+                    warc_uri = f"http://mailbag/{str(message.Mailbag_Message_ID)}"
+                else:
+                    # strip leading and trailing brackets and add mailto: URI scheme
+                    if message.Message_ID.startswith("<") and message.Message_ID.endswith(">"):
+                        warc_uri = "mailto:" + message.Message_ID[1:-1]
+                    else:
+                        warc_uri = "mailto:" + message.Message_ID
 
                 # Write Headers to UTF-8 JSON
                 try:
