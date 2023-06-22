@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mailbagit",
-    version="0.5.1",
+    version="0.6.0",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
     description="A tool for preserving email with multiple masters.",

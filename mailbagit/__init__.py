@@ -1,7 +1,7 @@
 # __init__.py
 
 # Version of the mailbagit package
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 import os
 from pathlib import Path
