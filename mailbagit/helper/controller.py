@@ -2,6 +2,8 @@ import os, shutil, glob
 import datetime
 from time import time
 import csv
+import random
+import string
 
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
