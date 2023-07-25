@@ -65,7 +65,7 @@ def normalizePath(path):
         out_path (str): Safe path/to/stuff
     """
     if os.name == "nt":
-        specials = ["<", ">", ":", '"', "/", "|", "?", "*"]
+        specials = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
         special_names = [
             "CON",
             "PRN",
