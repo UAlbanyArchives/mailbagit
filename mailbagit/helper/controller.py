@@ -2,6 +2,8 @@ import os, shutil, glob
 import datetime
 from time import time
 import csv
+import random
+import string
 
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
@@ -42,7 +44,7 @@ def progress(current, total, start_time, prefix="", suffix="", decimals=1, lengt
     status = f"{percent}% [Processed {current} of {total} messages] {remaining_time}s remaining"
 
     # Originally printed timestamp and [Progress] first, which was eliminated for screen readers
-    #print(f"\r{dt} {message_type} {status}", end=print_End)
+    # print(f"\r{dt} {message_type} {status}", end=print_End)
     print(f"\r{status}", end=print_End)
 
 
@@ -98,15 +100,29 @@ def writeAttachmentsToDisk(dry_run, attachments_dir, message):
             # The format parsers raise an error about this
             writtenName = attachment.WrittenName
             attachment_row = ["", writtenName, attachment.MimeType, attachment.Content_ID]
-        attachment_data.append(attachment_row)
 
         log.debug("Saving Attachment:" + str(attachment.Name))
         log.debug("Type:" + str(attachment.MimeType))
         if not dry_run:
             attachment_path = os.path.join(message_attachments_dir, writtenName)
-            f = open(attachment_path, "wb")
-            f.write(attachment.File)
-            f.close()
+            try:
+                f = open(attachment_path, "wb")
+                f.write(attachment.File)
+                f.close()
+            except Exception as e:
+                random_name = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+                desc = (
+                    f"Failed to write attachment {attachment.Name} even as normalized name {writtenName}. Instead writing as {random_name}."
+                )
+                errors = common.handle_error(errors, None, desc, "error")
+                attachment_row = [attachment.Name, random_name, attachment.MimeType, attachment.Content_ID]
+                attachment_path = os.path.join(message_attachments_dir, random_name)
+                f = open(attachment_path, "wb")
+                f.write(attachment.File)
+                f.close()
+
+        # add line to CSV for attachment
+        attachment_data.append(attachment_row)
 
     # Write attachments.csv
     if not dry_run:
