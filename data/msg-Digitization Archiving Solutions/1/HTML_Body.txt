@@ -334,7 +334,7 @@ adds maximum image quality, enhanced productivity, and increased efficiency that
 </p>
 <p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
 <![if !supportLists]>
-<span style="mso-list:Ignore">•
+<span style="mso-list:Ignore"> •
 <span style="font:7.0pt &quot;Times New Roman&quot;"> 
 &nbsp; 
 &nbsp; 
@@ -366,7 +366,7 @@ adds maximum image quality, enhanced productivity, and increased efficiency that
 </p>
 <p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
 <![if !supportLists]>
-<span style="mso-list:Ignore">•
+<span style="mso-list:Ignore"> •
 <span style="font:7.0pt &quot;Times New Roman&quot;"> 
 &nbsp; 
 &nbsp; 
@@ -398,7 +398,7 @@ adds maximum image quality, enhanced productivity, and increased efficiency that
 </p>
 <p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
 <![if !supportLists]>
-<span style="mso-list:Ignore">•
+<span style="mso-list:Ignore"> •
 <span style="font:7.0pt &quot;Times New Roman&quot;"> 
 &nbsp; 
 &nbsp; 
@@ -430,7 +430,7 @@ adds maximum image quality, enhanced productivity, and increased efficiency that
 </p>
 <p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
 <![if !supportLists]>
-<span style="mso-list:Ignore">•
+<span style="mso-list:Ignore"> •
 <span style="font:7.0pt &quot;Times New Roman&quot;"> 
 &nbsp; 
 &nbsp; 
