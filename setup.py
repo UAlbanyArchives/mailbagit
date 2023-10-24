@@ -6,10 +6,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mailbagit",
-    version="0.6.2",
+    version="0.6.3",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
-    description="A tool for preserving email with multiple masters.",
+    description="A tool for preserving email in multiple preservation formats.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/UAlbanyArchives/mailbag",
