@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mailbagit",
-    version="0.6.1",
+    version="0.6.2",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
     description="A tool for preserving email with multiple masters.",
@@ -25,7 +25,7 @@ setuptools.setup(
         "beautifulsoup4>=4.11.1,<5",
         "black>=22.1.0,<23",
         "jsonmodels>=2.2,<=2.5.0",
-        "extract_msg>=0.34.3,<1",
+        "extract_msg>=0.34.3,<0.42.0",
         "structlog>=21.1.0,<22",
         "packaging>=21.0,<21.3",
         "python-json-logger>=2.0.2,<3",
