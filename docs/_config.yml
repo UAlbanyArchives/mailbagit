@@ -35,7 +35,7 @@ aux_links:
   "Mailbag on Github":
     - "https://github.com/UAlbanyArchives/mailbagit"
 
-include: docker-compose.yml
+#include: docker-compose.yml
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
