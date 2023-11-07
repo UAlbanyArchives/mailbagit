@@ -10,4 +10,4 @@ services:
     stdin_open: true
     restart: always
     working_dir: /mailbagit
-    entrypoint: /bin/bash
+    command: bash -c "pip install --upgrade pip && pip install -e . && cd /data && bash"
