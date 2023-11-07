@@ -13,7 +13,16 @@ pip install mailbagit
 * To install PST dependancies: `pip install mailbagit[pst]`
 * To install `mailbagit-gui`: `pip install mailbagit[gui]`
 
+### Docker setup
+
 You can also run `mailbagit` using a [Docker image](https://archives.albany.edu/mailbag/docker).
+
+```
+docker pull ualbanyarchives/mailbagit
+wget https://raw.githubusercontent.com/UAlbanyArchives/mailbagit/main/docker-compose.yml
+docker compose run mailbagit
+mailbagit -v
+```
 
 ## Quick start
 
@@ -116,13 +125,19 @@ git switch develop
 pip install -e .
 ```
 
-#### Development with docker
+### Development with docker
 
-Build and run image
+* This runs the dev docker image with the code installed in editable mode. You can then make code changes and run them directly with `mailbagit`.
+
+* Assumes you have a directory with email data in ./sampleData. You can change this directory name in [line 7 of docker-compose-dev.yml](https://github.com/UAlbanyArchives/mailbagit/blob/main/docker-compose-dev.yml#L7).
 
 ```
 docker pull ualbanyarchives/mailbagit:dev
-docker run -it ualbanyarchives/mailbagit:dev
+git clone git@github.com:UAlbanyArchives/mailbagit.git
+cd mailbagit
+git switch develop
+docker-compose -f docker-compose-dev.yml run mailbagit
+mailbagit -v
 ```
 
 ## License

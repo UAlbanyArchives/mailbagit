@@ -19,7 +19,7 @@ docker pull ualbanyarchives/mailbagit
 To run the image as a Docker container, run:
 
 ```
-docker run -it ualbanyarchives/mailbagit:latest
+docker run -it ualbanyarchives/mailbagit:latest bash
 ```
 
 You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem with docker-compose or a bind mount.
@@ -29,20 +29,21 @@ You should be able to run `mailbagit -h`, but you won't be able to do much witho
 You can use the provided docker compose file, which will give the image access to your current directory.
 
 ```
-wget https://archives.albany.edu/mailbag/docker-compose.yml
+docker pull ualbanyarchives/mailbagit
+wget https://raw.githubusercontent.com/UAlbanyArchives/mailbagit/main/docker-compose.yml
 docker compose run mailbagit
 ```
 
 ## Run with bind mount.
 
-You can also use a bind mount to give the container and `mailbagit` access to another directory.
+You can also use a bind mount to give the container and `mailbagit` access to another directory. docker-compose does this automatically.
 
 Mailbagit will have access to the directory listed in the `source=` argument, which will be accessible in the container using the `/data` path.
 
 Examples:
 ```
-docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbagit:latest
-docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbagit:latest
+docker run -it --mount type=bind,source="path/to/data",target=/data ualbanyarchives/mailbagit:latest bash
+docker run -it --mount type=bind,source="C:\Users\Me\path\to\data",target=/data ualbanyarchives/mailbagit:latest bash
 ```
 
 If you are using Windows, the `source=` argument should be given a Windows path with "`\`", but the container uses Unix-style paths, so it will be accessible to `mailbagit` using `/data` using "`/`".
@@ -79,12 +80,15 @@ Remember to stop the container when you're done!
 
 ## Development Docker image
 
-There is also a development image available. This contains an consistent environment for mailbagit, but allows you to work directly with local code. Mounts a directory with test email data at `../sampleData` to `/data`.
+There is also a development image available. This contains an consistent environment for mailbagit, but allows you to work directly with local code. Mounts a directory with test email data at `./sampleData` to `/data`.
 
 ```
 docker pull ualbanyarchives/mailbagit:dev
-docker compose -f docker-compose-dev.yml run mailbagit
-pip install -e .[pst]
+git clone git@github.com:UAlbanyArchives/mailbagit.git
+cd mailbagit
+git switch develop
+docker-compose -f docker-compose-dev.yml run mailbagit
+mailbagit -v
 ```
 
 ### Other helpful docker commands
