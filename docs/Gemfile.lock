@@ -31,6 +31,8 @@ GEM
       terminal-table (~> 2.0)
     jekyll-feed (0.16.0)
       jekyll (>= 3.7, < 5.0)
+    jekyll-include-cache (0.2.1)
+      jekyll (>= 3.7, < 5.0)
     jekyll-remote-theme (0.4.3)
       addressable (~> 2.0)
       jekyll (>= 3.5, < 5.0)
@@ -77,6 +79,7 @@ DEPENDENCIES
   addressable (>= 2.8.0)
   jekyll (~> 4.2.2)
   jekyll-feed (~> 0.6)
+  jekyll-include-cache
   jekyll-remote-theme
   jekyll-sass-converter
   jekyll-seo-tag
