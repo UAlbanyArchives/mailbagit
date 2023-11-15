@@ -1,747 +1,362 @@
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40">
-<head>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40"><head>
+
 <meta name="Generator" content="Microsoft Word 15 (filtered medium)">
 <!--[if !mso]><style>v\:* {behavior:url(#default#VML);}
- o\:* {behavior:url(#default#VML);}
- w\:* {behavior:url(#default#VML);}
- .shape {behavior:url(#default#VML);}
- </style><![endif]-->
-<style>
-<!--
- /* Font Definitions */
- @font-face
-{font-family:Wingdings;
-panose-1:5 0 0 0 0 0 0 0 0 0;}
- @font-face
-{font-family:"Cambria Math";
-panose-1:2 4 5 3 5 4 6 3 2 4;}
- @font-face
-{font-family:Calibri;
-panose-1:2 15 5 2 2 2 4 3 2 4;}
- @font-face
-{font-family:"Avenir Next Condensed Medium";}
- @font-face
-{font-family:Palatino;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-{margin:0in;
-font-size:11.0pt;
-font-family:"Calibri",sans-serif;}
- a:link, span.MsoHyperlink
-{mso-style-priority:99;
-color:#0563C1;
-text-decoration:underline;}
- p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-{mso-style-priority:34;
-margin-top:0in;
-margin-right:0in;
-margin-bottom:0in;
-margin-left:.5in;
-font-size:11.0pt;
-font-family:"Calibri",sans-serif;}
- span.EmailStyle17
-{mso-style-type:personal-compose;
-font-family:"Calibri",sans-serif;
-color:windowtext;}
- .MsoChpDefault
-{mso-style-type:export-only;
-font-family:"Calibri",sans-serif;}
- @page WordSection1
-{size:8.5in 11.0in;
-margin:1.0in 1.0in 1.0in 1.0in;}
- div.WordSection1
-{page:WordSection1;}
- /* List Definitions */
- @list l0
-{mso-list-id:512037771;
-mso-list-type:hybrid;
-mso-list-template-ids:-244252812 378306436 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
- @list l0:level1
-{mso-level-start-at:0;
-mso-level-number-format:bullet;
-mso-level-text:\2022;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:1.0in;
-text-indent:-.5in;
-font-family:"Calibri",sans-serif;
-mso-fareast-font-family:Calibri;}
- @list l0:level2
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:1.25in;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l0:level3
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:1.75in;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l0:level4
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:2.25in;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l0:level5
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:2.75in;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l0:level6
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:3.25in;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l0:level7
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:3.75in;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l0:level8
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:4.25in;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l0:level9
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:4.75in;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l1
-{mso-list-id:1939750247;
-mso-list-type:hybrid;
-mso-list-template-ids:2007800688 378306436 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
- @list l1:level1
-{mso-level-start-at:0;
-mso-level-number-format:bullet;
-mso-level-text:\2022;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-margin-left:.75in;
-text-indent:-.5in;
-font-family:"Calibri",sans-serif;
-mso-fareast-font-family:Calibri;}
- @list l1:level2
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l1:level3
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l1:level4
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l1:level5
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l1:level6
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l1:level7
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l1:level8
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l1:level9
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l2
-{mso-list-id:2138253079;
-mso-list-type:hybrid;
-mso-list-template-ids:-969738888 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
- @list l2:level1
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l2:level2
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l2:level3
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l2:level4
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l2:level5
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l2:level6
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- @list l2:level7
-{mso-level-number-format:bullet;
-mso-level-text:\F0B7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Symbol;}
- @list l2:level8
-{mso-level-number-format:bullet;
-mso-level-text:o;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:"Courier New";}
- @list l2:level9
-{mso-level-number-format:bullet;
-mso-level-text:\F0A7;
-mso-level-tab-stop:none;
-mso-level-number-position:left;
-text-indent:-.25in;
-font-family:Wingdings;}
- ol
-{margin-bottom:0in;}
- ul
-{margin-bottom:0in;}
- -->
-</style>
-<!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="1026" />
- </xml><![endif]
--->
-<!--[if gte mso 9]><xml>
- <o:shapelayout v:ext="edit">
- <o:idmap v:ext="edit" data="1" />
- </o:shapelayout></xml><![endif]-->
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Avenir Next Condensed Medium";}
+@font-face
+	{font-family:Palatino;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-priority:34;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri",sans-serif;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:512037771;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-244252812 378306436 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:\2022;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.0in;
+	text-indent:-.5in;
+	font-family:"Calibri",sans-serif;
+	mso-fareast-font-family:Calibri;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.25in;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.75in;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l0:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.75in;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l0:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.25in;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l0:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.75in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l0:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:4.25in;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l0:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:4.75in;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l1
+	{mso-list-id:1939750247;
+	mso-list-type:hybrid;
+	mso-list-template-ids:2007800688 378306436 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l1:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:\2022;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:-.5in;
+	font-family:"Calibri",sans-serif;
+	mso-fareast-font-family:Calibri;}
+@list l1:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l1:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l1:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l1:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l1:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l1:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l1:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l1:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l2
+	{mso-list-id:2138253079;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-969738888 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l2:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l2:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l2:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l2:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+@list l2:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l2:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:"Courier New";}
+@list l2:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Wingdings;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext="edit" spidmax="1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext="edit">
+<o:idmap v:ext="edit" data="1" />
+</o:shapelayout></xml><![endif]-->
 </head>
-<body lang="EN-US" link="#0563C1" vlink="#954F72" style="word-wrap:break-word"> 
-<div class="WordSection1"> 
-<p class="MsoNormal"> Good Afternoon!
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-</o:p>
-</p>
-<p class="MsoNormal"> My name is Matthew McCabe and I’d like to introduce myself as the VP, Sales 
-&amp;  Marketing for
-<a href="https://thecrowleycompany.com/"> The Crowley Company 
-</a> (Crowley).
-&nbsp;  If you’re not familiar with Crowley, we provide a full range of digitization solutions ranging from
-<a href="https://thecrowleycompany.com/digitization-products/"> front-end capture 
-</a>,
-<a href="https://thecrowleycompany.com/laserfiche-ecm/"> ECM integration 
-</a>, as well as “best in class”
-<a href="https://thecrowleycompany.com/digitization-products/scanner-type/cultural-heritage-scanners/"> 
-cultural heritage scanners 
-</a> (offering up to 
-<a href="https://thecrowleycompany.com/digitization-services/fadgi-digitization-services/"> 
-FADGI 
-</a> 4-star quality).
-&nbsp;  
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-&nbsp; 
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> With 
-<a href="https://www.linkedin.com/in/mccabematthew/"> more than two decades 
-</a> in the records management industry, I’m excited about the opportunity to offer you brand name production-level scan systems with built-in software that
-adds maximum image quality, enhanced productivity, and increased efficiency that are all user friendly and packed with functionality.
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-&nbsp; 
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> Crowley’s capture offerings include:
-<o:p>
-</o:p> 
-</p>
-<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
-<![if !supportLists]>
-<span style="mso-list:Ignore"> •
-<span style="font:7.0pt &quot;Times New Roman&quot;"> 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-</span> 
-</span> 
-<![endif]>
-<a href="https://thecrowleycompany.com/digitization-products/scanner-type/document-scanners/"> document scanners 
-</a>
-<o:p>
-</o:p> 
-</p>
-<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
-<![if !supportLists]>
-<span style="mso-list:Ignore"> •
-<span style="font:7.0pt &quot;Times New Roman&quot;"> 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-</span> 
-</span> 
-<![endif]>
-<a href="https://thecrowleycompany.com/digitization-products/scanner-type/microfilm/"> microform scanners 
-</a> (microfilm, microfiche, aperture card)
-<o:p>
-</o:p> 
-</p>
-<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
-<![if !supportLists]>
-<span style="mso-list:Ignore"> •
-<span style="font:7.0pt &quot;Times New Roman&quot;"> 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-</span> 
-</span> 
-<![endif]>
-<a href="https://thecrowleycompany.com/digitization-products/scanner-type/large-format-book-scanners/"> book and large format scanners 
-</a>
-<o:p>
-</o:p> 
-</p>
-<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3"> 
-<![if !supportLists]>
-<span style="mso-list:Ignore"> •
-<span style="font:7.0pt &quot;Times New Roman&quot;"> 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-</span> 
-</span> 
-<![endif]>
-<a href="https://thecrowleycompany.com/scanner-products/product-types/archive-writers/"> archive writers 
-</a>
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-</o:p>
-</p>
-<p class="MsoNormal"> We understand that you may be in the planning and preparation phase for FY ’22 and beyond and are thinking about your future digitization projects.
-&nbsp;  The next time you consider purchasing scanning equipment, we’d appreciate your consideration
-and encourage you to review Crowley’s Digitization Solutions.
-&nbsp;  That way should you need to ramp up production, replace an aging unit, or want to see the latest in digitization technology, you will be able to make an informed decision.
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-</o:p>
-</p>
-<p class="MsoNormal"> If you would like any additional information or would like to set up a time to speak more in detail about your collection and evolving requirements, then please don’t hesitate to ask.
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-<p class="MsoNormal"> Sincerely,
-<o:p>
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<a name="_Hlk26188238"> 
-<img border="0" width="174" height="76" style="width:1.8125in;height:.7916in" id="Picture_x0020_1" src="cid:image001.png@01D81905.3EA3C240">
-<o:p>
-</o:p> 
-</a> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-<b> 
-<o:p>
-&nbsp; 
-</o:p>
-</b> 
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> Matthew J. McCabe
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> VP, Sales 
-&amp;  Marketing
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-<b> The Crowley Company
-<o:p>
-</o:p>
-</b> 
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 5111 Pegasus Court, Suite M
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> Frederick, MD
-&nbsp;  21704
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 240-215-0224 ext. 210
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 240-447-6642 mobile
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 240-215-0234 fax
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-</span> 
-<a href="mailto:mattm@thecrowleycompany.com"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-<span style="color:blue"> mattm@thecrowleycompany.com
-</span> 
-</span> 
-<span style="mso-bookmark:_Hlk26188238"> 
-</span> 
-</a>
-<span style="mso-bookmark:_Hlk26188238"> 
-<u> 
-<o:p>
-</o:p>
-</u> 
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-</span> 
-<a href="http://www.thecrowleycompany.com/" title="http://www.thecrowleycompany.com/
- blocked::http://www.thecrowleycompany.com/"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-<span style="color:blue"> www.thecrowleycompany.com
-</span> 
-</span> 
-<span style="mso-bookmark:_Hlk26188238"> 
-</span> 
-</a>
-<span style="mso-bookmark:_Hlk26188238"> 
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="mso-bookmark:_Hlk26188238"> 
-<b> 
-<o:p>
-&nbsp; 
-</o:p>
-</b> 
-</span> 
-</p>
-<span style="mso-bookmark:_Hlk26188238"> 
-</span> 
-<p class="MsoNormal">
-<b> FOLLOW US ON 
-</b> 
-<a href="https://www.linkedin.com/company/1798110/admin/"> 
-<b> 
-<span style="color:blue"> LINKEDIN
-</span> 
-</b> 
-</a>
-<b> 
-<o:p>
-</o:p>
-</b> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-<table class="MsoNormalTable" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse"> 
+<body lang="EN-US" link="#0563C1" vlink="#954F72" style="word-wrap:break-word">
+<div class="WordSection1">
+<p class="MsoNormal">Good Afternoon!<o:p></o:p></p>
+<p class="MsoNormal"><o:p></o:p></p>
+<p class="MsoNormal">My name is Matthew McCabe and I’d like to introduce myself as the VP, Sales &amp; Marketing for
+<a href="https://thecrowleycompany.com/">The Crowley Company</a> (Crowley).&nbsp; If you’re not familiar with Crowley, we provide a full range of digitization solutions ranging from
+<a href="https://thecrowleycompany.com/digitization-products/">front-end capture</a>,
+<a href="https://thecrowleycompany.com/laserfiche-ecm/">ECM integration</a>, as well as “best in class”
+<a href="https://thecrowleycompany.com/digitization-products/scanner-type/cultural-heritage-scanners/">
+cultural heritage scanners</a> (offering up to <a href="https://thecrowleycompany.com/digitization-services/fadgi-digitization-services/">
+FADGI</a> 4-star quality).&nbsp; <o:p></o:p></p>
+<p class="MsoNormal">&nbsp;<o:p></o:p></p>
+<p class="MsoNormal">With <a href="https://www.linkedin.com/in/mccabematthew/">more than two decades</a> in the records management industry, I’m excited about the opportunity to offer you brand name production-level scan systems with built-in software that
+ adds maximum image quality, enhanced productivity, and increased efficiency that are all user friendly and packed with functionality.
+<o:p></o:p></p>
+<p class="MsoNormal">&nbsp;<o:p></o:p></p>
+<p class="MsoNormal">Crowley’s capture offerings include:<o:p></o:p></p>
+<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3">
+<![if !supportLists]><span style="mso-list:Ignore">•<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]><a href="https://thecrowleycompany.com/digitization-products/scanner-type/document-scanners/">document scanners</a><o:p></o:p></p>
+<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3">
+<![if !supportLists]><span style="mso-list:Ignore">•<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]><a href="https://thecrowleycompany.com/digitization-products/scanner-type/microfilm/">microform scanners</a> (microfilm, microfiche, aperture card)<o:p></o:p></p>
+<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3">
+<![if !supportLists]><span style="mso-list:Ignore">•<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]><a href="https://thecrowleycompany.com/digitization-products/scanner-type/large-format-book-scanners/">book and large format scanners</a><o:p></o:p></p>
+<p class="MsoListParagraph" style="margin-left:1.0in;text-indent:-.5in;mso-list:l0 level1 lfo3">
+<![if !supportLists]><span style="mso-list:Ignore">•<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]><a href="https://thecrowleycompany.com/scanner-products/product-types/archive-writers/">archive writers</a><o:p></o:p></p>
+<p class="MsoNormal"><o:p></o:p></p>
+<p class="MsoNormal">We understand that you may be in the planning and preparation phase for FY ’22 and beyond and are thinking about your future digitization projects.&nbsp; The next time you consider purchasing scanning equipment, we’d appreciate your consideration
+ and encourage you to review Crowley’s Digitization Solutions.&nbsp; That way should you need to ramp up production, replace an aging unit, or want to see the latest in digitization technology, you will be able to make an informed decision.<o:p></o:p></p>
+<p class="MsoNormal"><o:p></o:p></p>
+<p class="MsoNormal">If you would like any additional information or would like to set up a time to speak more in detail about your collection and evolving requirements, then please don’t hesitate to ask.<o:p></o:p></p>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class="MsoNormal">Sincerely,<o:p></o:p></p>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class="MsoNormal"><a name="_Hlk26188238"><img border="0" width="174" height="76" style="width:1.8125in;height:.7916in" id="Picture_x0020_1" src="cid:image001.png@01D81905.3EA3C240"><o:p></o:p></a></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238"><b><o:p>&nbsp;</o:p></b></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">Matthew J. McCabe<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">VP, Sales &amp; Marketing<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238"><b>The Crowley Company<o:p></o:p></b></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">5111 Pegasus Court, Suite M<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">Frederick, MD&nbsp; 21704<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">240-215-0224 ext. 210<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">240-447-6642 mobile<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238">240-215-0234 fax<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238"></span><a href="mailto:mattm@thecrowleycompany.com"><span style="mso-bookmark:_Hlk26188238"><span style="color:blue">mattm@thecrowleycompany.com</span></span><span style="mso-bookmark:_Hlk26188238"></span></a><span style="mso-bookmark:_Hlk26188238"><u><o:p></o:p></u></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238"></span><a href="http://www.thecrowleycompany.com/" title="http://www.thecrowleycompany.com/
+blocked::http://www.thecrowleycompany.com/"><span style="mso-bookmark:_Hlk26188238"><span style="color:blue">www.thecrowleycompany.com</span></span><span style="mso-bookmark:_Hlk26188238"></span></a><span style="mso-bookmark:_Hlk26188238"><o:p></o:p></span></p>
+<p class="MsoNormal"><span style="mso-bookmark:_Hlk26188238"><b><o:p>&nbsp;</o:p></b></span></p>
+<span style="mso-bookmark:_Hlk26188238"></span>
+<p class="MsoNormal"><b>FOLLOW US ON </b><a href="https://www.linkedin.com/company/1798110/admin/"><b><span style="color:blue">LINKEDIN</span></b></a><b><o:p></o:p></b></p>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+<table class="MsoNormalTable" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse">
 <tbody>
-<tr> 
-<td width="623" valign="top" style="width:467.5pt;border:double #92D050 4.5pt;padding:0in 5.4pt 0in 5.4pt"> 
-<p class="MsoNormal">
-<b> 
-<span style="font-size:6.0pt;font-family:Palatino;color:#0070C0"> 
-<o:p>
-&nbsp; 
-</o:p>
-</span> 
-</b> 
-</p>
-<p class="MsoNormal"> 
-<b> 
-<span style="font-size:18.0pt;font-family:Palatino;color:#7030A0"> Hardware Financing Option
-</span> 
-</b> 
-<b> 
-<span style="font-size:16.0pt;font-family:Palatino;color:#7030A0"> $
-</span> 
-</b> 
-<b> 
-<span style="font-size:18.0pt;font-family:Palatino;color:#7030A0"> 
-Available
-&nbsp;  
-</span> 
-</b> 
-<b> 
-<span style="font-size:14.0pt;font-family:Palatino;color:#7030A0"> 
-<o:p>
-</o:p>
-</span> 
-</b> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> 
-&nbsp;  Click
-<span style="color:#7030A0"> 
-</span> 
-</span> 
-<a href="http://vr2.verticalresponse.com/emails/7696581455241?sk=aqZsB2JgHjBKUIrBWAPgF5PBkCrgQIaae6veCxkR1N6g=/aHR0cDovL3ZyMi52ZXJ0aWNhbHJlc3BvbnNlLmNvbS9lbWFpbHMvNzY5NjU4MTQ1NTI0MQ==/nUwAQdNN4pmx-o0BM8KtAg=="> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0"> here
-</span> 
-</a>
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> 
-to discover end-of-year tax incentives, financing purchase options or receive a leasing quote on Crowley
-</span> 
-<a href="https://thecrowleycompany.com/digitization-products/"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0"> digitization products
-</span> 
-</a>
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> .
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> 
-&nbsp;  
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> 
-&nbsp; 
-&nbsp; Call
-<span style="color:#7030A0"> (240) 215-0224 
-</span> or 
-</span> 
-<a href="https://thecrowleycompany.com/get-a-quote/film-and-scanning-equipment/"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0"> click
-</span> 
-</a>
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#0070C0"> 
-</span> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> to connect with your Crowley representative for additional information
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<span style="font-family:&quot;Avenir Next Condensed Medium&quot;"> 
-&nbsp; 
-&nbsp; and a scanner quote.
-<o:p>
-</o:p>
-</span> 
-</p>
-<p class="MsoNormal"> 
-<b> 
-<o:p>
-&nbsp; 
-</o:p>
-</b> 
-</p>
+<tr>
+<td width="623" valign="top" style="width:467.5pt;border:double #92D050 4.5pt;padding:0in 5.4pt 0in 5.4pt">
+<p class="MsoNormal"><b><span style="font-size:6.0pt;font-family:Palatino;color:#0070C0"><o:p>&nbsp;</o:p></span></b></p>
+<p class="MsoNormal"><b><span style="font-size:18.0pt;font-family:Palatino;color:#7030A0">Hardware Financing Option</span></b><b><span style="font-size:16.0pt;font-family:Palatino;color:#7030A0">$</span></b><b><span style="font-size:18.0pt;font-family:Palatino;color:#7030A0">
+ Available&nbsp; </span></b><b><span style="font-size:14.0pt;font-family:Palatino;color:#7030A0"><o:p></o:p></span></b></p>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class="MsoNormal"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">&nbsp; Click<span style="color:#7030A0">
+</span></span><a href="http://vr2.verticalresponse.com/emails/7696581455241?sk=aqZsB2JgHjBKUIrBWAPgF5PBkCrgQIaae6veCxkR1N6g=/aHR0cDovL3ZyMi52ZXJ0aWNhbHJlc3BvbnNlLmNvbS9lbWFpbHMvNzY5NjU4MTQ1NTI0MQ==/nUwAQdNN4pmx-o0BM8KtAg=="><span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0">here</span></a><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">
+ to discover end-of-year tax incentives, financing purchase options or receive a leasing quote on Crowley
+</span><a href="https://thecrowleycompany.com/digitization-products/"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0">digitization products</span></a><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">.<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">&nbsp; <o:p>
+</o:p></span></p>
+<p class="MsoNormal"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">&nbsp;&nbsp;Call
+<span style="color:#7030A0">(240) 215-0224 </span>or </span><a href="https://thecrowleycompany.com/get-a-quote/film-and-scanning-equipment/"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#7030A0">click</span></a><span style="font-family:&quot;Avenir Next Condensed Medium&quot;;color:#0070C0">
+</span><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">to connect with your Crowley representative for additional information
+<o:p></o:p></span></p>
+<p class="MsoNormal"><span style="font-family:&quot;Avenir Next Condensed Medium&quot;">&nbsp;&nbsp;and a scanner quote.
+<o:p></o:p></span></p>
+<p class="MsoNormal"><b><o:p>&nbsp;</o:p></b></p>
 </td>
 </tr>
 </tbody>
-</table> 
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-<p class="MsoNormal"> 
-<o:p>
-&nbsp; 
-</o:p> 
-</p>
-</div> 
+</table>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
 </body>
 </html>

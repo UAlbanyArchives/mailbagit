@@ -160,7 +160,7 @@ class MSG(EmailAccount):
 
                         contentID = None
                         try:
-                            contentID = mailAttachment.contendId
+                            contentID = mailAttachment.contentId
                         except Exception as e:
                             desc = "Error reading ContentID, creating an ID instead"
                             errors = common.handle_error(errors, e, desc, "warn")

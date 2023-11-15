@@ -105,12 +105,12 @@ if not skip_registry:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings[1] = {"name": CODE_PAGES[value], "label": "PidTagInternetCodepage"}
+                                            encodings[1] = {"name": _CODE_PAGES[value], "label": "PidTagInternetCodepage"}
                                     if entry.entry_type == LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE:
                                         if entry.data:
                                             value = entry.get_data_as_integer()
                                             # Use the extract_msg code page in constants.py
-                                            encodings[2] = {"name": CODE_PAGES[value], "label": "PidTagMessageCodepage"}
+                                            encodings[2] = {"name": _CODE_PAGES[value], "label": "PidTagMessageCodepage"}
                             # messageObj.html_body sometimes fails. This seems to often be the case for email in "Deleted Items"
                             try:
                                 if messageObj.html_body:
