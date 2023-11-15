@@ -25,7 +25,7 @@ setuptools.setup(
         "beautifulsoup4>=4.11.1,<5",
         "black>=22.1.0,<23",
         "jsonmodels>=2.2,<=2.5.0",
-        "extract_msg>=0.34.3,<0.42.0",
+        "extract_msg>=0.42.0",
         "structlog>=21.1.0,<22",
         "packaging>=21.0,<21.3",
         "python-json-logger>=2.0.2,<3",
@@ -45,5 +45,5 @@ setuptools.setup(
         "pst": ["libpff-python==20211114"],
         "dev": ["pyinstaller==5.0.1,<6"],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )

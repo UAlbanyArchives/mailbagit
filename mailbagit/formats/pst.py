@@ -2,7 +2,7 @@ import os
 import email
 from pathlib import Path
 import chardet
-from extract_msg.constants import CODE_PAGES
+from extract_msg.encoding import _CODE_PAGES
 from RTFDE.deencapsulate import DeEncapsulator
 from mailbagit.loggerx import get_logger
 from mailbagit.email_account import EmailAccount

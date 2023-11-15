@@ -9,7 +9,7 @@ from mailbagit.models import Email, Attachment
 import mailbagit.helper.format as format
 import mailbagit.helper.common as common
 import mailbagit.globals as globals
-from extract_msg import attachment
+import chardet
 import uuid
 
 log = get_logger()
@@ -91,10 +91,15 @@ class MSG(EmailAccount):
                 text_body = None
                 html_encoding = None
                 text_encoding = None
+                # encoding check priorities
+                encodings = {1: {"name": "cp1252", "label": "Windows 1252"}, 2: {"name": "utf-8", "label": "utf-8"}}
                 try:
-                    if mail.htmlBody:
-                        html_body = mail.htmlBody.decode("utf-8").strip()
-                        html_encoding = "utf-8"
+                    try:
+                        if mail.htmlBody:
+                            html_body, html_encoding, errors = format.safely_decode("HTML", mail.htmlBody, encodings, errors)
+                    except Exception as e:
+                        desc = "Error parsing HTML body"
+                        errors = common.handle_error(errors, e, desc)
                     if mail.body:
                         text_body = mail.body
                         text_encoding = mail.stringEncoding
@@ -181,7 +186,7 @@ class MSG(EmailAccount):
                     Original_File=originalFile,
                     Message_Path=messagePath,
                     Derivatives_Path=derivativesPath,
-                    Date=mail.date,
+                    Date=str(mail.date),
                     From=mail.sender,
                     To=mail.to,
                     Cc=mail.cc,
