@@ -78,9 +78,12 @@ e.g. `-d eml pdf warc`
 > Compresses the mailbag as a ZIP, TAR, or TAR.GZ
 > e.g. `-c zip` or `-c tar.gz`
 
-* **-f, --companion_files**
+* **-f, --companion-files**
 > Allows for companion metadata files to be packaged alongside email export files.
 > When this option is used, `mailbagit` will recursively include all the files in the directory provided into a mailbag.
+
+* **-l, --external-links**
+> Will crawl and add external `<a href="">` links to WARC derivatives as response records
 
 ### Bagit-python arguments
 
