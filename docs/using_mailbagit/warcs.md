@@ -8,7 +8,7 @@ nav_order: 9
 
 # WARC Derivatives
 
-`mailbagit` can create WARC derivatives for email messages. This is a bit of an experimental feature in that using web archives for email isn't common and there is no concensus yet on how these WARC should be strutured. Still, since WARCs do a good job of both preserving how messages are displayed as well as maintaining email messages as data, they can be really useful for email preservation. Thus, we're including this feature as an example for users to try out and experiment with. If you have thoughts or feedback on this, please [submit an issue](https://github.com/UAlbanyArchives/mailbagit/issues/new/choose)!
+`mailbagit` can create WARC derivatives for email messages. This is a bit of an experimental feature in that using web archives for email isn't common and there is no concensus yet on how these WARC should be structured. Still, since WARCs do a good job of both preserving how messages are displayed as well as maintaining email messages as data, they can be really useful for email preservation. Thus, we're including this feature as an example for users to try out and experiment with. If you have thoughts or feedback on this, please [submit an issue](https://github.com/UAlbanyArchives/mailbagit/issues/new/choose)!
 
 WARCs can be more challenging to use that typical files, as you need software to "replay" them. [ReplayWeb.Page](https://replayweb.page/) is an easy method, and you can checkout the [Web Archiving Awesome List](https://github.com/iipc/awesome-web-archiving#replay) for more. The WARC files created by `mailbagit` can also be small enough to view in a text editor. The files are compressed with gzip, so you just have to extract them to plain text.
 
