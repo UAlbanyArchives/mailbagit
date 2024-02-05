@@ -67,7 +67,7 @@ def safely_decode(body_type, binary_text, encodings, errors):
             try:
                 valid_encoding = codecs.lookup(encodings[priority]["name"]).name.lower()
                 valid.append(valid_encoding)
-                text = binary_text.decode(valid_encoding)
+                text = binary_text.decode(valid_encoding, errors="strict")
                 used = encodings[priority]["name"]
                 success = True
                 break
@@ -78,7 +78,7 @@ def safely_decode(body_type, binary_text, encodings, errors):
     if success == False:
         try:
             detected = chardet.detect(binary_text)["encoding"]
-            text = binary_text.decode(detected)
+            text = binary_text.decode(detected, errors="strict")
             used = detected
             if len(valid) < 1:
                 # desc = "No valid listed encodings, but successfully decoded " + body_type + " body with detected encoding " + detected

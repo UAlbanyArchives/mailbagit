@@ -92,7 +92,21 @@ class MSG(EmailAccount):
                 html_encoding = None
                 text_encoding = None
                 # encoding check priorities
-                encodings = {1: {"name": "cp1252", "label": "Windows 1252"}, 2: {"name": "utf-8", "label": "utf-8"}}
+                encodings = {}
+                """
+                The listed values are apparently unreliable for HTML bodies.
+                Thus with the encodings dict empty, chardet will be used, which is apparently the least bad option.
+                try:
+                    LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE = int("0x3fde", base=16)
+                    LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE = int("0x3ffd", base=16)
+                    message_body_codepage = extract_msg.encoding._CODE_PAGES[mail.getPropertyVal(LIBPFF_ENTRY_TYPE_MESSAGE_BODY_CODEPAGE)]
+                    message_codepage = extract_msg.encoding._CODE_PAGES[mail.getPropertyVal(LIBPFF_ENTRY_TYPE_MESSAGE_CODEPAGE)]
+                    encodings[1] = {"name": message_body_codepage, "label": "PidTagInternetCodepage"}
+                    encodings[2] = {"name": message_codepage, "label": "PidTagMessageCodepage"}
+                except:
+                    desc = "Error reading codepages"
+                    errors = common.handle_error(errors, e, desc)
+                """
                 try:
                     try:
                         if mail.htmlBody:

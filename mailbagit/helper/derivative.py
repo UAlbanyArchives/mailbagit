@@ -214,15 +214,20 @@ def htmlFormatting(message, external_css, headers=True):
         # HT to extract_msg for this approach
         # https://github.com/TeamMsgExtractor/msg-extractor/blob/6bed8213de1a7a41739fcf5c9363322508711fce/extract_msg/message_base.py#L403-L414
         tags = (tag for tag in soup.findAll("img") if tag.get("src") and tag.get("src").startswith("cid:"))
-        data = None
         for tag in tags:
             # Iterate through the attachments until we get the right one.
+            data = None
             cid = tag["src"][4:]
 
             for attachment in message.Attachments:
                 if attachment.Name:
                     if attachment.Name in cid:
                         data = attachment.File
+            if data == None:
+                for attachment in message.Attachments:
+                    if attachment.Content_ID:
+                        if attachment.Content_ID in cid:
+                            data = attachment.File
 
             # If we found anything, inject it.
             if data:
