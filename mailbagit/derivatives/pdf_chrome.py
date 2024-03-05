@@ -72,7 +72,7 @@ if not skip_registry:
                                 "--headless",
                                 "--run-all-compositor-stages-before-draw",
                                 "--disable-gpu",
-                                "--print-to-pdf-no-header",
+                                "--no-pdf-header-footer",
                                 "--print-to-pdf=" + os.path.abspath(pdf_name),
                                 os.path.abspath(html_name),
                             ]
