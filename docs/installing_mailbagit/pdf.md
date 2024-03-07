@@ -20,7 +20,7 @@ Installing [wkhtmltopdf](https://wkhtmltopdf.org/) and adding `wkhtmltopdf` or `
 
 ## Chrome Headless
 
-Installing [Google Chrome](https://www.google.com/chrome/) and adding `chrome`, `chrome.exe` or `google-chrome` to your `PATH` will make the `pdf-chrome` derivative option available. If you have Google Chrome installed already, you may just need to add it to your `PATH`.
+Installing [Google Chrome](https://www.google.com/chrome/) and adding `chrome`, `chrome.exe,` `google-chrome,` or `Google Chrome` to your `PATH` will make the `pdf-chrome` derivative option available. If you have Google Chrome installed already, you may just need to add it to your `PATH`.
 
 For Windows, Chrome usually installs in one of these locations by default:
 ```
@@ -28,12 +28,15 @@ C:\Program Files\Google\Chrome\Application
 C:\Program Files (x86)\Google\Chrome\Application
 ```
 
+For Macs, the usual install path is `/Applications/Google\ Chrome.app/Contents/MacOS/`.
+
 You can test if Chrome is correctly added to your `PATH` by entering the correlating command into a command line terminal:
 
 ```
 chrome https://archives.albany.edu/mailbag
 chrome.exe https://archives.albany.edu/mailbag
 google-chrome https://archives.albany.edu/mailbag
+Google\ Chrome https://archives.albany.edu/mailbag
 ```
 
 If any of these commands open a Chrome browser window, you're all set!

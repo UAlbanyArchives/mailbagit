@@ -10,7 +10,7 @@ import mailbagit.helper.common as common
 skip_registry = False
 
 try:
-    chromes = ["google-chrome", "chrome.exe", "chrome"]
+    chromes = ["google-chrome", "Google Chrome", "chrome.exe", "chrome"]
     chrome = next((c for c in chromes if distutils.spawn.find_executable(c)), None)
     skip_registry = True if chrome is None else False
 
@@ -72,7 +72,7 @@ if not skip_registry:
                                 "--headless",
                                 "--run-all-compositor-stages-before-draw",
                                 "--disable-gpu",
-                                "--print-to-pdf-no-header",
+                                "--no-pdf-header-footer",
                                 "--print-to-pdf=" + os.path.abspath(pdf_name),
                                 os.path.abspath(html_name),
                             ]
