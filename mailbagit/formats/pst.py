@@ -58,7 +58,7 @@ if not skip_registry:
                 count += 1
             return count
 
-        def folders(self, folder, path, originalFile, errors, iteration_only=False):
+        def folders(self, folder, path, originalFile, iteration_only=False):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is the email folder path of the message, separated by "/"
@@ -70,6 +70,7 @@ if not skip_registry:
                         yield None
                         continue
                     attachments = []
+                    errors = []
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -300,7 +301,7 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, errors, iteration_only=iteration_only)
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, iteration_only=iteration_only)
             else:
                 if not iteration_only:
                     if not folder.number_of_sub_messages:
@@ -338,11 +339,10 @@ if not skip_registry:
                 pst = pypff.file()
                 pst.open(filePath)
                 root = pst.get_root_folder()
-                errors = []
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, folder.name, originalFile, errors, iteration_only=iteration_only)
+                        yield from self.folders(folder, folder.name, originalFile, iteration_only=iteration_only)
                     else:
                         if not iteration_only:
                             # This is an email folder that does not contain any messages.
