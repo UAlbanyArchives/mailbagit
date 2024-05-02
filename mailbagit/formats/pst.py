@@ -45,6 +45,7 @@ if not skip_registry:
             self.source_parent_dir = source_parent_dir
             self.companion_files = args.companion_files
             log.info("Reading: " + self.path)
+            self.count = 0
 
         @property
         def account_data(self):
@@ -124,11 +125,28 @@ if not skip_registry:
                                         rtf_body = rtf_body[:-1]
                                     # decode it before using DeEncapsulator
                                     rtf_string, html_encoding, errors = format.safely_decode("HTML", rtf_body, encodings, errors)
-                                    deencapsulated_body = DeEncapsulator(rtf_string)
-                                    deencapsulated_body.deencapsulate()
-                                    html_body = deencapsulated_body.html
-                            except:
-                                pass
+
+                                    # Some sort of encoding issue can cause multiple EOF characters which is malformed RTF
+                                    """
+                                    eof_index = rtf_string.find('\x1a')
+                                    self.count += 1
+                                    if eof_index != -1:
+                                        print (rtf_string.count('\x1a'))
+                                    """
+
+                                    try:
+                                        deencapsulated_body = DeEncapsulator(rtf_body)
+                                        deencapsulated_body.deencapsulate()
+                                        html_body, html_encoding, errors = format.safely_decode(
+                                            "HTML", deencapsulated_body.html, encodings, errors
+                                        )
+                                        # html_body = deencapsulated_body.html.decode(html_encoding)
+                                    except Exception as e:
+                                        desc = "Error parsing RTF body"
+                                        errors = common.handle_error(errors, e, desc)
+                            except Exception as e:
+                                desc = "Error parsing HTML or RTF body"
+                                errors = common.handle_error(errors, e, desc)
                             if messageObj.plain_text_body:
                                 encodings[len(encodings.keys()) + 1] = {
                                     "name": "utf-8",
