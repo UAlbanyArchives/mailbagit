@@ -336,6 +336,7 @@ if not skip_registry:
                     originalFile = Path(os.path.normpath(rel_path)).as_posix()
                 # original file is now the relative path to the PST from the provided path
 
+                errors = []
                 pst = pypff.file()
                 pst.open(filePath)
                 root = pst.get_root_folder()
