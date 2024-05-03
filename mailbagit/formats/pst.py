@@ -45,6 +45,7 @@ if not skip_registry:
             self.source_parent_dir = source_parent_dir
             self.companion_files = args.companion_files
             log.info("Reading: " + self.path)
+            self.count = 0
 
         @property
         def account_data(self):
@@ -57,7 +58,7 @@ if not skip_registry:
                 count += 1
             return count
 
-        def folders(self, folder, path, originalFile, errors, iteration_only=False):
+        def folders(self, folder, path, originalFile, iteration_only=False):
             # recursive function that calls itself on any subfolders and
             # returns a generator of messages
             # path is the email folder path of the message, separated by "/"
@@ -69,6 +70,7 @@ if not skip_registry:
                         yield None
                         continue
                     attachments = []
+                    errors = []
                     try:
                         messageObj = folder.get_sub_message(index)
 
@@ -124,11 +126,28 @@ if not skip_registry:
                                         rtf_body = rtf_body[:-1]
                                     # decode it before using DeEncapsulator
                                     rtf_string, html_encoding, errors = format.safely_decode("HTML", rtf_body, encodings, errors)
-                                    deencapsulated_body = DeEncapsulator(rtf_string)
-                                    deencapsulated_body.deencapsulate()
-                                    html_body = deencapsulated_body.html
-                            except:
-                                pass
+
+                                    # Some sort of encoding issue can cause multiple EOF characters which is malformed RTF
+                                    """
+                                    eof_index = rtf_string.find('\x1a')
+                                    self.count += 1
+                                    if eof_index != -1:
+                                        print (rtf_string.count('\x1a'))
+                                    """
+
+                                    try:
+                                        deencapsulated_body = DeEncapsulator(rtf_body)
+                                        deencapsulated_body.deencapsulate()
+                                        html_body, html_encoding, errors = format.safely_decode(
+                                            "HTML", deencapsulated_body.html, encodings, errors
+                                        )
+                                        # html_body = deencapsulated_body.html.decode(html_encoding)
+                                    except Exception as e:
+                                        desc = "Error parsing RTF body"
+                                        errors = common.handle_error(errors, e, desc)
+                            except Exception as e:
+                                desc = "Error parsing HTML or RTF body"
+                                errors = common.handle_error(errors, e, desc)
                             if messageObj.plain_text_body:
                                 encodings[len(encodings.keys()) + 1] = {
                                     "name": "utf-8",
@@ -282,7 +301,7 @@ if not skip_registry:
             if folder.number_of_sub_folders:
                 for folder_index in range(folder.number_of_sub_folders):
                     subfolder = folder.get_sub_folder(folder_index)
-                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, errors, iteration_only=iteration_only)
+                    yield from self.folders(subfolder, path + "/" + subfolder.name, originalFile, iteration_only=iteration_only)
             else:
                 if not iteration_only:
                     if not folder.number_of_sub_messages:
@@ -320,11 +339,10 @@ if not skip_registry:
                 pst = pypff.file()
                 pst.open(filePath)
                 root = pst.get_root_folder()
-                errors = []
                 for folder in root.sub_folders:
                     if folder.number_of_sub_folders:
                         # call recursive function to parse email folder
-                        yield from self.folders(folder, folder.name, originalFile, errors, iteration_only=iteration_only)
+                        yield from self.folders(folder, folder.name, originalFile, iteration_only=iteration_only)
                     else:
                         if not iteration_only:
                             # This is an email folder that does not contain any messages.
