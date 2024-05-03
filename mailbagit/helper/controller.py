@@ -91,7 +91,7 @@ def writeAttachmentsToDisk(dry_run, attachments_dir, message):
             if attachment.Name.lower() == "attachments.csv":
                 writtenName = attachment.WrittenName + os.path.splitext(attachment.Name)[1]
                 desc = ""
-                errors = common.handle_error(errors, None, desc, "warn")
+                errors = common.handle_error([], None, desc, "warn")
             else:
                 writtenName = attachment.WrittenName
             attachment_row = [attachment.Name, writtenName, attachment.MimeType, attachment.Content_ID]
@@ -114,7 +114,7 @@ def writeAttachmentsToDisk(dry_run, attachments_dir, message):
                 desc = (
                     f"Failed to write attachment {attachment.Name} even as normalized name {writtenName}. Instead writing as {random_name}."
                 )
-                errors = common.handle_error(errors, None, desc, "error")
+                errors = common.handle_error([], None, desc, "error")
                 attachment_row = [attachment.Name, random_name, attachment.MimeType, attachment.Content_ID]
                 attachment_path = os.path.join(message_attachments_dir, random_name)
                 f = open(attachment_path, "wb")
