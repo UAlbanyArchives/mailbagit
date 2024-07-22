@@ -7,7 +7,7 @@ nav_order: 2
 
 # Trying mailbagit
 
-Google Colab mailbagit setup
+You can try out mailbagit step-by-step using a Jupyter Notebook in Google Colab.
 
 1. Go to [colab.research.google.com](https://colab.research.google.com)
 2. Load from Github tab
