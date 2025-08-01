@@ -7,6 +7,5 @@ services:
       - '.:/data'
     tty: true
     stdin_open: true
-    restart: always
     working_dir: /data
     entrypoint: /bin/bash

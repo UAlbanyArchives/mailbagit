@@ -153,9 +153,10 @@ class Mbox(EmailAccount):
             # Move MBOX to new mailbag directory structure
             if not iteration_only:
                 # Does not check path lengths for MBOXs because `errors` was already returned to the controller
-                new_path, errors = format.moveWithDirectoryStructure(
+                new_path, new_errors = format.moveWithDirectoryStructure(
                     self.dry_run, self.keep, self.source_parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
                 )
+                errors.extend(new_errors)
 
         if self.companion_files:
             # Move all files into mailbag directory structure

@@ -8,6 +8,5 @@ services:
       - '.:/mailbagit'
     tty: true
     stdin_open: true
-    restart: always
     working_dir: /mailbagit
     command: bash -c "pip install --upgrade pip && pip install -e . && cd /data && bash"

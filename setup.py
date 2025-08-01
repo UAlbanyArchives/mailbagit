@@ -1,12 +1,13 @@
 # /usr/bin/env python3
 import setuptools
+import sys
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mailbagit",
-    version="0.7.3",
+    version="0.7.4",
     author="Gregory Wiedeman",
     author_email="gwiedeman@albany.edu",
     description="A tool for preserving email in multiple preservation formats.",
@@ -23,11 +24,11 @@ setuptools.setup(
     install_requires=[
         "bagit>=1.8.1,<2",
         "beautifulsoup4>=4.11.1,<5",
-        "black>=22.1.0,<23",
+        "black>=23.7,<26",
         "jsonmodels>=2.2,<=2.5.0",
         "extract_msg>=0.42.0",
         "structlog>=21.1.0,<22",
-        "packaging>=21.0,<21.3",
+        "packaging>=21.0,<25",
         "python-json-logger>=2.0.2,<3",
         "pyparsing>=2.1.0,<3",
         "pytest>=7.0.1,<8",
@@ -37,13 +38,11 @@ setuptools.setup(
         "requests >=2.27.1,<3",
         "cssutils >=2.4.2,<3",
         "python-json-logger >=2.0.2,<3",
-        # for black
-        "typed-ast>=1.5.3,<2",
     ],
     extras_require={
         "gui": ["gooey>=1.0.8.1,<2"],
-        "pst": ["libpff-python==20211114"],
+        "pst": ["libpff-python==20231205"],
         "dev": ["pyinstaller==5.0.1,<6"],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 )

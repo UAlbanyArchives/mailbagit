@@ -46,8 +46,8 @@ class EML(EmailAccount):
         if os.path.isfile(self.path):
             return 1
         count = 0
-        for _ in chain((files for _, _, files in os.walk(self.path))):
-            count += 1
+        for file in chain.from_iterable((files for _, _, files in os.walk(self.path))):
+            if '.eml' in file: count += 1
         return count
 
     def messages(self):
@@ -145,9 +145,10 @@ class EML(EmailAccount):
                 message = Email(Errors=errors)
 
             # Move EML to new mailbag directory structure
-            new_path, errors = format.moveWithDirectoryStructure(
+            new_path, new_errors = format.moveWithDirectoryStructure(
                 self.dry_run, self.keep, self.source_parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
             )
+            errors.extend(new_errors)
             message.Errors.extend(errors)
 
             yield message

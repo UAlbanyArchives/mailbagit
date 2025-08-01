@@ -10,6 +10,7 @@ from warcio import WARCWriter
 from warcio.statusandheaders import StatusAndHeaders
 from warcio.timeutils import datetime_to_http_date
 import requests  # requests *must* be imported after capture_http
+from requests.exceptions import ChunkedEncodingError
 import json
 import urllib.parse
 from io import BytesIO
@@ -174,28 +175,37 @@ class WarcDerivative(Derivative):
         """
         url_page_requisites = []
         i = 0
-        while i < len(urls):
-            log.debug("capturing " + urls[i])
+        for url in urls:
+            log.debug("capturing " + url)
             # validate url
-            if self.validate_url(urls[i], errors):
+            if self.validate_url(url, errors):
                 with capture_http(warc_writer):
                     # First try with SSL verification. If fails, raise a warning and turn off
                     try:
-                        r = session.get(urls[i], headers=request_headers)
+                        r = session.get(url, headers=request_headers, stream=True, timeout=20)
+                        try:
+                            content = r.content  # force load to detect errors
+                        except ChunkedEncodingError as e:
+                            desc = f"ChunkedEncodingError for {url}, retrying without stream."
+                            errors = common.handle_error(errors, e, desc, "warn")
+                            # Retry without streaming
+                            r = session.get(url, headers=request_headers, stream=False, timeout=20)
+                            content = r.content
                         if r.status_code != 200:
-                            desc = f"When writing WARC derivative, HTTP {r.status_code} {r.reason} for external resource {urls[i]}"
+                            desc = f"When writing WARC derivative, HTTP {r.status_code} {r.reason} for external resource {url}"
                             errors = common.handle_error(errors, None, desc, "warn")
-                        if "content-type" in r.headers.keys():
+
+                        if "content-type" in r.headers:
                             if "text/html" in r.headers["content-type"]:
-                                # Gotta get these external resources as well
-                                new_soup = BeautifulSoup(r.text, "html.parser")
+                                new_soup = BeautifulSoup(content, "html.parser")
                                 new_external_urls = self.html_external_resources(new_soup, r.url)
                                 url_page_requisites.extend(new_external_urls)
                             elif r.headers["content-type"] == "text/css":
-                                new_external_urls = self.css_external_resources(r.text, r.url)
+                                new_external_urls = self.css_external_resources(content.decode("utf-8", errors="ignore"), r.url)
                                 url_page_requisites.extend(new_external_urls)
-                    except Exception as e:
-                        desc = f"Failed to request external URL for WARC derivatives ({urls[i]})"
+
+                    except requests.exceptions.RequestException as e:
+                        desc = f"Failed to request external URL for WARC derivatives ({url})"
                         errors = common.handle_error(errors, e, desc)
             i += 1
         return session, warc_writer, list(dict.fromkeys(url_page_requisites)), errors

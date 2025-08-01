@@ -1,6 +1,6 @@
 import os
+import shutil
 import subprocess
-import distutils.spawn
 from mailbagit.derivative import Derivative
 from mailbagit.loggerx import get_logger
 import mailbagit.helper.derivative as derivative
@@ -10,9 +10,9 @@ import mailbagit.helper.common as common
 # pst is not supported otherwise
 skip_registry = False
 try:
-    if distutils.spawn.find_executable("wkhtmltopdf.exe"):
+    if shutil.which("wkhtmltopdf.exe"):
         wkhtmltopdf = "wkhtmltopdf.exe"
-    elif distutils.spawn.find_executable("wkhtmltopdf"):
+    elif shutil.which("wkhtmltopdf"):
         wkhtmltopdf = "wkhtmltopdf"
     else:
         skip_registry = True

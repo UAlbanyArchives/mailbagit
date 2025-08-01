@@ -1,5 +1,4 @@
-FROM python:3.11.2-slim-buster
-MAINTAINER Gregory Wiedeman gwiedeman@albany.edu
+FROM python:3.11-slim-bookworm
 
 ENV TZ=America/New_York \
     DEBIAN_FRONTEND=noninteractive \
@@ -23,12 +22,12 @@ RUN apt-get install -y gcc dpkg-dev
 # wkhtmltopdf deps
 RUN apt-get install -y xfonts-75dpi xfonts-base
 
-RUN pip install libpff-python==20211114
+RUN pip install libpff-python==20231205
 
 RUN curl -L -o /tmp/google-chrome-stable_current_amd64.deb \
         https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt-get install -y /tmp/google-chrome-stable_current_amd64.deb
 
-RUN curl -L -o /tmp/wkhtmltox_0.12.6-1.buster_amd64.deb \ 
-        https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
-RUN dpkg -i /tmp/wkhtmltox_0.12.6-1.buster_amd64.deb
+RUN curl -L -o /tmp/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \ 
+        https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb
+RUN dpkg -i /tmp/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb

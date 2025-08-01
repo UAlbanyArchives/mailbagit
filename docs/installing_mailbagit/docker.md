@@ -16,7 +16,36 @@ Once Docker is installed, you can download the mailbagit image with the command:
 docker pull ualbanyarchives/mailbagit
 ```
 
-To run the image as a Docker container, run:
+## Run with docker-compose.
+
+The simpiest way to run mailbagit in a docker container is with docker compose. For this you have to download the provided `docker-compose.yml` file at [https://raw.githubusercontent.com/UAlbanyArchives/mailbagit/main/docker-compose.yml](https://raw.githubusercontent.com/UAlbanyArchives/mailbagit/main/docker-compose.yml).
+
+Place the `docker-compose.yml` file in your working directory along with the data you are working with.
+```
+.
+└── my_folder/
+    ├── docker-compose.yml
+    ├── email_archive.mbox
+    └── export.pst
+```
+
+From this directory (`my_folder`) run:
+```
+docker compose run mailbagit
+```
+
+This will mount your current working directory inside the container at `/data`. You can then run `mailbagit` on the files in this `/data` directory.
+
+```
+/data
+  ├── docker-compose.yml
+  ├── email_archive.mbox
+  └── export.pst
+```
+
+## Run without docker-compose
+
+To run the image directly as a Docker container, run:
 
 ```
 docker run -it ualbanyarchives/mailbagit:latest bash
@@ -24,17 +53,7 @@ docker run -it ualbanyarchives/mailbagit:latest bash
 
 You should be able to run `mailbagit -h`, but you won't be able to do much without giving the container access to your filesystem with docker-compose or a bind mount.
 
-## Run with docker-compose.
-
-You can use the provided docker compose file, which will give the image access to your current directory.
-
-```
-docker pull ualbanyarchives/mailbagit
-wget https://raw.githubusercontent.com/UAlbanyArchives/mailbagit/main/docker-compose.yml
-docker compose run mailbagit
-```
-
-## Run with bind mount.
+### Run with bind mount.
 
 You can also use a bind mount to give the container and `mailbagit` access to another directory. docker-compose does this automatically.
 
@@ -59,6 +78,7 @@ You could also use
 type=bind,source="C:\Users\Me",target=/data
 ```
 which will make the file accessible as `/data/sampleData/export.pst`
+
 
 ## Using Docker Desktop
 
@@ -89,21 +109,4 @@ cd mailbagit
 git switch develop
 docker-compose -f docker-compose-dev.yml run mailbagit
 mailbagit -v
-```
-
-### Other helpful docker commands
-
-List running containers: 
-```
-docker ps
-```
-
-List images:
-```
-docker images
-```
-
-Delete image: 
-```
-docker image rm <image id> -f
 ```

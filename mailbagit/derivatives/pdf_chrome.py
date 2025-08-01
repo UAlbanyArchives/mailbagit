@@ -1,6 +1,6 @@
 import os
+import shutil
 import subprocess
-import distutils.spawn
 from mailbagit.derivative import Derivative
 from mailbagit.loggerx import get_logger
 import mailbagit.helper.derivative as derivative
@@ -11,7 +11,7 @@ skip_registry = False
 
 try:
     chromes = ["google-chrome", "Google Chrome", "chrome.exe", "chrome"]
-    chrome = next((c for c in chromes if distutils.spawn.find_executable(c)), None)
+    chrome = next((c for c in chromes if shutil.which(c)), None)
     skip_registry = True if chrome is None else False
 
 except:

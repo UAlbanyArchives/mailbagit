@@ -228,9 +228,10 @@ class MSG(EmailAccount):
                 mail.close()
 
             # Move MSG to new mailbag directory structure
-            new_path, errors = format.moveWithDirectoryStructure(
+            new_path, new_errors = format.moveWithDirectoryStructure(
                 self.dry_run, self.keep, self.source_parent_dir, self.mailbag_dir, self.mailbag_name, self.format_name, filePath, errors
             )
+            errors.extend(new_errors)
             message.Errors.extend(errors)
 
             yield message
