@@ -13,6 +13,52 @@ pip install mailbagit
 * To install PST dependancies: `pip install mailbagit[pst]`
 * To install `mailbagit-gui`: `pip install mailbagit[gui]`
 
+### PST install on Windows: libpff-python build fails with windows.h not found
+
+If installation fails with an error such as:
+```
+fatal error C1083: Cannot open include file: 'windows.h': No such file or directory
+```
+
+Verify that the Windows SDK and Visual Studio C++ Build Tools are installed:
+```
+Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Include"
+```
+
+You should see a versioned SDK directory such as `10.0.26100.0` with `C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\Windows.h`.
+
+Then you can set the environment variables manually:
+```
+$SDK = "C:\Program Files (x86)\Windows Kits\10"
+$SDKVER = "10.0.26100.0"
+
+$env:WindowsSdkDir = "$SDK\"
+
+$env:INCLUDE = @(
+    "$SDK\Include\$SDKVER\ucrt",
+    "$SDK\Include\$SDKVER\shared",
+    "$SDK\Include\$SDKVER\um",
+    "$SDK\Include\$SDKVER\winrt"
+) -join ';'
+
+$env:LIB = @(
+    "$SDK\Lib\$SDKVER\ucrt\x64",
+    "$SDK\Lib\$SDKVER\um\x64"
+) -join ';'
+```
+
+Verify that these have paths:
+```
+$env:WindowsSdkDir
+$env:INCLUDE
+$env:LIB
+```
+
+Then retry:
+```
+pip install mailbagit[pst]
+```
+
 ### Docker setup
 
 You can also run `mailbagit` using a [Docker image](https://archives.albany.edu/mailbag/docker).

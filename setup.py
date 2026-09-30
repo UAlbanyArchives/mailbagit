@@ -32,7 +32,7 @@ setuptools.setup(
         "python-json-logger>=2.0.2,<3",
         "pyparsing>=2.1.0,<3",
         "pytest>=7.0.1,<8",
-        "python-dotenv>0.19.0,<=0.19.1",
+        "python-dotenv>0.19.0,<1",
         "chardet>=4.0.0,<5",
         "warcio>=1.7.4,<2",
         "requests >=2.27.1,<3",
